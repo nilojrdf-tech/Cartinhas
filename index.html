@@ -126,8 +126,12 @@ td input.ed{font-weight:600;color:var(--b)}tr.fut td{opacity:.7}tfoot td{border-
 @media(prefers-reduced-motion:no-preference){.col i{transition:height .35s ease}}
 </style>
 <script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<!-- leitor de PDF: pdf.js 5.4.149. A 3.11.174 tinha a falha CVE-2024-4367 (PDF podia rodar script na pagina). -->
+<script type="module" data-pdfjs-versao="5.4.149">
+const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.149/';
+window.pdfjsPronto=import(PDFJS+'pdf.min.mjs').then(lib=>{lib.GlobalWorkerOptions.workerSrc=PDFJS+'pdf.worker.min.mjs';window.pdfjsLib=lib;return lib});
+window.pdfjsPronto.catch(()=>{});/* se falhar, a mensagem aparece quando o usuario tentar ler o PDF */
+</script>
 </head>
 <body>
 <section class="band top"><div class="wrap">
@@ -442,11 +446,16 @@ function merge(novos,text){
   for(const ym of meses){
     useMonth(ym);
     const old=new Map(days.map(x=>[x.d,x]));
-    days=novos.filter(n=>n.d.slice(0,7)===ym).map(n=>{const o=old.get(n.d);if(!o)return n;
+    /* união por data: troca só os dias que vieram neste relatório e mantém os outros como estavam */
+    const doMes=novos.filter(n=>n.d.slice(0,7)===ym);const vindos=new Set(doMes.map(n=>n.d));
+    const trocados=doMes.map(n=>{const o=old.get(n.d);if(!o)return n;
       const keep=normM(o.marcas)!==normM(o.srpMarcas)&&normM(o.srpMarcas)===normM(n.srpMarcas);
       return {...n,marcas:keep?o.marcas:n.marcas,obs:o.obs||n.obs||'',abono:o.abono,tipo:o.tipoManual?o.tipo:n.tipo,tipoManual:o.tipoManual}});
+    days=trocados.concat(days.filter(x=>!vindos.has(x.d))).sort((a,b)=>a.d<b.d?-1:1);
+    /* relatório parcial: os totais dele não cobrem o mês todo, então não dá para conferir */
+    const parcial=days.some(x=>!vindos.has(x.d)&&String(x.marcas||'').trim());
     meta=info?{...info}:null;
-    if(meta){if(meses.length>1){meta.atraso=meta.he=meta.falta=null}/* totais do relatório valem para o período todo */
+    if(meta){if(meses.length>1||parcial){meta.atraso=meta.he=meta.falta=null}/* totais do relatório valem para o período todo */
       meta.raw=raw;meta.pv=PV}
     fillMonth(old);months[cur]={days,meta};
   }
@@ -469,8 +478,10 @@ ${meta.falta?`<tr><td>Falta</td><td class="n">${esc(hm(meta.falta))}</td><td cla
 async function readPdf(file){
   $('msg').textContent='Lendo o PDF…';
   try{
-    const lib=window.pdfjsLib;if(!lib)throw new Error('leitor de PDF não carregou');
-    const pdf=await lib.getDocument({data:await file.arrayBuffer()}).promise;let lines=[];
+    const lib=window.pdfjsLib||(window.pdfjsPronto?await window.pdfjsPronto:null);
+    if(!lib)throw new Error('leitor de PDF não carregou');
+    /* isEvalSupported:false desliga o eval do pdf.js: mitiga a CVE-2024-4367 */
+    const pdf=await lib.getDocument({data:await file.arrayBuffer(),isEvalSupported:false}).promise;let lines=[];
     for(let p=1;p<=pdf.numPages;p++){
       const tc=await (await pdf.getPage(p)).getTextContent();const rows=new Map();
       for(const it of tc.items){if(!it.str.trim())continue;const y=Math.round(it.transform[5]/3)*3;if(!rows.has(y))rows.set(y,[]);rows.get(y).push([it.transform[4],it.str])}
@@ -514,7 +525,6 @@ try{const m=localStorage.getItem(KEY+'.tema');if(m==='light'||m==='dark')documen
 $('btnTema').addEventListener('click',()=>{const n=temaAtual()==='dark'?'light':'dark';document.documentElement.dataset.mode=n;try{localStorage.setItem(KEY+'.tema',n)}catch(e){}pintaTema();if(typeof nuvemAgenda==='function')nuvemAgenda()});
 new MutationObserver(pintaTema).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 pintaTema();
-try{if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'}catch(e){}
 const st=load();
 if(st){months=st.months;cur=null;useMonth(st.cur&&months[st.cur]?st.cur:Object.keys(months).sort().pop());for(const k in months)for(const x of months[k].days)if(x.futuro&&x.tipo==='util'&&!x.marcas&&ehFeriado(x.d)){x.tipo='feriado';if(DISP[x.d]&&!x.obs)x.obs=DISP[x.d]}}else{
   cur=todayISO.slice(0,7);days=[];meta=null;fillMonth();

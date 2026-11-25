@@ -123,6 +123,23 @@ caso('Abono','Formatos "1h30", "1,5" e "45min"',()=>{const p=abre();p.importa(L(
 caso('Leitura do relatório','Abono de dia inteiro aparece como 8:00 na coluna',()=>{const p=abre();p.importa(dia(10,11)+' 08:00 Afastamento: Licença Médica;');const c=p.cel('10/11');return {ok:c.abono==='08:00',obs:'coluna Abono: '+c.abono}});
 caso('Leitura do relatório','Tipo trocado à mão continua depois de reimportar',()=>{const p=abre();p.importa(L(3,11,'',''));p.edita('03/11','tipo','feriado');p.importa(L(3,11,'',''));const c=p.cel('03/11');return {ok:c.tipo==='feriado',obs:'tipo: '+c.tipo}});
 
+// ---------- CORREÇÕES DA AUDITORIA DE 25/11/2026 ----------
+caso('Leitura do relatório','Relatório parcial não apaga os dias já importados',()=>{const p=abre();
+  p.importa([L(3,11,'08:00 12:00 13:00 18:00'),L(4,11,'08:00 12:00 13:00 17:00')].join('\n'));
+  p.edita('03/11','marcas','08:00 12:00 13:00 19:00');p.edita('03/11','obs','cartinha assinada');p.edita('03/11','abono','1:00');p.edita('03/11','tipo','folga');
+  p.importa(L(4,11,'08:00 12:00 13:00 17:30'));
+  const d3=(p.est().months['2026-11'].days.find(z=>z.d==='2026-11-03'))||{};const c4=p.cel('04/11');
+  const ok=d3.marcas==='08:00 12:00 13:00 19:00'&&d3.obs==='cartinha assinada'&&d3.abono==='1:00'&&d3.tipo==='folga'&&!!d3.tipoManual&&!!c4&&c4.trab==='08:30';
+  return {ok,obs:`03/11 continua com batidas "${d3.marcas||'—'}", obs "${d3.obs||'—'}", abono "${d3.abono||'—'}", tipo ${d3.tipo} (à mão: ${!!d3.tipoManual}) · 04/11 atualizado para ${c4?c4.trab:'—'}`}});
+caso('Dados','Leitor de PDF em versão sem a falha CVE-2024-4367 e com eval desligado',()=>{
+  const bruto=fs.readFileSync(ARQ,'utf8');const MIN=[4,2,67];const num=v=>v[0]*1e6+v[1]*1e3+v[2];
+  const achadas=[...bruto.matchAll(/pdf\.js\/(\d+)\.(\d+)\.(\d+)\//g),...bruto.matchAll(/data-pdfjs-versao="(\d+)\.(\d+)\.(\d+)"/g)].map(m=>[+m[1],+m[2],+m[3]]);
+  const vs=[...new Set(achadas.map(v=>v.join('.')))];
+  const velhas=vs.filter(v=>num(v.split('.').map(Number))<num(MIN));
+  const semEval=/getDocument\(\{[^}]*isEvalSupported:\s*false/.test(bruto);
+  return {ok:vs.length>0&&!velhas.length&&semEval,
+    obs:`pdf.js ${vs.join(', ')||'não encontrado'}${velhas.length?' — abaixo da versão corrigida '+MIN.join('.')+': '+velhas.join(', '):''} · isEvalSupported:false ${semEval?'presente':'AUSENTE'}`}});
+
 // ---------- SAÍDA ----------
 const fal=R.filter(r=>!r.ok&&!r.aviso),av=R.filter(r=>!r.ok&&r.aviso),ok=R.filter(r=>r.ok);
 for(const r of R)console.log(`${r.ok?'PASSOU ':r.aviso?'ATENÇÃO':'FALHOU '} #${String(r.id).padStart(2,'0')} [${r.grupo}] ${r.nome} — ${r.obs}`);

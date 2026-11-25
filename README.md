@@ -55,7 +55,7 @@ node auditoria.test.js ../index.html
 | `instalacao/LEIA-ME.txt` | Instruções para quem vai usar. |
 | `logo/` | Logo em SVG, PNG e ícone do Windows. |
 
-O leitor de PDF é o [pdf.js](https://github.com/mozilla/pdf.js) (Mozilla, licença Apache 2.0).
+O leitor de PDF é o [pdf.js](https://github.com/mozilla/pdf.js) 5.4.149 (Mozilla, licença Apache 2.0).
 
 ## Licença
 
