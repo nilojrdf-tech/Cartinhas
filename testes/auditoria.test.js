@@ -22,6 +22,19 @@ function abre(hoje){const html=hoje?BASE.replace(`let todayISO='${HOJE}';`,`let 
   return api}
 const R=[];let id=0;
 function caso(grupo,nome,fn){id++;let r;try{r=fn()}catch(e){r={ok:false,obs:'ERRO: '+e.message}}R.push({id,grupo,nome,...r});}
+/* Casos que mexem no arquivo de dados são assíncronos: guardam o número agora e resolvem no fim. */
+const PEND=[];
+function casoA(grupo,nome,fn){id++;const meu=id;PEND.push((async()=>{let r;try{r=await fn()}catch(e){r={ok:false,obs:'ERRO: '+e.message}}R.push({id:meu,grupo,nome,...r})})())}
+/* Um arquivo de dados de verdade, em memória, com a mesma interface que a página usa.
+   Assim a suíte exercita conecta/gravaArq em vez de procurar mensagens no código. */
+function fakeArq(texto){let conteudo=texto||'',mtime=1000,gravacoes=0;
+  return {get conteudo(){return conteudo},get gravacoes(){return gravacoes},
+    queryPermission:async()=>'granted',requestPermission:async()=>'granted',
+    getFile:async()=>({lastModified:mtime,text:async()=>conteudo}),
+    createWritable:async()=>({write:async t=>{conteudo=t;mtime+=1;gravacoes+=1},close:async()=>{}})}}
+const leuDoArq=h=>{try{return JSON.parse(h.conteudo)}catch(e){return null}};
+const diasDoArq=(h,ym)=>{const o=leuDoArq(h);
+  return ((o&&o.months&&o.months[ym]&&o.months[ym].days)||[]).filter(x=>x.marcas&&String(x.marcas).trim()).map(x=>x.d)};
 const dia=(d,m,y=2026)=>`${String(d).padStart(2,'0')}/${String(m).padStart(2,'0')}/${y}`;
 const L=(d,m,marks,carga='08:00',occ='Inter Jornada;',y=2026)=>`${dia(d,m,y)} ${marks} ${carga} ${occ}`.replace(/\s+/g,' ');
 
@@ -119,7 +132,17 @@ caso('Dados','Apagar tudo e desfazer',()=>{const p=abre();p.importa(L(3,11,'08:0
   return {ok:vazio&&volta&&!p.erros.length,obs:`apagou: ${vazio}, desfez: ${volta}, erros: ${p.erros.length}`}});
 caso('Dados','Remover um dia e importar de novo',()=>{const p=abre();p.importa(L(3,11,'08:00 12:00 13:00 17:00'));p.linha('03/11').querySelector('button[data-del]').click();p.importa(L(3,11,'08:00 12:00 13:00 17:00'));
   return {ok:!!p.cel('03/11'),obs:'o dia volta com a reimportação'}});
-caso('Dados','Dois navegadores gravando o mesmo arquivo ao mesmo tempo',()=>({ok:/alterados em outro navegador/.test(BASE),aviso:true,obs:'antes de gravar, o sistema confere se o arquivo mudou e relê (conferido no código; o acesso a arquivo não roda no simulador)'}));
+casoA('Dados','Dois navegadores gravando dias diferentes no mesmo arquivo',async()=>{
+  const h=fakeArq('');const a=abre(),b=abre();
+  await a.w.cartinhasTeste.conecta(h,true);          // A adota o arquivo vazio
+  await b.w.cartinhasTeste.conecta(h,true);          // B lê o que A gravou
+  a.importa(L(3,11,'08:00 12:00 13:00 18:00'));
+  b.importa(L(4,11,'08:00 12:00 13:00 18:00'));
+  await a.w.cartinhasTeste.gravaArq();
+  await b.w.cartinhasTeste.gravaArq();
+  const dias=diasDoArq(h,'2026-11');
+  return {ok:dias.includes('2026-11-03')&&dias.includes('2026-11-04'),
+    obs:`no arquivo ficaram: ${dias.join(', ')||'nenhum'} · B avisou: ${b.T('nuvem').slice(0,56)}`}});
 caso('Dados','Firefox / navegador sem acesso a arquivo',()=>{const p=abre();return {ok:/Chrome ou o Edge/.test(p.T('nuvem')),aviso:true,obs:'aviso na tela: '+p.T('nuvem')}});
 
 caso('Abono','Formatos "1h30", "1,5" e "45min"',()=>{const p=abre();p.importa(L(3,11,'08:00 12:00 13:00 15:00'));const v=[];for(const x of ['1h30','1,5','45min']){p.edita('03/11','abono',x);v.push(p.cel('03/11').abono)}
@@ -209,11 +232,65 @@ caso('Datas e meses','Virada da meia-noite com a página aberta',()=>{
   const depois=p.w.cartinhasTeste.hoje();
   return {ok:antes===isoD(ontem)&&mudou===true&&depois===isoD(agora),
     obs:`abriu em ${antes} e passou para ${depois} sem recarregar (mudou: ${mudou})`}});
-caso('Dados','Alteração de outro navegador não descarta a desta janela sem aviso',()=>({
-  ok:/\.conflito/.test(BASE)&&/usar os meus/.test(BASE)&&/function guardaConflito/.test(BASE),aviso:true,
-  obs:'antes de recarregar o arquivo, a versão desta janela é guardada e aparece o botão "usar os meus" (conferido no código; o acesso a arquivo não roda no simulador). Quem vence passa a ser decidido pelo servidor na fase 1 do app.'}));
+casoA('Dados','Duas janelas no mesmo dia: nada se perde calado',async()=>{
+  const h=fakeArq('');const a=abre(),b=abre();
+  await a.w.cartinhasTeste.conecta(h,true);
+  await b.w.cartinhasTeste.conecta(h,true);
+  a.importa(L(3,11,'08:00 12:00 13:00 18:00'));
+  await a.w.cartinhasTeste.gravaArq();               // A grava 9 h no dia 03
+  b.importa(L(3,11,'08:00 12:00 13:00 17:00'));      // B mexe no MESMO dia
+  await b.w.cartinhasTeste.gravaArq();
+  const o=leuDoArq(h);
+  const d=((o&&o.months&&o.months['2026-11'].days)||[]).find(x=>x.d==='2026-11-03')||{};
+  const copia=b.w.localStorage.getItem('cartinhas.v4.conflito');
+  const nuvem=b.T('nuvem');
+  /* o arquivo fica com UMA versão (a dele), a desta janela fica guardada e a tela oferece voltar */
+  const umaSo=d.marcas==='08:00 12:00 13:00 18:00';
+  const avisou=/mesmo dia foi alterado/.test(nuvem)&&/usar só os meus/.test(nuvem);
+  return {ok:umaSo&&!!copia&&avisou,
+    obs:`no arquivo ficou "${d.marcas||'—'}" (a versão do arquivo) · cópia desta janela guardada: ${!!copia} · avisou e ofereceu voltar: ${avisou}`}});
+
+// ---------- REAUDITORIA DE 25/11/2026 ----------
+casoA('Dados','Arquivo de outro programa não é sobrescrito',async()=>{
+  const p=abre();const original='{"outroApp":"ROTA","registros":[{"id":1,"rota":"A-12"}]}';const h=fakeArq(original);
+  await p.w.cartinhasTeste.conecta(h,true);
+  return {ok:h.conteudo===original&&h.gravacoes===0&&/não é do Cartinhas/.test(p.T('nuvem')),
+    obs:`conteúdo intacto: ${h.conteudo===original} · gravações no arquivo: ${h.gravacoes} · aviso: ${p.T('nuvem').slice(0,58)}`}});
+casoA('Dados','Arquivo vazio é adotado e recebe os dados',async()=>{
+  const p=abre();const h=fakeArq('');
+  await p.w.cartinhasTeste.conecta(h,true);
+  const o=leuDoArq(h);const n=o&&o.months?Object.keys(o.months).length:0;
+  return {ok:n>0&&/Salvo em/.test(p.T('nuvem')),
+    obs:`gravou ${n} mês(es) no arquivo · ${p.T('nuvem').slice(0,40)}`}});
+caso('Cálculo do dia','"Usar batidas de hoje" leva a jornada do dia (6 h)',()=>{const p=abre();
+  p.importa(L(25,11,'08:00 14:00','06:00'));
+  const c=p.cel('25/11');
+  p.d.getElementById('cHoje').click();
+  const j=p.d.getElementById('cJ').value;const dia=p.T('cSal');
+  return {ok:!c.cred&&!c.deb&&j==='06:00'&&zero(dia),
+    obs:`tabela: trab ${c.trab}, crédito ${c.cred||'-'} débito ${c.deb||'-'} · calculadora: jornada ${j}, dia ${dia}`}});
+caso('Cálculo do dia','Hora de saída para +1h num dia com hora extra autorizada',()=>{const p=abre();
+  p.importa(L(25,11,'08:00 12:00 13:00 18:00','08:00','Extras 01:00; HE autorizada;'));
+  const r=p.calc({cE1:'08:00',cS1:'12:00',cE2:'13:00',cS2:'',cJ:'08:00',cAlvo:'+1:00'});
+  const hs=/Pode ir embora às(\d{2}:\d{2})/.exec(r);const fe=/dia fecha em ([+−-]?\d{1,2}:\d{2})/.exec(r);
+  return {ok:!!hs&&hs[1]==='19:00'&&!!fe&&/^\+?0?1:00$/.test(fe[1].replace('+','')),
+    obs:`sugeriu sair ${hs?hs[1]:'—'} e o dia fecha em ${fe?fe[1]:'—'} (a HE autorizada de 1 h é paga à parte)`}});
+caso('Leitura do relatório','Relatório de outra pessoa não é gravado sem confirmação',()=>{const p=abre();
+  p.importa('Empregado: FULANO DE TAL CEI:\n'+L(3,11,'08:00 12:00 13:00 17:00'));
+  const marcas04=()=>((p.est().months['2026-11'].days.find(x=>x.d==='2026-11-04')||{}).marcas||'');
+  const antes=marcas04();                           // a versão pessoal já traz 04/11 de exemplo
+  p.importa('Empregado: BELTRANO CEI:\n'+L(4,11,'08:00 12:00 13:00 19:00'));
+  const nome=(p.est().months['2026-11'].meta&&p.est().months['2026-11'].meta.nome)||'';
+  const b=p.d.getElementById('btnOutro');
+  const barrou=marcas04()===antes&&/FULANO/.test(nome)&&!!b;
+  if(b)b.click();                                   // "Importar mesmo assim"
+  const depois=marcas04();
+  return {ok:barrou&&depois==='08:00 12:00 13:00 19:00',
+    obs:`sem confirmar: 04/11 seguiu "${antes||'vazio'}" e o mês em nome de ${nome||'—'} · depois de "Importar mesmo assim": "${depois||'vazio'}"`}});
 
 // ---------- SAÍDA ----------
+Promise.all(PEND).then(()=>{
+R.sort((a,b)=>a.id-b.id);
 const fal=R.filter(r=>!r.ok&&!r.aviso),av=R.filter(r=>!r.ok&&r.aviso),ok=R.filter(r=>r.ok);
 for(const r of R)console.log(`${r.ok?'PASSOU ':r.aviso?'ATENÇÃO':'FALHOU '} #${String(r.id).padStart(2,'0')} [${r.grupo}] ${r.nome} — ${r.obs}`);
 console.log(`\nTotal: ${R.length} · passou ${ok.length} · falhou ${fal.length} · atenção ${av.length}`);
@@ -222,3 +299,4 @@ if(fal.length)process.exitCode=1;
 /* a página agenda a virada do dia com setTimeout: encerra sem esperar esses relógios,
    e sem fechar as janelas (fechar derruba o documento com callbacks ainda na fila) */
 setTimeout(()=>process.exit(process.exitCode||0),50);
+});

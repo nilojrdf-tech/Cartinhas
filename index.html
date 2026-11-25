@@ -215,7 +215,7 @@ const WD=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const KEY='cartinhas.v3';
 const SAMPLE_TXT="";
 let days=[],meta=null,undo=null,months={},cur=null;
-let FH=null,pronto=false,fila=null,gravando=false,ultMod=0,ultJS='';
+let FH=null,pronto=false,fila=null,gravando=false,ultMod=0,ultJS='',ultTxt=null;/* ultTxt: o arquivo como esta janela o viu por último */
 const KEYM='cartinhas.v4';
 const PV=3; /* versão da leitura do relatório: ao mudar, os meses com relatório guardado são relidos */
 const $=id=>document.getElementById(id);
@@ -391,7 +391,15 @@ function renderHoje(T){
   // conta ao contrário: hora de saída para o saldo desejado
   let alvo=parseAlvo($('cAlvo').value);
   if(S2==null&&E1!=null&&alvo!=null){
-    alvo=Math.max(-J,Math.min(alvo,120));const meta=J+alvo;
+    alvo=Math.max(-J,Math.min(alvo,120));
+    /* o alvo é o efeito no banco. A HE autorizada é paga e sai do crédito, e o abono cobre
+       parte do débito, então a diferença bruta a atingir é maior do que o alvo. */
+    const sa=diaSim();
+    const heA=(sa.srp&&sa.srp.extra)||0;
+    let abA=(sa.abono!=null&&sa.abono!=='')?(dur(sa.abono)||0):((sa.srp&&sa.srp.abono)||0);
+    if(abA<0)abA=J;
+    const bruto=alvo>0?alvo+heA:alvo<0?alvo-abA:0;
+    const meta=J+bruto;
     let saida=null;
     if(E2!=null&&S1!=null){const extra=meta>J&&inter<60?60-inter:0;saida=E2+(meta-manha)+extra}
     else if(semAlm){const extra=meta>J?60:0;saida=E1+meta+extra}
@@ -400,14 +408,20 @@ function renderHoje(T){
          fechar diferente do saldo pedido */
       const rs=calcDay(diaSim(),[E1,S1,E2,saida].filter(m=>m!=null).map(clock).join(' '));
       const efd=rs.cred-rs.deb;
-      out=`<div class="saia"><span>Pode ir embora às</span><b>${esc(clock(saida))}</b><span>dia fecha em ${esc((efd<0?'−':'+')+hm(efd))} · mês fica em ${esc(fmt(S+contrib(rs),true))}</span></div>`+(semAlm&&meta>J?'<p class="msg">Sem almoço informado: como passa da jornada, já contei 1 h de intervalo.</p>':'')+out;
+      out=`<div class="saia"><span>Pode ir embora às</span><b>${esc(clock(saida))}</b><span>dia fecha em ${esc((efd<0?'−':'+')+hm(efd))} · mês fica em ${esc(fmt(S+contrib(rs),true))}</span></div>`+(semAlm&&meta>J?'<p class="msg">Sem almoço informado: como passa da jornada, já contei 1 h de intervalo.</p>':'')
+        +(bruto!==alvo?`<p class="msg">Para o dia fechar em ${esc((alvo<0?'−':'+')+hm(alvo))} no banco, a conta pede ${esc(hm(Math.abs(bruto)))} ${bruto<0?'a menos':'a mais'} que a jornada, porque ${heA&&alvo>0?esc(hm(heA))+' de hora extra autorizada é paga à parte':'o abono de '+esc(hm(abA))+' cobre parte do débito'}.</p>`:'')
+        +out;
     }else out='<p class="msg">Informe a saída e a volta do almoço (ou deixe as duas em branco) para eu calcular a hora de saída.</p>'+out;
   }else if(E1==null)out='<p class="msg">Digite a entrada e o almoço. Com a saída em branco, eu digo a que horas você pode ir embora para ficar com o saldo que você escolher.</p>';
   else if(alvo==null&&S2==null)out='<p class="msg neg">Digite o saldo desejado como +0:30, −1:00 ou 0:00.</p>';
   $('hoje').innerHTML=out;
 }
 function calcHoje(){const x=days.find(d=>d.d===todayISO);const m=x?parseList(x.marcas):[];
-  ['cE1','cS1','cE2','cS2'].forEach((id,k)=>$(id).value=m[k]!=null?clock(m[k]):'');renderHoje()}
+  /* a jornada vem do relatório (8h, 7h15 noturno, 6h): sem isso a calculadora discorda da tabela */
+  $('cJ').value=clock(x&&x.carga?x.carga:480);
+  /* duas batidas = entrada e saída, sem almoço: vão para o primeiro e o último campo */
+  const v=m.length===2?[m[0],null,null,m[1]]:[m[0],m[1],m[2],m[3]];
+  ['cE1','cS1','cE2','cS2'].forEach((id,k)=>$(id).value=v[k]!=null?clock(v[k]):'');renderHoje()}
 function srpTxt(x){const s=x.srp;if(!s)return '';const a=[];if(s.atraso)a.push('Atraso '+s.atraso);if(s.falta)a.push('Falta '+s.falta);if(s.irr)a.push('Irregular '+s.irr);if(s.impar)a.push('Ímpar');return a.length?`<span class="msg">${esc(a.join(' · '))}</span>`:''}
 
 function parseMeta(text){
@@ -470,7 +484,7 @@ function uneDias(antigos,novos,ym){
   return {days:trocados.concat(antigos.filter(x=>!vindos.has(x.d))).sort((a,b)=>a.d<b.d?-1:1),vindos,old};
 }
 
-function merge(novos,text){
+function merge(novos,text,forca){
   if(!novos.length){$('msg').textContent='Não encontrei nenhuma linha com data (dd/mm/aaaa) no arquivo ou texto.';return}
   /* texto copiado da tela do SRP (dia da semana depois da data): não dá para ler com segurança */
   const L=String(text||'').split(/\r?\n/).filter(l=>/^\s*\d{2}\/\d{2}\/\d{4}/.test(l));
@@ -478,6 +492,11 @@ function merge(novos,text){
     $('msg').textContent='Esse texto parece copiado da tela do SRP. Para ler certo, use o PDF do Relatório Espelho de Ponto (ou o texto copiado de dentro do PDF).';return}
   const info=text?parseMeta(text):null;const nome=info&&info.nome?info.nome.trim():'';
   const outro=nome&&Object.values(months).map(m=>m&&m.meta&&m.meta.nome).find(n=>n&&n.trim()!==nome);
+  /* relatório de outra pessoa: confere ANTES de gravar, para não misturar o ponto de duas */
+  if(outro&&!forca){
+    $('msg').innerHTML='Este relatório é de '+esc(nome)+', e os dados guardados aqui são de '+esc(outro.trim())+'. Não importei nada, para não misturar o ponto de duas pessoas. <button id="btnOutro" type="button">Importar mesmo assim</button>';
+    $('btnOutro').onclick=()=>merge(novos,text,true);
+    return}
   const raw=text?text.split(/\r?\n/).filter(l=>!/PIS|PASEP|CNPJ|Matr[íi]cula|CTPS/i.test(l)).join('\n'):'';
   const meses=[...new Set(novos.map(n=>n.d.slice(0,7)))].sort();
   for(const ym of meses){
@@ -572,7 +591,7 @@ function relerMeses(){const vol=cur;let n=0;for(const k of Object.keys(months)){
   if(n)useMonth(vol);}
 relerMeses();
 save();renderMeses();
-try{const c=JSON.parse(localStorage.getItem(KEY+'.calc'));if(Array.isArray(c)&&c.some(Boolean)){['cE1','cS1','cE2','cS2','cJ','cAlvo'].forEach((id,k)=>{if(c[k]!=null&&c[k]!=='')$(id).value=c[k]});}else throw 0}catch(e){const x=days.find(d=>d.d===todayISO);if(x){const m=parseList(x.marcas);['cE1','cS1','cE2','cS2'].forEach((id,k)=>$(id).value=m[k]!=null?clock(m[k]):'')}}
+try{const c=JSON.parse(localStorage.getItem(KEY+'.calc'));if(Array.isArray(c)&&c.some(Boolean)){['cE1','cS1','cE2','cS2','cJ','cAlvo'].forEach((id,k)=>{if(c[k]!=null&&c[k]!=='')$(id).value=c[k]});}else throw 0}catch(e){if(days.some(d=>d.d===todayISO))calcHoje()}
 render();
 
 /* ---- virada do dia: a página pode ficar aberta depois da meia-noite ---- */
@@ -589,7 +608,8 @@ window.addEventListener('focus',conferiaDia);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)conferiaDia()});
 
 /* ponte usada só pela auditoria automática (publico/testes/auditoria.test.js) */
-window.cartinhasTeste={calcDay,uneDias,validaArq,aplicaArq,conferiaDia,relerMeses,hoje:()=>todayISO,estado:()=>({cur,days,months})};
+window.cartinhasTeste={calcDay,uneDias,validaArq,aplicaArq,conferiaDia,relerMeses,hoje:()=>todayISO,estado:()=>({cur,days,months}),
+  conecta:(h,g)=>conecta(h,g),gravaArq:()=>gravaArq(),confereArq:()=>confereArq(),pacote:()=>pacote()};
 
 /* ---- arquivo de dados único na pasta (Chrome/Edge): todos os navegadores leem e gravam o mesmo arquivo ---- */
 const NOME_ARQ='cartinhas-dados.json';
@@ -598,15 +618,33 @@ const idb=(modo,fn)=>new Promise((ok,er)=>{const q=indexedDB.open('cartinhas',1)
 const pacote=()=>({app:'Cartinhas',versao:1,salvoEm:new Date().toISOString(),cur,months,calc:['cE1','cS1','cE2','cS2','cJ','cAlvo'].map(i=>$(i).value),tema:document.documentElement.dataset.mode||''});
 function nuvemAgenda(){if(!pronto||!FH)return;clearTimeout(fila);status('Salvando no arquivo…');fila=setTimeout(gravaArq,600)}
 async function gravaArq(){if(gravando){fila=setTimeout(gravaArq,300);return}gravando=true;
-  try{const f0=await FH.getFile();if(f0.lastModified>ultMod){const o=await leArq();if(o&&o!=='invalido'){
-      const meu=pacote();
+  let aviso='';
+  try{
+    /* Confere pelo CONTEÚDO, não pela data do arquivo: duas janelas podem gravar no mesmo
+       segundo, e aí a data não acusa a diferença. */
+    const tx0=await (await FH.getFile()).text();
+    if(ultTxt!=null&&tx0!==ultTxt){
+      const meu=pacote();let base=null;try{base=JSON.parse(ultTxt)}catch(e){}
+      const o=await leArq();
+      if(!o||o==='invalido'){status('O arquivo foi alterado por fora e está ilegível; não gravei em cima dele.');gravando=false;return}
       if(!aplicaArq(o)){gravando=false;return}
-      ultJS=JSON.stringify({...pacote(),salvoEm:''});
-      if(soDados(meu)!==soDados(pacote())){guardaConflito(meu);status('Os dados foram alterados em outro navegador; recarreguei antes de gravar. O que estava nesta janela ficou guardado: <button id="btnMeu" type="button">usar os meus</button>',true);ligaMeu()}
-      else status('Os dados foram alterados em outro navegador; recarreguei antes de gravar.');
-      gravando=false;return}}
-    const p=pacote();const js=JSON.stringify({...p,salvoEm:''});if(js!==ultJS){const w=await FH.createWritable();await w.write(JSON.stringify(p,null,1));await w.close();ultJS=js;ultMod=(await FH.getFile()).lastModified}
-    status('Salvo em '+NOME_ARQ)}catch(e){status('Não consegui gravar o arquivo; salvo neste navegador. <button id="btnArq" type="button">Reconectar</button>',true);ligaBotao()}
+      guardaConflito(meu);
+      const {n,conflitos}=reaplicaMinhas(base,meu);
+      if(months[cur]){days=months[cur].days;meta=months[cur].meta||null}
+      renderMeses();render();
+      if(!n){ultJS=JSON.stringify({...pacote(),salvoEm:''});
+        status(conflitos?'O mesmo dia foi alterado nos dois navegadores ('+conflitos+'). Ficou valendo o do arquivo; o que estava aqui está guardado: <button id="btnMeu" type="button">usar só os meus</button>'
+                        :'Os dados foram alterados em outro navegador; recarreguei. Não havia nada pendente aqui.',!!conflitos);
+        if(conflitos)ligaMeu();
+        gravando=false;return}
+      aviso='Outro navegador gravou enquanto eu salvava. Juntei: '+n+(n>1?' dias alterados aqui continuam':' dia alterado aqui continua')+' valendo, e o resto veio do arquivo.'
+        +(conflitos?' Em '+conflitos+(conflitos>1?' dias alterados nos dois':' dia alterado nos dois')+' ficou valendo o do arquivo.':'')
+        +' <button id="btnMeu" type="button">usar só os meus</button>';
+    }
+    const p=pacote();const js=JSON.stringify({...p,salvoEm:''});
+    if(js!==ultJS||aviso){const txNovo=JSON.stringify(p,null,1);const w=await FH.createWritable();await w.write(txNovo);await w.close();ultJS=js;ultTxt=txNovo;ultMod=(await FH.getFile()).lastModified}
+    if(aviso){status(aviso,true);ligaMeu()}else status('Salvo em '+NOME_ARQ);
+  }catch(e){status('Não consegui gravar o arquivo; salvo neste navegador. <button id="btnArq" type="button">Reconectar</button>',true);ligaBotao()}
   gravando=false}
 const TIPOS=['util','folga','feriado','ferias'];
 /* Confere a estrutura ANTES de trocar o estado: um JSON válido mas fora do formato
@@ -654,21 +692,53 @@ const soDados=p=>JSON.stringify({cur:p.cur,months:p.months});
 /* O arquivo mudou em outro navegador: o certo é o servidor decidir (fase 1 do app), mas
    até lá nada desta janela se perde calado — a versão daqui fica guardada e dá para voltar. */
 function guardaConflito(p){try{localStorage.setItem(KEYM+'.conflito',JSON.stringify(p))}catch(e){}}
+/* Compara dois dias sem se perder em campo vazio ou ordem de chave. */
+const mesmoDia=(a,b)=>{const canon=x=>{if(!x)return '';const o={};for(const k of Object.keys(x).sort())if(x[k]!=null&&x[k]!=='')o[k]=x[k];return JSON.stringify(o)};return canon(a)===canon(b)};
+/* Depois de recarregar o arquivo que outro navegador gravou, volta a pôr os dias que ESTA
+   janela mudou em relação ao que ela tinha lido. Dia que esta janela não tocou fica como veio
+   do arquivo. Exclusão não é repetida: dia apagado aqui e mexido lá continua lá.
+   Dia que MUDOU NOS DOIS não é decidido aqui: fica valendo o do arquivo e a versão desta
+   janela continua guardada — se cada janela reimpusesse a sua, as duas trocariam a mesma
+   data para sempre a cada foco. Quem decide isso passa a ser o servidor na fase 1 do app. */
+function reaplicaMinhas(base,meu){
+  if(!meu||!meu.months)return {n:0,conflitos:0};
+  const antes=(ym,d)=>{const m=base&&base.months&&base.months[ym];return m&&Array.isArray(m.days)?m.days.find(z=>z&&z.d===d):null};
+  let n=0,conflitos=0;
+  for(const ym of Object.keys(meu.months)){
+    const meus=(meu.months[ym]&&meu.months[ym].days)||[];
+    if(!months[ym])months[ym]={days:[],meta:(meu.months[ym]&&meu.months[ym].meta)||null};
+    const alvo=months[ym].days;
+    for(const x of meus){
+      const b=antes(ym,x.d);
+      if(mesmoDia(x,b))continue;              /* esta janela não mudou esse dia */
+      const i=alvo.findIndex(z=>z.d===x.d);
+      const dele=i<0?null:alvo[i];
+      if(dele&&!mesmoDia(dele,b)){conflitos++;continue}  /* mudou nos dois: fica o do arquivo */
+      if(i<0)alvo.push(x);else alvo[i]=x;
+      n++;
+    }
+    alvo.sort((a,b)=>a.d<b.d?-1:1);
+  }
+  return {n,conflitos};
+}
 function ligaMeu(){const b=$('btnMeu');if(!b)return;b.onclick=()=>{let p=null;
   try{p=JSON.parse(localStorage.getItem(KEYM+'.conflito'))}catch(e){}
   if(!p||!aplicaArq(p)){status('Não achei a cópia guardada desta janela.');return}
   try{localStorage.removeItem(KEYM+'.conflito')}catch(e){}
   nuvemAgenda()}}
-async function leArq(){const f=await FH.getFile();ultMod=f.lastModified;const tx=await f.text();if(!tx.trim())return null;try{return JSON.parse(tx)}catch(e){return 'invalido'}}
+async function leArq(){const f=await FH.getFile();ultMod=f.lastModified;const tx=await f.text();ultTxt=tx;if(!tx.trim())return null;try{return JSON.parse(tx)}catch(e){return 'invalido'}}
 async function conecta(h,gesto){FH=h;let perm=await FH.queryPermission({mode:'readwrite'});
   if(perm!=='granted'&&gesto)perm=await FH.requestPermission({mode:'readwrite'});
   if(perm!=='granted'){status('Arquivo de dados: <button id="btnArq" type="button">Abrir '+NOME_ARQ+'</button>',true);ligaBotao(h);return}
   const o=await leArq();
-  if(o==='invalido'){status('O arquivo de dados está ilegível; nada foi alterado nele.');return}
-  if(o&&o.months&&Object.keys(o.months).length){try{localStorage.setItem(KEYM+'.backup',JSON.stringify({cur,months}))}catch(e){}
+  if(o==='invalido'){FH=null;status('Esse arquivo não é um JSON legível; não gravei nada nele. <button id="btnArq" type="button">Escolher outro</button>',true);ligaBotao();return}
+  if(o===null){pronto=true;await gravaArq()}        /* arquivo vazio: pode ser usado */
+  else if(o.months&&Object.keys(o.months).length){try{localStorage.setItem(KEYM+'.backup',JSON.stringify({cur,months}))}catch(e){}
     if(!aplicaArq(o))return;/* fora do formato: não conecta, para não gravar em cima */
     ultJS=JSON.stringify({...pacote(),salvoEm:''});pronto=true;status('Salvo em '+NOME_ARQ)}
-  else{pronto=true;await gravaArq()}
+  else{/* JSON legível, com conteúdo, mas sem os meses: é de outro programa. Não gravar em cima. */
+    FH=null;pronto=false;
+    status('Esse arquivo tem conteúdo que não é do Cartinhas; não gravei nada nele. Escolha outro arquivo, ou um arquivo novo e vazio. <button id="btnArq" type="button">Escolher outro</button>',true);ligaBotao();return}
   try{await idb('readwrite',st=>st.put(FH,'arq'))}catch(e){}}
 function ligaBotao(h){const b=$('btnArq');if(!b)return;b.onclick=async()=>{try{
     if(h){await conecta(h,true);return}
@@ -676,12 +746,23 @@ function ligaBotao(h){const b=$('btnArq');if(!b)return;b.onclick=async()=>{try{
     catch(e){if(e&&e.name==='AbortError'){try{const n=await showSaveFilePicker({id:'cartinhas',suggestedName:NOME_ARQ,types:[{description:'Dados do Cartinhas',accept:{'application/json':['.json']}}]});await conecta(n,true)}catch(e2){}return}throw e}
     await conecta(novo,true)}catch(e){try{const n=await showSaveFilePicker({id:'cartinhas',suggestedName:NOME_ARQ,types:[{description:'Dados do Cartinhas',accept:{'application/json':['.json']}}]});await conecta(n,true)}catch(e2){}}}}
 /* outro navegador gravou? relê quando a janela volta ao foco */
-async function confereArq(){if(!FH||!pronto||gravando)return;try{const f=await FH.getFile();if(f.lastModified>ultMod){const o=await leArq();if(o&&o!=='invalido'){
-  const meu=pacote();
+async function confereArq(){if(!FH||!pronto||gravando)return;try{
+  const tx0=await (await FH.getFile()).text();
+  if(ultTxt==null||tx0===ultTxt)return;
+  const meu=pacote();let base=null;try{base=JSON.parse(ultTxt)}catch(e){}
+  const o=await leArq();
+  if(!o||o==='invalido')return;
   if(!aplicaArq(o))return;
-  ultJS=JSON.stringify({...pacote(),salvoEm:''});
-  if(soDados(meu)!==soDados(pacote())){guardaConflito(meu);status('Atualizado do arquivo. O que estava nesta janela ficou guardado: <button id="btnMeu" type="button">usar os meus</button>',true);ligaMeu()}
-  else status('Atualizado do arquivo')}}}catch(e){}}
+  const {n,conflitos}=reaplicaMinhas(base,meu);
+  if(months[cur]){days=months[cur].days;meta=months[cur].meta||null}
+  if(n||conflitos){guardaConflito(meu);renderMeses();render()}
+  if(n){status('Atualizado do arquivo e juntado com '+n+(n>1?' dias alterados aqui':' dia alterado aqui')
+      +(conflitos?'. Em '+conflitos+(conflitos>1?' dias alterados nos dois':' dia alterado nos dois')+' ficou valendo o do arquivo':'')
+      +'. <button id="btnMeu" type="button">usar só os meus</button>',true);ligaMeu();nuvemAgenda()}
+  else if(conflitos){ultJS=JSON.stringify({...pacote(),salvoEm:''});
+    status('O mesmo dia foi alterado nos dois navegadores ('+conflitos+'). Ficou valendo o do arquivo; o que estava aqui está guardado: <button id="btnMeu" type="button">usar só os meus</button>',true);ligaMeu()}
+  else{ultJS=JSON.stringify({...pacote(),salvoEm:''});status('Atualizado do arquivo')}
+}catch(e){}}
 window.addEventListener('focus',confereArq);document.addEventListener('visibilitychange',()=>{if(!document.hidden)confereArq()});
 (async()=>{
   if(!('showOpenFilePicker' in window)){status('Use o Chrome ou o Edge para salvar no arquivo de dados');return}
