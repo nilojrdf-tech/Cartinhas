@@ -32,7 +32,7 @@ caso('Leitura do relatório','Período que atravessa dois meses (21/10 a 20/11)'
   return {ok:!!temNov,obs:temNov?'os dois meses recebem seus dias':'os dias de novembro foram descartados (só o mês da primeira data é importado)'}});
 caso('Leitura do relatório','Texto copiado da tela do SRP (não do PDF)',()=>{const p=abre();
   p.importa('03/11/2026 Ter 10:53 16:58 10:53 16:58 06:05 01:55\n04/11/2026 Qua 09:46 15:47 09:46 15:47 06:01 01:59');
-  const a=p.cel('03/11');return {ok:a&&a.trab==='06:05',obs:a?`03/11 trabalhadas="${a.trab||'(vazio)'}" débito=${a.deb||'(vazio)'}`:'linha não encontrada'}});
+  const m=p.T('msg');const a=p.cel('03/11');return {ok:/tela do SRP/.test(m)&&!(a&&a.deb),obs:'aviso: '+m.slice(0,70)}});
 caso('Leitura do relatório','Três pares de batidas (dois intervalos)',()=>{const p=abre();
   p.importa(L(3,11,'08:00 10:00 10:15 12:00 13:00 17:00'));const a=p.cel('03/11');
   return {ok:a.trab==='07:45'&&a.deb==='00:15',obs:`trabalhadas ${a.trab}, débito ${a.deb}`}});
@@ -48,10 +48,10 @@ caso('Leitura do relatório','Dia útil inteiro sem batida e sem ocorrência (fa
   p.importa(dia(3,11)+' 08:00 Falta 08:00;');const c=p.cel('03/11');return {ok:c.deb==='08:00',obs:`débito ${c.deb}`}});
 caso('Leitura do relatório','Hora extra autorizada em dia útil ("Extras 01:00")',()=>{const p=abre();
   p.importa(L(3,11,'08:00 12:00 13:00 18:00','08:00','Extras 01:00; HE autorizada;'));const c=p.cel('03/11');
-  return {ok:!c.cred,aviso:true,obs:`crédito no banco: ${c.cred||'nenhum'} (se a HE é paga, não deveria ir para o banco)`}});
+  return {ok:!c.cred,aviso:true,obs:`crédito no banco: ${c.cred||'nenhum'} (HE autorizada é paga e fica fora do banco)`}});
 caso('Leitura do relatório','Relatório de outra pessoa importado por engano',()=>{const p=abre();
   p.importa('Empregado: FULANO DE TAL CEI:\n'+L(3,11,'08:00 12:00 13:00 17:00'));p.importa('Empregado: BELTRANO CEI:\n'+L(4,11,'08:00 12:00 13:00 17:00'));
-  return {ok:false,aviso:true,obs:'nenhum aviso: o sistema não compara o nome do empregado entre importações'}});
+  const m=p.T('msg');return {ok:/BELTRANO/.test(m)&&/FULANO/.test(m),aviso:true,obs:'aviso: '+m.slice(m.indexOf('Atenção'))}});
 caso('Leitura do relatório','Importar de novo um relatório mais antigo depois de corrigir um dia',()=>{const p=abre();
   p.importa(L(6,11,'10:36 13:50 19:00'));p.edita('06/11','marcas','10:36 13:50 19:00 23:10');p.importa(L(6,11,'10:36 13:50 19:00'));const c=p.cel('06/11');
   return {ok:c.trab==='07:24',obs:`após reimportar: trabalhadas ${c.trab} (correção ${c.trab==='07:24'?'mantida':'perdida'})`}});
@@ -72,7 +72,7 @@ caso('Cálculo','Turno noturno 22:00–06:00 com carga 07:15',()=>{const c=umDia
 caso('Cálculo','Batidas fora de ordem digitadas na tabela (17:00 antes de 08:00)',()=>{const p=abre();p.importa(L(3,11,'08:00 12:00 13:00 17:00'));p.edita('03/11','marcas','13:00 17:00 08:00 12:00');const c=p.cel('03/11');
   return {ok:c.trab==='08:00',obs:`trabalhadas ${c.trab} (o sistema entende a batida menor como do dia seguinte)`}});
 caso('Cálculo','Hora inválida digitada ("25:00", "10:3o")',()=>{const p=abre();p.importa(L(3,11,'08:00 12:00 13:00 17:00'));p.edita('03/11','marcas','08:00 12:00 13:00 25:00');const c=p.cel('03/11');
-  return {ok:false,aviso:true,obs:`aceita 25:00 sem aviso: trabalhadas ${c.trab}`}});
+  const inv=p.linha('03/11').querySelector('[data-f=marcas]').classList.contains('inv');return {ok:inv&&c.trab!=='16:00',aviso:true,obs:`campo em vermelho: ${inv}; trabalhadas ${c.trab||'(ignora a hora inválida)'}`}});
 caso('Cálculo','Trabalho em sábado (folga) — fora do banco',()=>{const p=abre();p.importa(dia(7,11)+' 08:00 12:00 Folga;');const c=p.cel('07/11');
   return {ok:!c.cred,obs:`crédito ${c.cred||'nenhum'}, trabalhadas ${c.trab}`}});
 
@@ -94,9 +94,9 @@ caso('Datas e meses','Virada de ano: dezembro → janeiro',()=>{const p=abre('20
 caso('Datas e meses','1º de janeiro marcado como feriado',()=>{const p=abre('2027-01-05');const c=p.cel('01/01');return {ok:c&&c.tipo==='feriado',obs:'01/01: '+(c?c.tipo:'?')}});
 caso('Datas e meses','Ano bissexto (fevereiro/2028 com 29 dias)',()=>{const p=abre('2028-02-10');const ok=!!p.cel('29/02');return {ok,obs:ok?'29/02 aparece':'29/02 não aparece'}});
 caso('Datas e meses','Carnaval (ponto facultativo) não marcado',()=>{const p=abre('2027-02-08');const c=p.cel('09/02');
-  return {ok:false,aviso:true,obs:`09/02/2027 (terça de Carnaval) aparece como "${c?c.tipo:'?'}": precisa marcar à mão se houver folga`}});
+  const nota=/[Pp]onto facultativo/.test(p.d.querySelector('.note:not(.aviso)').textContent);return {ok:nota,aviso:true,obs:`09/02/2027 aparece como "${c?c.tipo:'?'}"; a tela orienta mudar o Tipo para Feriado: ${nota}`}});
 caso('Datas e meses','Corpus Christi (ponto facultativo) não marcado',()=>{const p=abre('2027-05-20');const c=p.cel('27/05');
-  return {ok:false,aviso:true,obs:`27/05/2027 aparece como "${c?c.tipo:'?'}"`}});
+  const nota=/[Pp]onto facultativo/.test(p.d.querySelector('.note:not(.aviso)').textContent);return {ok:nota,aviso:true,obs:`27/05/2027 aparece como "${c?c.tipo:'?'}"; orientação na tela: ${nota}`}});
 caso('Datas e meses','Hoje com entrada em aberto não conta; hoje fechado conta',()=>{const p=abre();p.importa(L(25,11,'08:00 12:00 13:00'));const a=p.cel('25/11');p.edita('25/11','marcas','08:00 12:00 13:00 17:00');const b=p.cel('25/11');
   return {ok:!a.deb&&b.trab==='08:00',obs:`aberto: débito ${a.deb||'nenhum'} · fechado: trabalhadas ${b.trab}`}});
 caso('Datas e meses','Abrir o sistema num mês sem dados',()=>{const p=abre('2027-03-10');return {ok:/Sem dados/.test(p.T('prev'))&&!p.erros.length,obs:p.T('prev').slice(0,60)}});
@@ -106,7 +106,7 @@ caso('Cálculo do dia','Saída para saldo +0:00 com almoço',()=>{const p=abre()
 caso('Cálculo do dia','Saldo desejado acima de +2:00 é limitado a +2:00',()=>{const p=abre();const t=p.calc({cE1:'08:00',cS1:'12:00',cE2:'13:00',cS2:'',cAlvo:'+3:00'});return {ok:/19:00/.test(t),obs:t.slice(0,60)}});
 caso('Cálculo do dia','Turno noturno no cálculo (entrada 22:00)',()=>{const p=abre();const t=p.calc({cE1:'22:00',cS1:'02:00',cE2:'03:00',cS2:'',cJ:'07:15',cAlvo:'+0:00'});return {ok:/06:15/.test(t),obs:t.slice(0,60)}});
 caso('Cálculo do dia','Saldo digitado com vírgula ou só número ("1,5", "30")',()=>{const p=abre();const t=p.calc({cE1:'08:00',cS1:'12:00',cE2:'13:00',cS2:'',cAlvo:'30'});
-  return {ok:false,aviso:true,obs:'"30" é lido como 30 horas e limitado a +2:00: '+t.slice(0,50)}});
+  return {ok:/17:30/.test(t),obs:'"30" lido como 30 min: '+t.slice(0,50)}});
 
 // ---------- DADOS E SEGURANÇA ----------
 caso('Dados','Texto com código na observação não é executado',()=>{const p=abre();p.importa(L(3,11,'08:00 12:00 13:00 17:00'));p.edita('03/11','obs','<img src=x onerror=alert(1)>');
@@ -115,8 +115,13 @@ caso('Dados','Apagar tudo e desfazer',()=>{const p=abre();p.importa(L(3,11,'08:0
   return {ok:vazio&&volta&&!p.erros.length,obs:`apagou: ${vazio}, desfez: ${volta}, erros: ${p.erros.length}`}});
 caso('Dados','Remover um dia e importar de novo',()=>{const p=abre();p.importa(L(3,11,'08:00 12:00 13:00 17:00'));p.linha('03/11').querySelector('button[data-del]').click();p.importa(L(3,11,'08:00 12:00 13:00 17:00'));
   return {ok:!!p.cel('03/11'),obs:'o dia volta com a reimportação'}});
-caso('Dados','Dois navegadores gravando o mesmo arquivo ao mesmo tempo',()=>({ok:false,aviso:true,obs:'não testável aqui: vale a última gravação; o outro navegador só relê quando a janela volta ao foco'}));
-caso('Dados','Firefox / navegador sem acesso a arquivo',()=>({ok:false,aviso:true,obs:'dados ficam só naquele navegador; a página avisa "Use o Chrome ou o Edge"'}));
+caso('Dados','Dois navegadores gravando o mesmo arquivo ao mesmo tempo',()=>({ok:/alterados em outro navegador/.test(BASE),aviso:true,obs:'antes de gravar, o sistema confere se o arquivo mudou e relê (conferido no código; o acesso a arquivo não roda no simulador)'}));
+caso('Dados','Firefox / navegador sem acesso a arquivo',()=>{const p=abre();return {ok:/Chrome ou o Edge/.test(p.T('nuvem')),aviso:true,obs:'aviso na tela: '+p.T('nuvem')}});
+
+caso('Abono','Formatos "1h30", "1,5" e "45min"',()=>{const p=abre();p.importa(L(3,11,'08:00 12:00 13:00 15:00'));const v=[];for(const x of ['1h30','1,5','45min']){p.edita('03/11','abono',x);v.push(p.cel('03/11').abono)}
+  return {ok:v.join(' ')==='1:30 1:30 0:45',obs:v.join(' · ')}});
+caso('Leitura do relatório','Abono de dia inteiro aparece como 8:00 na coluna',()=>{const p=abre();p.importa(dia(10,11)+' 08:00 Afastamento: Licença Médica;');const c=p.cel('10/11');return {ok:c.abono==='08:00',obs:'coluna Abono: '+c.abono}});
+caso('Leitura do relatório','Tipo trocado à mão continua depois de reimportar',()=>{const p=abre();p.importa(L(3,11,'',''));p.edita('03/11','tipo','feriado');p.importa(L(3,11,'',''));const c=p.cel('03/11');return {ok:c.tipo==='feriado',obs:'tipo: '+c.tipo}});
 
 // ---------- SAÍDA ----------
 const fal=R.filter(r=>!r.ok&&!r.aviso),av=R.filter(r=>!r.ok&&r.aviso),ok=R.filter(r=>r.ok);

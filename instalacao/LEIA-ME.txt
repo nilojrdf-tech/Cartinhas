@@ -32,6 +32,12 @@ REGRAS USADAS (iguais às observadas no SRP)
 - Passando da jornada, intervalo mínimo de 1h (o que faltar é descontado).
 - Tolerância de até 10 minutos por dia.
 - Abonos, compensações e lançamentos do relatório são considerados.
+- Hora extra autorizada (paga) fica fora do banco.
+
+DICAS
+- Abono (consulta, atestado): digite as horas na coluna Abono do dia (ex.: 4:00, 4h, 30min).
+- Ponto facultativo (Carnaval, Corpus Christi): se não houve expediente, mude o Tipo do dia para Feriado.
+- Use o PDF do relatório; o texto copiado da tela do SRP não é aceito.
 
 DESINSTALAR
 Dê dois cliques em "desinstalar.bat". Seus dados (cartinhas-dados.json) não são apagados.

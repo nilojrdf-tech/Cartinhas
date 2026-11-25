@@ -32,7 +32,18 @@
 - Tolerância de até 10 minutos por dia.
 - Turnos que passam da meia-noite são tratados como um dia só.
 - Abonos, compensações (COMP. MENSAL) e lançamentos com "Total" são considerados.
-- Trabalho em folga ou feriado é hora extra paga e fica fora do banco.
+- Trabalho em folga ou feriado, e hora extra autorizada, é hora extra paga e fica fora do banco.
+- Ponto facultativo no relatório = dia sem carga; afastamento ou licença = dia abonado.
+
+## Testes
+
+`testes/auditoria.test.js` roda 47 situações (relatórios fora do padrão, tolerância, turno noturno, meses, abono etc.) num navegador simulado:
+
+```
+cd testes
+npm install
+node auditoria.test.js ../index.html
+```
 
 ## Arquivos
 
