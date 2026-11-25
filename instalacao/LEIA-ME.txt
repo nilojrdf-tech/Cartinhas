@@ -1,0 +1,37 @@
+﻿CARTINHAS - Banco de horas: estou devendo?
+==========================================
+
+Ferramenta de apoio, NÃO OFICIAL. O registro que vale é o do SRP.
+Tudo roda no seu computador: nenhum dado é enviado para lugar nenhum.
+
+INSTALAR
+1. Copie esta pasta inteira para o seu computador (por exemplo, para Downloads).
+2. Dê dois cliques em "instalar.bat".
+   - Ele copia o Cartinhas para C:\Users\<seu usuário>\Cartinhas
+   - e cria o atalho "Cartinhas" na Área de Trabalho.
+3. Abra pelo atalho, no Google Chrome ou no Microsoft Edge.
+
+PRIMEIRO USO
+1. No topo, abaixo do "Mês", clique em "Conectar cartinhas-dados.json"
+   e escolha o arquivo cartinhas-dados.json que está em C:\Users\<seu usuário>\Cartinhas.
+   Autorize quando o navegador perguntar. Seus dados passam a ficar nesse arquivo,
+   iguais em qualquer navegador.
+2. No SRP, abra "Meu Espelho Ponto", escolha o mês e gere o Relatório Espelho de Ponto em PDF.
+3. Arraste o PDF para a caixa "Importar o espelho do SRP", no fim da página.
+   Repita a cada atualização do espelho (e para meses anteriores, se quiser).
+
+O QUE ELE MOSTRA
+- Saldo do mês (positivo ou negativo), com créditos e débitos de cada dia.
+- Previsão até o fim do mês: quanto pode trabalhar a menos ou precisa fazer a mais.
+- Cálculo do dia: digite entrada e almoço e veja a que horas pode ir embora.
+- Conferência com os totais do próprio relatório do SRP.
+
+REGRAS USADAS (iguais às observadas no SRP)
+- Carga do dia vem do relatório (8h, 7h15 etc.); fins de semana, feriados e férias sem carga.
+- Crédito máximo de 2h por dia (o que passar é "crédito irregular").
+- Passando da jornada, intervalo mínimo de 1h (o que faltar é descontado).
+- Tolerância de até 10 minutos por dia.
+- Abonos, compensações e lançamentos do relatório são considerados.
+
+DESINSTALAR
+Dê dois cliques em "desinstalar.bat". Seus dados (cartinhas-dados.json) não são apagados.
