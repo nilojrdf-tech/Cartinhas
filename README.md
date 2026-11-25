@@ -37,13 +37,15 @@
 
 ## Testes
 
-`testes/auditoria.test.js` roda 47 situações (relatórios fora do padrão, tolerância, turno noturno, meses, abono etc.) num navegador simulado:
+`testes/auditoria.test.js` roda 57 situações (relatórios fora do padrão, tolerância, turno noturno, meses, abono, virada da meia-noite, arquivo de dados fora do formato etc.) num navegador simulado:
 
 ```
 cd testes
 npm install
 node auditoria.test.js ../index.html
 ```
+
+Termina com código de erro se algum caso falhar, e grava o detalhe em `testes/resultado.json`.
 
 ## Arquivos
 

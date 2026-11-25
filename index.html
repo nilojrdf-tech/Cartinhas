@@ -237,7 +237,7 @@ const fmt=(m,sign)=>{const s=m<0?'−':(sign&&m>0?'+':'');m=Math.abs(Math.round(
 const hm=m=>{m=Math.abs(m);return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
 const clock=m=>{m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
 const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-const todayISO=iso(new Date());
+let todayISO=iso(new Date());/* let: muda na virada do dia, ver conferiaDia */
 const br=s=>s.slice(8)+'/'+s.slice(5,7)+'/'+s.slice(0,4);
 const wd=s=>new Date(s+'T12:00').getDay();
 /* feriados nacionais de data fixa + 30/11 (Dia do Evangélico, DF); confira no seu espelho */
@@ -262,7 +262,7 @@ function garanteMeses(){const fim=todayISO.slice(0,7);const d=new Date(PRIMEIRO_
   for(;iso(d).slice(0,7)<=fim;d.setMonth(d.getMonth()+1)){const ym=iso(d).slice(0,7);if(months[ym]&&months[ym].days&&months[ym].days.length)continue;cur=ym;days=[];meta=null;fillMonth();months[ym]={days,meta}}
   ({cur,days,meta}=salva);if(cur)months[cur]={days,meta}}
 function renderMeses(){const ks=Object.keys(months);if(!ks.includes(cur))ks.push(cur);const prox=(()=>{const d=new Date(ks.sort().slice(-1)[0]+'-15T12:00');d.setMonth(d.getMonth()+1);return iso(d).slice(0,7)})();
-  $('mesSel').innerHTML=ks.sort().reverse().map(k=>`<option value="${k}"${k===cur?' selected':''}>${esc(cap(nomeMes(k)))}</option>`).join('')+`<option value="+${prox}">+ Começar ${esc(nomeMes(prox))}</option>`;
+  $('mesSel').innerHTML=ks.sort().reverse().map(k=>`<option value="${esc(k)}"${k===cur?' selected':''}>${esc(cap(nomeMes(k)))}</option>`).join('')+`<option value="+${prox}">+ Começar ${esc(nomeMes(prox))}</option>`;
   $('mesTit').textContent='Dias de '+nomeMes(cur)}
 
 /* completa o mês com os dias que ainda não vieram no relatório */
@@ -353,7 +353,16 @@ function renderPrev(T,rest){
 let lastT={saldo:0};
 const parseAlvo=t=>{t=String(t||'').trim();const neg=/^[-−]/.test(t);const v=dur(t.replace(/^[-−+]/,''));return v==null?null:neg?-v:v};
 function renderHoje(T){
-  if(T)lastT=T;const S=lastT.saldo;
+  if(T)lastT=T;
+  const useExc=$('optExc').checked;
+  const contrib=r=>r.fora?0:((useExc?r.cred:0)-r.deb);
+  /* Hoje já está no saldo do mês quando as batidas estão fechadas. Tira a contribuição do
+     dia que está sendo simulado antes de somar a simulação, senão hoje conta duas vezes. */
+  const hojeYM=todayISO.slice(0,7);
+  const arrH=cur===hojeYM?days:((months[hojeYM]&&months[hojeYM].days)||[]);
+  const xh=arrH.find(d=>d.d===todayISO);
+  const S=lastT.saldo-(xh?contrib(calcDay(xh)):0);
+  const diaSim=()=>({...(xh||{d:todayISO,tipo:'util',marcas:'',srpMarcas:''}),carga:J,futuro:false});
   const v=id=>toM($(id).value||'');let E1=v('cE1'),S1=v('cS1'),E2=v('cE2'),S2=v('cS2');const J=v('cJ')??480;
   {let ant=E1,add=0;const aj=m=>{if(m==null)return m;if(ant!=null&&m+add<ant)add+=1440;ant=m+add;return m+add};S1=aj(S1);E2=aj(E2);S2=aj(S2)}
   try{localStorage.setItem(KEY+'.calc',JSON.stringify(['cE1','cS1','cE2','cS2','cJ','cAlvo'].map(i=>$(i).value)))}catch(e){}if(typeof nuvemAgenda==='function')nuvemAgenda();
@@ -364,11 +373,20 @@ function renderHoje(T){
   $('cM').textContent=manha!=null?hm(manha):(semAlm&&total!=null?hm(total):'—');$('cT').textContent=tarde!=null?hm(tarde):'—';
   $('cTot').textContent=total!=null?hm(total):'—';
   let out='';
-  if(total!=null){let desc=0;if(total>J&&inter<60)desc=Math.min(60-inter,total-J);const sal=total-desc-J;
+  if(total!=null){
+    /* mesmo motor da tabela: carga do dia, desconto de intervalo, tolerância de 10 min,
+       HE autorizada e abono valem aqui igual valem no mês */
+    const sim=diaSim();
+    const r=calcDay(sim,['cE1','cS1','cE2','cS2'].map(id=>$(id).value.trim()).filter(Boolean).join(' '));
+    const sal=r.cred-r.deb;
     $('cSal').textContent=(sal<0?'−':'+')+hm(sal);$('cSal').className=sal<0?'neg':'pos';$('cSalL').textContent=sal<0?'saldo negativo':'saldo positivo';
-    if(desc)out+=`<p class="msg">O SRP desconta ${esc(hm(desc))} porque o intervalo foi menor que 1 h (o saldo já está com esse desconto).</p>`;
-    if(sal>120)out+=`<p class="msg">Passou de +2:00: ${esc(hm(sal-120))} vira crédito irregular.</p>`;
-    out+=`<p class="msg">Com esse dia, o mês fica em <b>${esc(fmt(S+Math.max(-Infinity,Math.min(sal,120)),true))}</b>.</p>`;
+    if(r.desc)out+=`<p class="msg">O SRP desconta ${esc(hm(r.desc))} porque o intervalo foi menor que 1 h (o saldo já está com esse desconto).</p>`;
+    if(sim.tipo!=='util')out+=`<p class="msg">Hoje está como ${esc({folga:'fim de semana',feriado:'feriado',ferias:'férias'}[sim.tipo]||sim.tipo)} na tabela: as horas viram hora extra paga e ficam fora do banco.</p>`;
+    if(r.tol)out+=`<p class="msg">${esc(hm(r.tol))} ${r.tol>0?'a mais':'a menos'} ficam na tolerância de 10 min por dia e não entram no saldo.</p>`;
+    if(r.extra&&sim.tipo==='util')out+=`<p class="msg">${esc(hm(r.extra))} de hora extra autorizada no relatório: é paga e fica fora do banco.</p>`;
+    if(r.abono)out+=`<p class="msg">O abono de ${esc(hm(r.abono))} cobre ${r.deb?'parte do':'o'} débito do dia.</p>`;
+    if(r.irr)out+=`<p class="msg">Passou de +2:00: ${esc(hm(r.irr))} vira crédito irregular.</p>`;
+    out+=`<p class="msg">Com esse dia, o mês fica em <b>${esc(fmt(S+contrib(r),true))}</b>.</p>`;
   }else{$('cSal').textContent='—';$('cSal').className='';$('cSalL').textContent='saldo'}
   // conta ao contrário: hora de saída para o saldo desejado
   let alvo=parseAlvo($('cAlvo').value);
@@ -377,8 +395,13 @@ function renderHoje(T){
     let saida=null;
     if(E2!=null&&S1!=null){const extra=meta>J&&inter<60?60-inter:0;saida=E2+(meta-manha)+extra}
     else if(semAlm){const extra=meta>J?60:0;saida=E1+meta+extra}
-    if(saida!=null)out=`<div class="saia"><span>Pode ir embora às</span><b>${esc(clock(saida))}</b><span>dia fecha em ${esc((alvo<0?'−':'+')+hm(alvo))} · mês fica em ${esc(fmt(S+alvo,true))}</span></div>`+(semAlm&&meta>J?'<p class="msg">Sem almoço informado: como passa da jornada, já contei 1 h de intervalo.</p>':'')+out;
-    else out='<p class="msg">Informe a saída e a volta do almoço (ou deixe as duas em branco) para eu calcular a hora de saída.</p>'+out;
+    if(saida!=null){
+      /* o efeito mostrado sai do mesmo calcDay: com tolerância, HE ou abono, o dia pode
+         fechar diferente do saldo pedido */
+      const rs=calcDay(diaSim(),[E1,S1,E2,saida].filter(m=>m!=null).map(clock).join(' '));
+      const efd=rs.cred-rs.deb;
+      out=`<div class="saia"><span>Pode ir embora às</span><b>${esc(clock(saida))}</b><span>dia fecha em ${esc((efd<0?'−':'+')+hm(efd))} · mês fica em ${esc(fmt(S+contrib(rs),true))}</span></div>`+(semAlm&&meta>J?'<p class="msg">Sem almoço informado: como passa da jornada, já contei 1 h de intervalo.</p>':'')+out;
+    }else out='<p class="msg">Informe a saída e a volta do almoço (ou deixe as duas em branco) para eu calcular a hora de saída.</p>'+out;
   }else if(E1==null)out='<p class="msg">Digite a entrada e o almoço. Com a saída em branco, eu digo a que horas você pode ir embora para ficar com o saldo que você escolher.</p>';
   else if(alvo==null&&S2==null)out='<p class="msg neg">Digite o saldo desejado como +0:30, −1:00 ou 0:00.</p>';
   $('hoje').innerHTML=out;
@@ -433,6 +456,20 @@ function parseReport(text){
   return out.sort((a,b)=>a.d<b.d?-1:1);
 }
 
+/* União por data de um relatório com os dias que já existem no mês: troca só as datas que
+   vieram no relatório e mantém as outras como estavam. Nos dias que vieram, preserva o que
+   o usuário corrigiu à mão — marcações, observação, abono e tipo. Usada na importação e na
+   releitura por mudança de PV, para as duas não divergirem. */
+function uneDias(antigos,novos,ym){
+  const old=new Map(antigos.map(x=>[x.d,x]));
+  const doMes=novos.filter(n=>n.d.slice(0,7)===ym);
+  const vindos=new Set(doMes.map(n=>n.d));
+  const trocados=doMes.map(n=>{const o=old.get(n.d);if(!o)return n;
+    const keep=normM(o.marcas)!==normM(o.srpMarcas)&&normM(o.srpMarcas)===normM(n.srpMarcas);
+    return {...n,marcas:keep?o.marcas:n.marcas,obs:o.obs||n.obs||'',abono:o.abono,tipo:o.tipoManual?o.tipo:n.tipo,tipoManual:o.tipoManual}});
+  return {days:trocados.concat(antigos.filter(x=>!vindos.has(x.d))).sort((a,b)=>a.d<b.d?-1:1),vindos,old};
+}
+
 function merge(novos,text){
   if(!novos.length){$('msg').textContent='Não encontrei nenhuma linha com data (dd/mm/aaaa) no arquivo ou texto.';return}
   /* texto copiado da tela do SRP (dia da semana depois da data): não dá para ler com segurança */
@@ -445,19 +482,13 @@ function merge(novos,text){
   const meses=[...new Set(novos.map(n=>n.d.slice(0,7)))].sort();
   for(const ym of meses){
     useMonth(ym);
-    const old=new Map(days.map(x=>[x.d,x]));
-    /* união por data: troca só os dias que vieram neste relatório e mantém os outros como estavam */
-    const doMes=novos.filter(n=>n.d.slice(0,7)===ym);const vindos=new Set(doMes.map(n=>n.d));
-    const trocados=doMes.map(n=>{const o=old.get(n.d);if(!o)return n;
-      const keep=normM(o.marcas)!==normM(o.srpMarcas)&&normM(o.srpMarcas)===normM(n.srpMarcas);
-      return {...n,marcas:keep?o.marcas:n.marcas,obs:o.obs||n.obs||'',abono:o.abono,tipo:o.tipoManual?o.tipo:n.tipo,tipoManual:o.tipoManual}});
-    days=trocados.concat(days.filter(x=>!vindos.has(x.d))).sort((a,b)=>a.d<b.d?-1:1);
+    const uni=uneDias(days,novos,ym);days=uni.days;
     /* relatório parcial: os totais dele não cobrem o mês todo, então não dá para conferir */
-    const parcial=days.some(x=>!vindos.has(x.d)&&String(x.marcas||'').trim());
+    const parcial=days.some(x=>!uni.vindos.has(x.d)&&String(x.marcas||'').trim());
     meta=info?{...info}:null;
     if(meta){if(meses.length>1||parcial){meta.atraso=meta.he=meta.falta=null}/* totais do relatório valem para o período todo */
       meta.raw=raw;meta.pv=PV}
-    fillMonth(old);months[cur]={days,meta};
+    fillMonth(uni.old);months[cur]={days,meta};
   }
   useMonth(meses[meses.length-1]);
   save();renderMeses();render();
@@ -535,13 +566,30 @@ garanteMeses();{const m=/^#mes-(\d{4}-\d{2})$/.exec(location.hash||'');if(m&&mon
 window.addEventListener('hashchange',()=>{const m=/^#mes-(\d{4}-\d{2})$/.exec(location.hash||'');if(m&&months[m[1]]&&m[1]!==cur){useMonth(m[1]);save();renderMeses();render()}});
 garanteMeses();
 function relerMeses(){const vol=cur;let n=0;for(const k of Object.keys(months)){const m=months[k];if(m&&m.meta&&m.meta.raw&&m.meta.pv!==PV){useMonth(k);const tx=m.meta.raw;const novos=parseReport(tx);
-  const old=new Map(days.map(x=>[x.d,x]));days=novos.filter(z=>z.d.slice(0,7)===k).map(z=>{const o=old.get(z.d);if(!o)return z;const keep=normM(o.marcas)!==normM(o.srpMarcas)&&normM(o.srpMarcas)===normM(z.srpMarcas);return {...z,marcas:keep?o.marcas:z.marcas,obs:o.obs||z.obs||''}});
-  meta=parseMeta(tx);meta.raw=tx;meta.pv=PV;fillMonth(old);n++}}
+  /* mesma regra da importação: abono e tipo trocado à mão também ficam */
+  const uni=uneDias(days,novos,k);days=uni.days;
+  meta=parseMeta(tx);meta.raw=tx;meta.pv=PV;fillMonth(uni.old);n++}}
   if(n)useMonth(vol);}
 relerMeses();
 save();renderMeses();
 try{const c=JSON.parse(localStorage.getItem(KEY+'.calc'));if(Array.isArray(c)&&c.some(Boolean)){['cE1','cS1','cE2','cS2','cJ','cAlvo'].forEach((id,k)=>{if(c[k]!=null&&c[k]!=='')$(id).value=c[k]});}else throw 0}catch(e){const x=days.find(d=>d.d===todayISO);if(x){const m=parseList(x.marcas);['cE1','cS1','cE2','cS2'].forEach((id,k)=>$(id).value=m[k]!=null?clock(m[k]):'')}}
 render();
+
+/* ---- virada do dia: a página pode ficar aberta depois da meia-noite ---- */
+function conferiaDia(){const h=iso(new Date());if(h===todayISO)return false;
+  const eraMesDeHoje=cur===todayISO.slice(0,7);
+  todayISO=h;garanteMeses();
+  const ym=h.slice(0,7);
+  if(eraMesDeHoje&&months[ym]&&cur!==ym)useMonth(ym);
+  save();renderMeses();render();return true}
+function agendaVirada(){const d=new Date();const vira=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1,0,0,30);
+  setTimeout(()=>{conferiaDia();agendaVirada()},Math.max(1000,vira-d))}
+agendaVirada();
+window.addEventListener('focus',conferiaDia);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)conferiaDia()});
+
+/* ponte usada só pela auditoria automática (publico/testes/auditoria.test.js) */
+window.cartinhasTeste={calcDay,uneDias,validaArq,aplicaArq,conferiaDia,relerMeses,hoje:()=>todayISO,estado:()=>({cur,days,months})};
 
 /* ---- arquivo de dados único na pasta (Chrome/Edge): todos os navegadores leem e gravam o mesmo arquivo ---- */
 const NOME_ARQ='cartinhas-dados.json';
@@ -550,23 +598,76 @@ const idb=(modo,fn)=>new Promise((ok,er)=>{const q=indexedDB.open('cartinhas',1)
 const pacote=()=>({app:'Cartinhas',versao:1,salvoEm:new Date().toISOString(),cur,months,calc:['cE1','cS1','cE2','cS2','cJ','cAlvo'].map(i=>$(i).value),tema:document.documentElement.dataset.mode||''});
 function nuvemAgenda(){if(!pronto||!FH)return;clearTimeout(fila);status('Salvando no arquivo…');fila=setTimeout(gravaArq,600)}
 async function gravaArq(){if(gravando){fila=setTimeout(gravaArq,300);return}gravando=true;
-  try{const f0=await FH.getFile();if(f0.lastModified>ultMod){const o=await leArq();if(o&&o!=='invalido'){aplicaArq(o);ultJS=JSON.stringify({...pacote(),salvoEm:''});status('Os dados foram alterados em outro navegador; recarreguei antes de gravar.');gravando=false;return}}
+  try{const f0=await FH.getFile();if(f0.lastModified>ultMod){const o=await leArq();if(o&&o!=='invalido'){
+      const meu=pacote();
+      if(!aplicaArq(o)){gravando=false;return}
+      ultJS=JSON.stringify({...pacote(),salvoEm:''});
+      if(soDados(meu)!==soDados(pacote())){guardaConflito(meu);status('Os dados foram alterados em outro navegador; recarreguei antes de gravar. O que estava nesta janela ficou guardado: <button id="btnMeu" type="button">usar os meus</button>',true);ligaMeu()}
+      else status('Os dados foram alterados em outro navegador; recarreguei antes de gravar.');
+      gravando=false;return}}
     const p=pacote();const js=JSON.stringify({...p,salvoEm:''});if(js!==ultJS){const w=await FH.createWritable();await w.write(JSON.stringify(p,null,1));await w.close();ultJS=js;ultMod=(await FH.getFile()).lastModified}
     status('Salvo em '+NOME_ARQ)}catch(e){status('Não consegui gravar o arquivo; salvo neste navegador. <button id="btnArq" type="button">Reconectar</button>',true);ligaBotao()}
   gravando=false}
-function aplicaArq(o){if(!o||!o.months||!Object.keys(o.months).length)return false;
+const TIPOS=['util','folga','feriado','ferias'];
+/* Confere a estrutura ANTES de trocar o estado: um JSON válido mas fora do formato
+   (ex.: {"months":{"2026-11":{}}}) quebrava a tela e a conexão com o arquivo. */
+function validaArq(o){
+  if(!o||typeof o!=='object'||Array.isArray(o))return 'não é um objeto';
+  if(!o.months||typeof o.months!=='object'||Array.isArray(o.months))return 'sem a lista de meses';
+  const ks=Object.keys(o.months);
+  if(!ks.length)return 'sem nenhum mês';
+  for(const k of ks){
+    if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(k))return 'mês com chave inválida: '+k;
+    const m=o.months[k];
+    if(!m||typeof m!=='object'||Array.isArray(m))return 'o mês '+k+' está fora do formato';
+    if(!Array.isArray(m.days))return 'o mês '+k+' está sem a lista de dias';
+    if(m.meta!=null&&(typeof m.meta!=='object'||Array.isArray(m.meta)))return 'a conferência do mês '+k+' está fora do formato';
+    for(const d of m.days){
+      if(!d||typeof d!=='object'||Array.isArray(d))return 'dia fora do formato no mês '+k;
+      if(typeof d.d!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(d.d)||d.d.slice(0,7)!==k)return 'dia com data inválida no mês '+k+': '+String(d.d);
+      if(Number.isNaN(new Date(d.d+'T12:00').getTime()))return 'data que não existe: '+d.d;
+      for(const c of ['marcas','srpMarcas','obs','abono'])if(d[c]!=null&&typeof d[c]!=='string')return 'o campo '+c+' de '+d.d+' está fora do formato';
+      if(d.tipo!=null&&!TIPOS.includes(d.tipo))return 'tipo desconhecido em '+d.d+': '+String(d.tipo);
+      if(d.carga!=null&&(typeof d.carga!=='number'||!(d.carga>=0&&d.carga<=1440)))return 'carga fora do esperado em '+d.d;
+    }
+  }
+  if(o.calc!=null&&!Array.isArray(o.calc))return 'a calculadora está fora do formato';
+  return null;
+}
+/* completa o que faltar, para um arquivo antigo não chegar na tela com campo faltando */
+function limpaArq(o){
+  for(const k of Object.keys(o.months)){const m=o.months[k];
+    m.days=m.days.map(d=>({...d,marcas:typeof d.marcas==='string'?d.marcas:'',srpMarcas:typeof d.srpMarcas==='string'?d.srpMarcas:'',obs:typeof d.obs==='string'?d.obs:'',tipo:d.tipo||'util'}));
+    if(!m.meta)m.meta=null}
+  return o;
+}
+function aplicaArq(o){
+  const erro=validaArq(o);
+  if(erro){status('O arquivo de dados está fora do formato ('+erro+'); nada foi alterado aqui nem nele.');return false}
+  o=limpaArq(o);
   months=o.months;cur=o.cur&&months[o.cur]?o.cur:Object.keys(months).sort().pop();days=months[cur].days;meta=months[cur].meta||null;
   if(Array.isArray(o.calc))['cE1','cS1','cE2','cS2','cJ','cAlvo'].forEach((k,i)=>{if(o.calc[i]!=null&&document.activeElement!==$(k))$(k).value=o.calc[i]});
   if(o.tema==='light'||o.tema==='dark'){document.documentElement.dataset.mode=o.tema;pintaTema()}
   relerMeses();garanteMeses();if(!months[cur])useMonth(Object.keys(months).sort().pop());else{days=months[cur].days;meta=months[cur].meta||null}
   try{localStorage.setItem(KEYM,JSON.stringify({cur,months}))}catch(e){}renderMeses();render();return true}
+const soDados=p=>JSON.stringify({cur:p.cur,months:p.months});
+/* O arquivo mudou em outro navegador: o certo é o servidor decidir (fase 1 do app), mas
+   até lá nada desta janela se perde calado — a versão daqui fica guardada e dá para voltar. */
+function guardaConflito(p){try{localStorage.setItem(KEYM+'.conflito',JSON.stringify(p))}catch(e){}}
+function ligaMeu(){const b=$('btnMeu');if(!b)return;b.onclick=()=>{let p=null;
+  try{p=JSON.parse(localStorage.getItem(KEYM+'.conflito'))}catch(e){}
+  if(!p||!aplicaArq(p)){status('Não achei a cópia guardada desta janela.');return}
+  try{localStorage.removeItem(KEYM+'.conflito')}catch(e){}
+  nuvemAgenda()}}
 async function leArq(){const f=await FH.getFile();ultMod=f.lastModified;const tx=await f.text();if(!tx.trim())return null;try{return JSON.parse(tx)}catch(e){return 'invalido'}}
 async function conecta(h,gesto){FH=h;let perm=await FH.queryPermission({mode:'readwrite'});
   if(perm!=='granted'&&gesto)perm=await FH.requestPermission({mode:'readwrite'});
   if(perm!=='granted'){status('Arquivo de dados: <button id="btnArq" type="button">Abrir '+NOME_ARQ+'</button>',true);ligaBotao(h);return}
   const o=await leArq();
   if(o==='invalido'){status('O arquivo de dados está ilegível; nada foi alterado nele.');return}
-  if(o&&o.months&&Object.keys(o.months).length){try{localStorage.setItem(KEYM+'.backup',JSON.stringify({cur,months}))}catch(e){}aplicaArq(o);ultJS=JSON.stringify({...pacote(),salvoEm:''});pronto=true;status('Salvo em '+NOME_ARQ)}
+  if(o&&o.months&&Object.keys(o.months).length){try{localStorage.setItem(KEYM+'.backup',JSON.stringify({cur,months}))}catch(e){}
+    if(!aplicaArq(o))return;/* fora do formato: não conecta, para não gravar em cima */
+    ultJS=JSON.stringify({...pacote(),salvoEm:''});pronto=true;status('Salvo em '+NOME_ARQ)}
   else{pronto=true;await gravaArq()}
   try{await idb('readwrite',st=>st.put(FH,'arq'))}catch(e){}}
 function ligaBotao(h){const b=$('btnArq');if(!b)return;b.onclick=async()=>{try{
@@ -575,7 +676,12 @@ function ligaBotao(h){const b=$('btnArq');if(!b)return;b.onclick=async()=>{try{
     catch(e){if(e&&e.name==='AbortError'){try{const n=await showSaveFilePicker({id:'cartinhas',suggestedName:NOME_ARQ,types:[{description:'Dados do Cartinhas',accept:{'application/json':['.json']}}]});await conecta(n,true)}catch(e2){}return}throw e}
     await conecta(novo,true)}catch(e){try{const n=await showSaveFilePicker({id:'cartinhas',suggestedName:NOME_ARQ,types:[{description:'Dados do Cartinhas',accept:{'application/json':['.json']}}]});await conecta(n,true)}catch(e2){}}}}
 /* outro navegador gravou? relê quando a janela volta ao foco */
-async function confereArq(){if(!FH||!pronto||gravando)return;try{const f=await FH.getFile();if(f.lastModified>ultMod){const o=await leArq();if(o&&o!=='invalido'){aplicaArq(o);ultJS=JSON.stringify({...pacote(),salvoEm:''});status('Atualizado do arquivo')}}}catch(e){}}
+async function confereArq(){if(!FH||!pronto||gravando)return;try{const f=await FH.getFile();if(f.lastModified>ultMod){const o=await leArq();if(o&&o!=='invalido'){
+  const meu=pacote();
+  if(!aplicaArq(o))return;
+  ultJS=JSON.stringify({...pacote(),salvoEm:''});
+  if(soDados(meu)!==soDados(pacote())){guardaConflito(meu);status('Atualizado do arquivo. O que estava nesta janela ficou guardado: <button id="btnMeu" type="button">usar os meus</button>',true);ligaMeu()}
+  else status('Atualizado do arquivo')}}}catch(e){}}
 window.addEventListener('focus',confereArq);document.addEventListener('visibilitychange',()=>{if(!document.hidden)confereArq()});
 (async()=>{
   if(!('showOpenFilePicker' in window)){status('Use o Chrome ou o Edge para salvar no arquivo de dados');return}

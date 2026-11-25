@@ -2,9 +2,13 @@
 // Uso: node auditoria.test.js <caminho do index.html> [AAAA-MM-DD de "hoje"]
 const {JSDOM}=require(process.env.JSDOM||'jsdom');const fs=require('fs');
 const ARQ=process.argv[2];const HOJE=process.argv[3]||'2026-11-25';
-const BASE=fs.readFileSync(ARQ,'utf8').replace(/<script src=[^>]+><\/script>/g,'').replace("const todayISO=iso(new Date());",`const todayISO='${HOJE}';`);
-function abre(hoje){const html=hoje?BASE.replace(`const todayISO='${HOJE}';`,`const todayISO='${hoje}';`):BASE;
-  const erros=[];const dom=new JSDOM(html,{runScripts:'dangerously',url:'https://teste.local/',pretendToBeVisual:true,beforeParse(win){win.localStorage.clear();win.addEventListener('error',e=>erros.push(e.message))}});const w=dom.window;
+const DECL=/(?:const|let) todayISO=iso\(new Date\(\)\);(?:\/\*[^*]*\*\/)?/;
+const BASE=(()=>{const t=fs.readFileSync(ARQ,'utf8').replace(/<script src=[^>]+><\/script>/g,'');
+  if(!DECL.test(t))throw new Error('não achei a declaração de todayISO em '+ARQ);
+  return t.replace(DECL,`let todayISO='${HOJE}';`)})();
+const JANELAS=[];
+function abre(hoje){const html=hoje?BASE.replace(`let todayISO='${HOJE}';`,`let todayISO='${hoje}';`):BASE;
+  const erros=[];const dom=new JSDOM(html,{runScripts:'dangerously',url:'https://teste.local/',pretendToBeVisual:true,beforeParse(win){win.localStorage.clear();win.addEventListener('error',e=>erros.push(e.message))}});const w=dom.window;JANELAS.push(w);
   const d=w.document;const T=id=>(d.getElementById(id)||{textContent:''}).textContent.replace(/\s+/g,' ').trim();
   const api={w,d,erros,T,
     importa(txt){d.getElementById('txt').value=txt;d.getElementById('btnTxt').click()},
@@ -140,8 +144,81 @@ caso('Dados','Leitor de PDF em versão sem a falha CVE-2024-4367 e com eval desl
   return {ok:vs.length>0&&!velhas.length&&semEval,
     obs:`pdf.js ${vs.join(', ')||'não encontrado'}${velhas.length?' — abaixo da versão corrigida '+MIN.join('.')+': '+velhas.join(', '):''} · isEvalSupported:false ${semEval?'presente':'AUSENTE'}`}});
 
+// ---------- ACHADOS 2, 4, 5, 6, 7 e 8 DA AUDITORIA DE 25/11/2026 ----------
+// Saldo do mês em minutos, com sinal (o número na tela vem sem sinal, o sinal está no rótulo).
+const saldoMin=p=>{const m=/(\d+)h(\d{2})/.exec(p.T('big'));if(!m)return null;
+  const v=+m[1]*60+ +m[2];return /negativo/.test(p.T('bigLbl'))?-v:v};
+const mesMin=t=>{const m=/mês fica em ([+−-]?)(\d+)h(\d{2})/.exec(t);
+  return m?(m[1]==='−'||m[1]==='-'?-1:1)*(+m[2]*60+ +m[3]):null};
+const zero=t=>/^[+−-]?0?0:00$/.test(String(t).trim());
+const fmtMin=v=>v==null?'—':(v<0?'−':'+')+Math.floor(Math.abs(v)/60)+'h'+String(Math.abs(v)%60).padStart(2,'0');
+// Simular um dia que já está fechado com as mesmas batidas não pode mudar o total do mês:
+// se mudar, o dia está entrando duas vezes (ou com regra diferente da tabela).
+const simulaMesmoDia=(p,marcas)=>{const [E1,S1,E2,S2]=marcas.split(/\s+/);
+  const r=p.calc(S1?{cE1:E1,cS1:S1,cE2:E2,cS2:S2,cAlvo:'+0:00'}:{cE1:E1,cS1:'',cE2:'',cS2:S2,cAlvo:'+0:00'});
+  return {r,mes:mesMin(r),antes:saldoMin(p),dia:p.T('cSal')}};
+
+caso('Cálculo do dia','Hoje não é somado duas vezes no saldo do mês',()=>{const p=abre();
+  p.importa(L(25,11,'08:00 12:00 13:00 18:00'));
+  const s=simulaMesmoDia(p,'08:00 12:00 13:00 18:00');
+  return {ok:s.mes!=null&&s.mes===s.antes&&/^\+01:00$/.test(s.dia),
+    obs:`mês hoje ${fmtMin(s.antes)} · simulando o mesmo dia fechado: ${fmtMin(s.mes)} (dia ${s.dia})`}});
+caso('Cálculo do dia','Tolerância de 10 min vale igual na tabela e no Cálculo do dia',()=>{const p=abre();
+  p.importa(L(25,11,'08:00 12:00 13:00 17:05'));
+  const c=p.cel('25/11');const s=simulaMesmoDia(p,'08:00 12:00 13:00 17:05');
+  return {ok:!c.cred&&!c.deb&&zero(s.dia)&&s.mes===s.antes,
+    obs:`tabela: crédito ${c.cred||'-'} débito ${c.deb||'-'} · calculadora: dia ${s.dia}, mês ${fmtMin(s.antes)} → ${fmtMin(s.mes)}`}});
+caso('Cálculo do dia','Hora extra autorizada não entra no saldo do Cálculo do dia',()=>{const p=abre();
+  p.importa(L(25,11,'08:00 12:00 13:00 18:00','08:00','Extras 01:00; HE autorizada;'));
+  const s=simulaMesmoDia(p,'08:00 12:00 13:00 18:00');
+  return {ok:zero(s.dia)&&s.mes===s.antes&&/autorizada/.test(s.r),
+    obs:`dia ${s.dia}, mês ${fmtMin(s.antes)} → ${fmtMin(s.mes)} · aviso de HE autorizada: ${/autorizada/.test(s.r)}`}});
+caso('Cálculo do dia','Abono do dia entra no Cálculo do dia',()=>{const p=abre();
+  p.importa(L(25,11,'08:00 12:00 13:00 16:00'));
+  p.edita('25/11','abono','1:00');
+  const s=simulaMesmoDia(p,'08:00 12:00 13:00 16:00');
+  return {ok:zero(s.dia)&&s.mes===s.antes&&/abono/i.test(s.r),
+    obs:`1 h de débito abonada — dia ${s.dia}, mês ${fmtMin(s.antes)} → ${fmtMin(s.mes)} · aviso de abono: ${/abono/i.test(s.r)}`}});
+caso('Dados','Releitura por mudança de versão mantém abono e tipo trocado à mão',()=>{const p=abre();
+  p.importa(L(3,11,'08:00 12:00 13:00 16:00'));
+  p.edita('03/11','abono','1:00');p.edita('03/11','tipo','feriado');p.edita('03/11','obs','guardar isso');
+  p.w.cartinhasTeste.estado().months['2026-11'].meta.pv=0;  // finge relatório lido por versão antiga
+  p.w.cartinhasTeste.relerMeses();
+  const d=p.w.cartinhasTeste.estado().months['2026-11'].days.find(x=>x.d==='2026-11-03')||{};
+  return {ok:d.abono==='1:00'&&d.tipo==='feriado'&&!!d.tipoManual&&d.obs==='guardar isso',
+    obs:`depois de reler: abono "${d.abono||'—'}", tipo ${d.tipo} (à mão: ${!!d.tipoManual}), obs "${d.obs||'—'}"`}});
+caso('Dados','Arquivo de dados fora do formato é recusado sem mexer na tela',()=>{const p=abre();
+  p.importa(L(3,11,'08:00 12:00 13:00 17:00'));
+  const antes=p.saldo();const V=p.w.cartinhasTeste.validaArq;
+  const ruins=[{},{months:{}},{months:{'2026-11':{}}},{months:{'2026-13':{days:[]}}},
+    {months:{'2026-11':{days:[{d:'2026-11-03',tipo:'inventado'}]}}},
+    {months:{'2026-11':{days:[{d:'2026-12-03'}]}}},
+    {months:{'2026-11':{days:[{d:'2026-11-03',obs:{}}]}}}];
+  const recusados=ruins.filter(o=>typeof V(o)==='string').length;
+  const voltou=p.w.cartinhasTeste.aplicaArq({months:{'2026-11':{}}});
+  const bom=V({months:{'2026-11':{days:[{d:'2026-11-03',marcas:'08:00 12:00',tipo:'util'}],meta:null}}});
+  return {ok:recusados===ruins.length&&voltou===false&&p.saldo()===antes&&bom===null&&/fora do formato/.test(p.T('nuvem')),
+    obs:`${recusados} de ${ruins.length} arquivos ruins recusados · arquivo bom aceito: ${bom===null} · saldo intacto: ${p.saldo()===antes} · aviso na tela: ${/fora do formato/.test(p.T('nuvem'))}`}});
+caso('Datas e meses','Virada da meia-noite com a página aberta',()=>{
+  const z=n=>String(n).padStart(2,'0');
+  const isoD=d=>`${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`;
+  const agora=new Date();const ontem=new Date(agora.getFullYear(),agora.getMonth(),agora.getDate()-1);
+  const p=abre(isoD(ontem));                 // a página abriu "ontem" e ficou aberta
+  const antes=p.w.cartinhasTeste.hoje();
+  const mudou=p.w.cartinhasTeste.conferiaDia();
+  const depois=p.w.cartinhasTeste.hoje();
+  return {ok:antes===isoD(ontem)&&mudou===true&&depois===isoD(agora),
+    obs:`abriu em ${antes} e passou para ${depois} sem recarregar (mudou: ${mudou})`}});
+caso('Dados','Alteração de outro navegador não descarta a desta janela sem aviso',()=>({
+  ok:/\.conflito/.test(BASE)&&/usar os meus/.test(BASE)&&/function guardaConflito/.test(BASE),aviso:true,
+  obs:'antes de recarregar o arquivo, a versão desta janela é guardada e aparece o botão "usar os meus" (conferido no código; o acesso a arquivo não roda no simulador). Quem vence passa a ser decidido pelo servidor na fase 1 do app.'}));
+
 // ---------- SAÍDA ----------
 const fal=R.filter(r=>!r.ok&&!r.aviso),av=R.filter(r=>!r.ok&&r.aviso),ok=R.filter(r=>r.ok);
 for(const r of R)console.log(`${r.ok?'PASSOU ':r.aviso?'ATENÇÃO':'FALHOU '} #${String(r.id).padStart(2,'0')} [${r.grupo}] ${r.nome} — ${r.obs}`);
 console.log(`\nTotal: ${R.length} · passou ${ok.length} · falhou ${fal.length} · atenção ${av.length}`);
-fs.writeFileSync('resultado.json',JSON.stringify(R,null,1));
+fs.writeFileSync(require('path').join(__dirname,'resultado.json'),JSON.stringify(R,null,1));
+if(fal.length)process.exitCode=1;
+/* a página agenda a virada do dia com setTimeout: encerra sem esperar esses relógios,
+   e sem fechar as janelas (fechar derruba o documento com callbacks ainda na fila) */
+setTimeout(()=>process.exit(process.exitCode||0),50);
