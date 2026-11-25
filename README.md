@@ -37,7 +37,7 @@
 
 ## Testes
 
-`testes/auditoria.test.js` roda 57 situações (relatórios fora do padrão, tolerância, turno noturno, meses, abono, virada da meia-noite, arquivo de dados fora do formato etc.) num navegador simulado:
+`testes/auditoria.test.js` roda 62 situações (relatórios fora do padrão, tolerância, turno noturno, meses, abono, virada da meia-noite, arquivo de dados fora do formato etc.) num navegador simulado:
 
 ```
 cd testes

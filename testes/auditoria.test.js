@@ -48,8 +48,11 @@ caso('Leitura do relatório','Período que atravessa dois meses (21/10 a 20/11)'
   const temNov=nov&&nov.days.some(x=>x.d==='2026-11-03'&&x.marcas);
   return {ok:!!temNov,obs:temNov?'os dois meses recebem seus dias':'os dias de novembro foram descartados (só o mês da primeira data é importado)'}});
 caso('Leitura do relatório','Texto copiado da tela do SRP (não do PDF)',()=>{const p=abre();
+  const antes=JSON.stringify(p.cel('03/11'));
   p.importa('03/11/2026 Ter 10:53 16:58 10:53 16:58 06:05 01:55\n04/11/2026 Qua 09:46 15:47 09:46 15:47 06:01 01:59');
-  const m=p.T('msg');const a=p.cel('03/11');return {ok:/tela do SRP/.test(m)&&!(a&&a.deb),obs:'aviso: '+m.slice(0,70)}});
+  const m=p.T('msg');const depois=JSON.stringify(p.cel('03/11'));
+  /* o certo é o texto ser recusado: o dia tem de ficar exatamente como estava, com ou sem dados antes */
+  return {ok:/tela do SRP/.test(m)&&depois===antes,obs:'aviso: '+m.slice(0,58)+' · 03/11 inalterado: '+(depois===antes)}});
 caso('Leitura do relatório','Três pares de batidas (dois intervalos)',()=>{const p=abre();
   p.importa(L(3,11,'08:00 10:00 10:15 12:00 13:00 17:00'));const a=p.cel('03/11');
   return {ok:a.trab==='07:45'&&a.deb==='00:15',obs:`trabalhadas ${a.trab}, débito ${a.deb}`}});
@@ -143,7 +146,9 @@ casoA('Dados','Dois navegadores gravando dias diferentes no mesmo arquivo',async
   const dias=diasDoArq(h,'2026-11');
   return {ok:dias.includes('2026-11-03')&&dias.includes('2026-11-04'),
     obs:`no arquivo ficaram: ${dias.join(', ')||'nenhum'} · B avisou: ${b.T('nuvem').slice(0,56)}`}});
-caso('Dados','Firefox / navegador sem acesso a arquivo',()=>{const p=abre();return {ok:/Chrome ou o Edge/.test(p.T('nuvem')),aviso:true,obs:'aviso na tela: '+p.T('nuvem')}});
+caso('Dados','Firefox / navegador sem acesso a arquivo',()=>{const p=abre();const t=p.T('nuvem');
+  /* as duas redações avisam: a limpa manda usar Chrome ou Edge, a pessoal diz que ficou só neste navegador */
+  return {ok:/Chrome ou o Edge/.test(t)||/s[óo] neste navegador/.test(t),aviso:true,obs:'aviso na tela: '+t.slice(0,80)}});
 
 caso('Abono','Formatos "1h30", "1,5" e "45min"',()=>{const p=abre();p.importa(L(3,11,'08:00 12:00 13:00 15:00'));const v=[];for(const x of ['1h30','1,5','45min']){p.edita('03/11','abono',x);v.push(p.cel('03/11').abono)}
   return {ok:v.join(' ')==='1:30 1:30 0:45',obs:v.join(' · ')}});
