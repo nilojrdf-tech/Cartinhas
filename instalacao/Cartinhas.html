@@ -80,6 +80,7 @@ td select{appearance:none;cursor:pointer}td input::placeholder{color:var(--mut);
 tr:not(.folga):not(.feriado):not(.ferias):hover td{background:light-dark(#f4f7f9,#152434)}
 td{border-bottom:1px solid light-dark(#d9d9d9,#25384a)}
 td input.t{font-variant-numeric:tabular-nums;min-width:200px}
+td input.ab{width:84px;text-align:center;font-variant-numeric:tabular-nums;border:1px solid light-dark(#b9c3cb,#3a5166);background:light-dark(#fff,#10202e)}tr.folga td input.ab,tr.feriado td input.ab,tr.ferias td input.ab{visibility:hidden}
 td select[data-f=tipo]{min-width:132px}
 .alts b{text-align:right}
 .pos{color:var(--pos);font-weight:600}.neg{color:var(--neg);font-weight:600}
@@ -219,13 +220,13 @@ td input.ed{font-weight:600;color:var(--b)}tr.fut td{opacity:.7}tfoot td{border-
   </div>
   <div class="scroll">
   <table class="stack" id="tbl">
-    <thead><tr><th>Dia</th><th>Tipo</th><th>Marcações</th><th class="n">Trabalhadas</th><th class="n cr">Crédito</th><th class="n db">Débito</th><th>Observação</th><th></th></tr></thead>
+    <thead><tr><th>Dia</th><th>Tipo</th><th>Marcações</th><th class="n">Trabalhadas</th><th class="n">Abono</th><th class="n cr">Crédito</th><th class="n db">Débito</th><th>Observação</th><th></th></tr></thead>
     <tbody id="tb"></tbody>
     <tfoot id="tf"></tfoot>
   </table>
   </div>
   <p class="note aviso"><b>Ferramenta de apoio, não oficial.</b> O registro que vale é o do SRP. Tudo roda no seu computador: nenhum dado é enviado para lugar nenhum.</p>
-  <p class="note">Regras, iguais às do SRP: dia útil = 8 h; o crédito do dia vai até 2 h, e o que passar é "crédito irregular", que não entra no saldo; passando de 8 h no dia, o intervalo precisa ter 1 h, e o que faltar é descontado; com número ímpar de batidas, a batida sem par é ignorada. O dia de hoje com batida aberta e os dias futuros não entram no saldo. Fins de semana, feriados e férias não têm carga. Para corrigir um dia, edite as marcações; a marcação original do SRP fica anotada embaixo. Os dados ficam salvos só neste navegador.</p>
+  <p class="note">Regras, iguais às do SRP: dia útil = 8 h; o crédito do dia vai até 2 h, e o que passar é "crédito irregular", que não entra no saldo; passando de 8 h no dia, o intervalo precisa ter 1 h, e o que faltar é descontado; com número ímpar de batidas, a batida sem par é ignorada. O dia de hoje com batida aberta e os dias futuros não entram no saldo. Fins de semana, feriados e férias não têm carga. Abono (consulta, atestado etc.): digite as horas abonadas na coluna Abono (ex.: 4:00); elas cobrem o débito do dia. Os abonos do relatório do SRP já vêm preenchidos. Para corrigir um dia, edite as marcações; a marcação original do SRP fica anotada embaixo. Os dados ficam salvos só neste navegador.</p>
 </div></section>
 
 <section class="band" style="padding-top:0"><div class="wrap">
@@ -315,7 +316,7 @@ function calcDay(x,marcas){
   let diff=worked-carga;
   if(marks.length&&Math.abs(diff)<=10){r.tol=diff;diff=0}  /* tolerância de até 10 min por dia */
   if(diff>0){r.cred=Math.min(diff,120);r.irr=diff-r.cred}else r.deb=-diff;
-  const ab=x.srp&&x.srp.abono||0;if(ab&&r.deb){r.abono=Math.min(ab,r.deb);r.deb-=r.abono}
+  const ab=(x.abono!=null&&x.abono!=='')?(toM(x.abono)||0):(x.srp&&x.srp.abono||0);if(ab&&r.deb){r.abono=Math.min(ab,r.deb);r.deb-=r.abono}
   return r;
 }
 function totals(useExc,srp,arr){
@@ -352,11 +353,12 @@ function render(){
 <td><select data-i="${i}" data-f="tipo"><option value="util"${x.tipo==='util'?' selected':''}>Útil</option><option value="folga"${x.tipo==='folga'?' selected':''}>Fim de semana</option><option value="feriado"${x.tipo==='feriado'?' selected':''}>Feriado</option><option value="ferias"${x.tipo==='ferias'?' selected':''}>Férias</option></select></td>
 <td><input class="t${edit?' ed':''}" data-i="${i}" data-f="marcas" value="${esc(x.marcas)}" placeholder="${x.futuro||wk?'':'sem batida'}" aria-label="Marcações de ${esc(br(x.d))}">${edit?`<div class="orig">SRP: ${esc(x.srpMarcas||'sem batida')} <button class="lnk" data-undo="${i}">voltar</button></div>`:''}</td>
 <td class="n">${r.worked?esc(hm(r.worked)):''}${st?'<br>'+st:''}</td>
+<td class="n"><input class="ab" data-i="${i}" data-f="abono" value="${esc(x.abono!=null&&x.abono!==''?x.abono:(x.srp&&x.srp.abono&&!wk?hm(x.srp.abono):''))}" placeholder="${wk?'':'0:00'}" inputmode="numeric" aria-label="Horas abonadas em ${esc(br(x.d))}"></td>
 <td class="n cr${r.cred?' v':''}">${r.cred?esc(hm(r.cred)):''}</td>
 <td class="n db${r.deb?' v':''}">${r.deb?esc(hm(r.deb)):''}</td>
 <td><input data-i="${i}" data-f="obs" value="${esc(x.obs)}" class="obs" aria-label="Observação de ${esc(br(x.d))}"></td>
 <td>${x.futuro?'':`<button class="del" data-del="${i}" aria-label="Remover dia ${esc(br(x.d))}" title="Remover dia">×</button>`}</td></tr>`}).join('');
-  $('tf').innerHTML=`<tr><td colspan="4"><b>Total</b></td><td class="n cr"><b>${esc(hm(T.cred))}</b></td><td class="n db"><b>${esc(hm(T.deb))}</b></td><td colspan="2"><b class="${T.saldo<0?'neg':'pos'}">Saldo ${esc(fmt(T.saldo,true))}</b>${useExc?'':' <span class="msg">(sem contar excedentes)</span>'}</td></tr>`;
+  $('tf').innerHTML=`<tr><td colspan="5"><b>Total</b></td><td class="n cr"><b>${esc(hm(T.cred))}</b></td><td class="n db"><b>${esc(hm(T.deb))}</b></td><td colspan="2"><b class="${T.saldo<0?'neg':'pos'}">Saldo ${esc(fmt(T.saldo,true))}</b>${useExc?'':' <span class="msg">(sem contar excedentes)</span>'}</td></tr>`;
   renderMeta();
 }
 
@@ -494,7 +496,8 @@ async function readPdf(file){
 }
 
 $('tb').addEventListener('change',e=>{const el=e.target;const i=el.dataset.i;if(i==null)return;
-  days[i][el.dataset.f]=el.value;
+  let v=el.value;if(el.dataset.f==='abono'){const t=v.trim().toLowerCase().replace(/\s/g,'');const m=/^(\d{1,2})(?:[:h](\d{2})?)?(?:min)?$/.exec(t);v=!t?'':m?(+m[1])+':'+(m[2]||'00'):v}
+  days[i][el.dataset.f]=v;
   if(el.dataset.f==='marcas'&&el.value.trim())days[i].futuro=false;
   save();render();});
 $('tb').addEventListener('click',e=>{

@@ -12,6 +12,7 @@
 - **Até o fim do mês**: quanto você pode trabalhar a menos, ou precisa fazer a mais, nos dias úteis que faltam.
 - **Cálculo do dia**: digite entrada e almoço e veja a que horas pode ir embora, para o saldo que você escolher.
 - **Vários meses**, cada um com sua tela; o relatório importado entra sozinho no mês certo.
+- **Abono** por dia (consulta, atestado etc.): digite as horas abonadas e elas cobrem o débito do dia.
 - **Conferência** com os totais do próprio relatório do SRP.
 - **Dados num arquivo seu** (`cartinhas-dados.json`), lido e gravado por qualquer navegador (Chrome ou Edge).
 
