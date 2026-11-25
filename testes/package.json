@@ -1,0 +1,7 @@
+{
+  "name": "cartinhas-testes",
+  "private": true,
+  "description": "Auditoria de testes do Cartinhas (roda a página num navegador simulado)",
+  "scripts": { "test": "node auditoria.test.js ../index.html" },
+  "devDependencies": { "jsdom": "^24.0.0" }
+}
