@@ -623,6 +623,78 @@ caso('Férias — saldo','Meses sem relatório deixam o saldo provisório, até 
   const card=p.d.querySelector('[data-ciclo="2025-03-15"]').textContent;
   return {ok:antes&&!/faltam os relatórios/.test(card),obs:`antes: ${antes?'faltam relatórios':'—'} · depois de conferir: ${/faltam os relatórios/.test(card)?'AINDA FALTA':'pendência resolvida'}`}});
 
+// ---------- PROGRAMAÇÃO DE FÉRIAS — fases 5 e 6: marcar no mês e validar (PLANO-FERIAS.md) ----------
+function vaiMes(p,ym){for(let i=0;i<30&&!p.d.querySelector(`#fMesCard [data-d="${ym}-01"]`);i++){const at=p.d.querySelector('#fMesCard [data-d]').dataset.d.slice(0,7);clica(p,at<ym?'#fMesProx':'#fMesAnt')}}
+function marca(p,a,b){vaiMes(p,a.slice(0,7));clica(p,`#fMesCard [data-d="${a}"]`);vaiMes(p,b.slice(0,7));clica(p,`#fMesCard [data-d="${b}"]`)}
+const painel=p=>{const e=p.d.querySelector('#fMesCard .fnat');return e?{cls:e.className,txt:e.textContent.replace(/\s+/g,' ').trim()}:{cls:'',txt:''}};
+const V=p=>p.w.cartinhasTeste.fer;
+const concorda=p=>{const c=p.d.querySelector('[data-ciclo="2025-03-15"] [data-fc="concorda"]');c.checked=true;c.dispatchEvent(new p.w.Event('change',{bubbles:true}))};
+
+caso('Férias — marcação','Marcar 30 dias de uma vez: útil fica rosa, fim de semana fica com a cor dele puxada para o rosa, e o banco de horas não muda',()=>{const p=abre();
+  p.importa(L(3,11,'08:00 12:00 13:00 18:00'));const s0=p.saldo(),m0=JSON.stringify(p.w.cartinhasTeste.estado().months);
+  comPlano(p);marca(p,'2027-01-04','2027-02-02');const y=cicloDe(p,'2025-03-15');vaiMes(p,'2027-01');
+  const cl=d=>p.d.querySelector(`[data-d="${d}"]`).className,pr=p.d.querySelector('[data-d="2027-01-05"]').getAttribute('aria-pressed');
+  const cores=/\butil\b.*p-planejado/.test(cl('2027-01-05'))&&/\bfolga\b.*p-planejado/.test(cl('2027-01-09'))&&/\bferiado\b/.test(cl('2027-01-01'))&&!/p-/.test(cl('2027-01-01'));
+  V(p).fecha();const igual=p.saldo()===s0&&JSON.stringify(p.w.cartinhasTeste.estado().months)===m0;
+  const ok=y.periodos.length===1&&y.periodos[0].estado==='planejado'&&y.periodos[0].ini==='2027-01-04'&&y.periodos[0].fim==='2027-02-02'&&cores&&pr==='true'&&igual;
+  return {ok,obs:`período: ${y.periodos.map(x=>x.ini+' a '+x.fim+' '+x.estado).join(', ')} · cores certas: ${cores} · aria-pressed: ${pr} · banco de horas e meses iguais: ${igual}`}});
+
+caso('Férias — validação','Dia de início: segunda a quarta passam; sexta e sábado são proibição legal; domingo e quinta, regra interna',()=>{const p=abre();comPlano(p);
+  const r=['2027-01-04','2027-01-05','2027-01-06','2027-01-07','2027-01-08','2027-01-09','2027-01-10'].map(d=>V(p).inicio(d));
+  const esp=[[true],[true],[true],[false,'R1b','interna'],[false,'R1a','legal'],[false,'R1a','legal'],[false,'R1c','interna']];
+  const ok=r.every((x,i)=>x.ok===esp[i][0]&&(x.ok||(x.regra===esp[i][1]&&x.natureza===esp[i][2])));
+  return {ok,obs:r.map((x,i)=>['seg','ter','qua','qui','sex','sáb','dom'][i]+': '+(x.ok?'passa':x.regra+' '+x.natureza)).join(' · ')}});
+
+caso('Férias — validação','Leitura só da CLT: a quinta passa, a sexta continua proibida por lei',()=>{const p=abre();comPlano(p);
+  const s=p.d.getElementById('fLeitura');s.value='clt';s.dispatchEvent(new p.w.Event('change',{bubbles:true}));
+  const qui=V(p).inicio('2027-01-07'),sex=V(p).inicio('2027-01-08');
+  return {ok:qui.ok&&!sex.ok&&sex.natureza==='legal',obs:`quinta: ${qui.ok?'passa':qui.regra} · sexta: ${sex.ok?'PASSA':sex.regra+' '+sex.natureza}`}});
+
+caso('Férias — validação','Véspera e antevéspera de feriado: proibição legal, dizendo qual feriado',()=>{const p=abre();comPlano(p);
+  const a=V(p).inicio('2026-12-23'),b=V(p).inicio('2026-12-24');
+  return {ok:!a.ok&&!b.ok&&a.natureza==='legal'&&b.natureza==='legal'&&/25\/12\/2026/.test(a.msg),obs:`23/12: ${a.msg} · 24/12: ${b.regra} ${b.natureza}`}});
+
+caso('Férias — validação','Recusa aparece no mês com a natureza, e nada é marcado',()=>{const p=abre();comPlano(p);marca(p,'2027-01-08','2027-02-06');
+  const pa=painel(p);
+  return {ok:/fnat-legal/.test(pa.cls)&&/Proibição legal/.test(pa.txt)&&/não foi marcado/.test(pa.txt)&&cicloDe(p,'2025-03-15').periodos.length===0,obs:pa.txt.slice(0,140)}});
+
+caso('Férias — validação','Prazo do ciclo (R4) e saldo: período que passa do concessivo, ou que pede mais dias que o saldo, é recusado',()=>{const p=abre();comPlano(p);
+  const a=V(p).valida('2027-03-01','2027-03-30').recusa||{},b=V(p).valida('2027-01-04','2027-02-03').recusa||{};
+  return {ok:a.regra==='R4'&&a.natureza==='legal'&&b.regra==='saldo',obs:`01/03 a 30/03: ${a.regra} — ${a.msg} · 31 dias: ${b.regra} — ${b.msg}`}});
+
+caso('Férias — validação','Dividir sem concordância é recusado (R11); com ela, 14 dias passam',()=>{const p=abre();comPlano(p);
+  const a=V(p).valida('2027-01-04','2027-01-17');concorda(p);const b=V(p).valida('2027-01-04','2027-01-17');
+  return {ok:a.recusa&&a.recusa.regra==='R11'&&b.ok,obs:`sem concordância: ${a.recusa?a.recusa.regra:'PASSOU'} · com: ${b.ok?'passa':b.recusa.regra}`}});
+
+caso('Férias — validação','Mínimos: 4 dias recusado; 15 marcados e depois 12 deixariam 3, e é recusado (R2c)',()=>{const p=abre();comPlano(p);concorda(p);
+  const a=V(p).valida('2027-01-04','2027-01-07');marca(p,'2027-01-04','2027-01-18');const b=V(p).valida('2027-02-22','2027-03-05');
+  return {ok:a.recusa&&a.recusa.regra==='R2f'&&b.recusa&&b.recusa.regra==='R2c'&&/menos que o mínimo de 5/.test(b.recusa.msg),obs:`4 dias: ${a.recusa&&a.recusa.msg} · 15 + 12: ${b.recusa&&b.recusa.msg}`}});
+
+caso('Férias — validação','Intervalo de 30 dias (R3): 01/02 recusado como regra interna; 17/02 passa',()=>{const p=abre();comPlano(p);concorda(p);
+  marca(p,'2027-01-04','2027-01-17');const a=V(p).valida('2027-02-01','2027-02-16'),b=V(p).valida('2027-02-17','2027-03-04');
+  return {ok:a.recusa&&a.recusa.regra==='R3'&&a.recusa.natureza==='interna'&&/17\/02\/2027/.test(a.recusa.msg)&&b.ok,obs:`01/02: ${a.recusa&&a.recusa.msg} · 17/02: ${b.ok?'passa':b.recusa.msg}`}});
+
+caso('Férias — validação','O que sobra precisa caber nas datas (R2c): 14 dias no meio de um prazo curto, sem lugar para os 16 restantes, é recusado',()=>{const p=abre('2027-01-20');comPlano(p);concorda(p);
+  const a=V(p).valida('2027-02-01','2027-02-14');
+  return {ok:!!(a.recusa&&a.recusa.regra==='R2c'&&/não há datas/.test(a.recusa.msg)),obs:a.recusa?a.recusa.msg:'PASSOU'}});
+
+caso('Férias — validação','Antecedência menor que 40 dias marca mesmo assim, com aviso',()=>{const p=abre();comPlano(p);marca(p,'2026-12-14','2027-01-12');
+  const pa=painel(p),y=cicloDe(p,'2025-03-15');
+  return {ok:y.periodos.length===1&&/fnat-ok/.test(pa.cls)&&/Faltam 19 dias/.test(pa.txt)&&/Aviso/.test(pa.txt),obs:`marcou: ${y.periodos.length} · painel: ${pa.txt.slice(0,120)}`}});
+
+caso('Férias — marcação','Clicar num período planejado mostra as duas medidas e deixa desmarcar',()=>{const p=abre();comPlano(p);marca(p,'2027-01-04','2027-02-02');
+  vaiMes(p,'2027-01');clica(p,'#fMesCard [data-d="2027-01-20"]');const pa=painel(p);clica(p,'[data-desmarca]');
+  return {ok:/Descanso seguido/.test(pa.txt)&&/Dias úteis poupados/.test(pa.txt)&&cicloDe(p,'2025-03-15').periodos.length===0,obs:pa.txt.slice(0,150)}});
+
+caso('Férias — marcação','O início fica guardado ao trocar de mês, e Esc cancela',()=>{const p=abre();comPlano(p);
+  vaiMes(p,'2026-12');clica(p,'#fMesCard [data-d="2026-12-14"]');vaiMes(p,'2027-01');const guardou=/Início em 14\/12\/2026/.test(p.T('fMesCard'));
+  p.d.dispatchEvent(new p.w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));const cancelou=!/Início em/.test(p.T('fMesCard'));
+  return {ok:guardou&&cancelou,obs:`guardou o início em janeiro: ${guardou} · Esc cancelou: ${cancelou}`}});
+
+caso('Férias — medidas','Descanso seguido conta as bordas que não se pagam: 04/01 a 02/02/2027 dá 33 dias fora e 22 úteis poupados',()=>{const p=abre();comPlano(p);
+  const a=V(p).avalia('2027-01-04',30);
+  return {ok:a.antes===3&&a.depois===0&&a.uteis===22&&a.descanso===33,obs:`antes ${a.antes} (01/01 feriado, 02 e 03 fim de semana) · depois ${a.depois} · úteis ${a.uteis} · descanso ${a.descanso}`}});
+
 // ---------- SAÍDA ----------
 Promise.all(PEND).then(()=>{
 R.sort((a,b)=>a.id-b.id);
