@@ -3,22 +3,35 @@
 
 Dê dois cliques em "atualizar.bat".
 
-Ele busca a versao nova, confere se chegou inteira e troca so o programa,
-na pasta de sempre (C:\Users\<seu usuario>\Cartinhas).
+Ele troca só o programa, onde ele já está instalado. Não cria atalho novo, não
+muda nada de lugar e não deixa arquivo sobrando na pasta.
 
-O que ele NAO toca:
-- o seu cartinhas-dados.json (seus meses e correcoes);
-- o atalho da Area de Trabalho.
-
-A versao anterior fica guardada ao lado, como Cartinhas-anterior.html, caso
-voce queira voltar: e so renomear.
+O que ele NÃO toca:
+- o seu cartinhas-dados.json (seus meses e correções);
+- o atalho da Área de Trabalho, que continua abrindo o mesmo lugar.
 
 Depois de atualizar, se a tela ainda parecer a antiga, aperte Ctrl+F5 na
-pagina: o navegador estava mostrando a copia guardada dele.
+página: o navegador estava mostrando a cópia guardada dele.
+
+ONDE ELE PROCURA O SEU CARTINHAS
+Primeiro em C:\Users\<seu usuario>\Cartinhas (a pasta que o instalar.bat usa)
+e, se não achar, no atalho "Cartinhas" da Área de Trabalho: ele lê o atalho e
+atualiza o arquivo para onde o atalho aponta.
+
+ANTES DE TROCAR, ELE CONFERE
+Só grava depois de conferir que o arquivo chegou inteiro e que é mesmo o
+Cartinhas. Se vier pela metade, ele avisa e não troca nada. Se o Cartinhas
+estiver aberto e o arquivo travado, ele também avisa e não troca nada.
+
+SE O WINDOWS DISSER QUE BLOQUEOU O ARQUIVO
+Arquivo .bat que chega por download, e-mail ou WhatsApp vem marcado como "da
+internet". Clique com o botão direito no atualizar.bat, escolha Propriedades
+e, embaixo, marque "Desbloquear". Se aparecer a tela azul "O Windows protegeu
+o seu PC", clique em "Mais informações" e depois em "Executar assim mesmo".
 
 SE A REDE BLOQUEAR O DOWNLOAD
-Peca o arquivo Cartinhas.html, deixe ele nesta mesma pasta, ao lado do
-atualizar.bat, e rode de novo: ele usa o arquivo da pasta e nao baixa nada.
+Peça o arquivo Cartinhas.html, deixe ele nesta mesma pasta, ao lado do
+atualizar.bat, e rode de novo: ele usa o arquivo da pasta e não baixa nada.
 
-Quem nunca instalou nao usa este arquivo: pede o pacote de instalacao e roda
-o instalar.bat, que ja vem com a versao nova.
+Quem nunca instalou não usa este arquivo: pede o pacote de instalação e roda o
+instalar.bat, que já vem com a versão nova.

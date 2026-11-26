@@ -75,7 +75,7 @@ node testes/todos.js
 | `index.html` | O sistema, código legível (carrega o leitor de PDF da internet). |
 | `instalacao/Cartinhas.html` | O mesmo sistema em um arquivo só, com o leitor de PDF embutido (funciona sem internet). |
 | `instalacao/instalar.bat` / `desinstalar.bat` | Instalam e removem o atalho no Windows. |
-| `atualizacao/atualizar.bat` | Para quem já usa: busca a versão nova, confere e troca só o programa. |
+| `atualizacao/atualizar.bat` | Para quem já usa: busca a versão nova, confere e troca só o programa, onde ele está instalado. |
 | `instalacao/LEIA-ME.txt` | Instruções para quem vai usar. |
 | `app/` | O aplicativo para celular (PWA), com conta por pessoa. Em construção. |
 | `logo/` | Logo em SVG, PNG e ícone do Windows. |
