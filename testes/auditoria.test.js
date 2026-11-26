@@ -766,6 +766,73 @@ caso('Férias — desempenho','Dicas de todos os meses e a melhor combinação, 
   const t0=Date.now();for(const ym of ['2026-11','2026-12','2027-01','2027-02','2027-03'])V(p).dicas(ym,14);V(p).melhor();const ms=Date.now()-t0;
   return {ok:ms<100,obs:`${ms} ms`}});
 
+// ---------- PROGRAMAÇÃO DE FÉRIAS — fases 9 e 10: avisos e lançar na tabela (PLANO-FERIAS.md) ----------
+const aprova=(p,k)=>clica(p,`[data-ciclo="${k||'2025-03-15'}"] [data-pid] [data-pa="aprovar"]`);
+const diaP=(p,d)=>(p.w.cartinhasTeste.estado().months[d.slice(0,7)]||{days:[]}).days.find(x=>x.d===d)||null;
+const linhaPer=p=>{const e=p.d.querySelector('[data-ciclo="2025-03-15"] [data-pid]');return e?e.textContent.replace(/\s+/g,' '):''};
+function lancaDezJan(p){comPlano(p);marca(p,'2026-12-14','2027-01-12');aprova(p);clica(p,'[data-pa="lancar"]')}
+
+caso('Férias — avisos','Abono: o cartão do ciclo em aquisição diz até quando registrar a intenção no e-Benefício',()=>{const p=abre();comPlano(p);
+  const t=p.d.querySelector('[data-ciclo="2026-03-15"]').textContent;
+  return {ok:/e-Benefício até 27\/02\/2027/.test(t),obs:(t.match(/Abono:[^.]*\.[^.]*\./)||['sem aviso'])[0]}});
+
+caso('Férias — avisos','Prazo correndo: a menos de 90 dias do fim do concessivo, com saldo sem data, avisa da dobra',()=>{const p=abre('2027-01-20');comPlano(p);
+  const t=p.d.querySelector('[data-ciclo="2025-03-15"]').textContent;
+  return {ok:/faltam 30 dias sem data, e o prazo termina em 14\/03\/2027/.test(t)&&/paga em dobro/.test(t),obs:(t.match(/Prazo correndo:[^.]*\./)||['sem aviso'])[0]}});
+
+caso('Férias — avisos','Cada período diz o seu prazo: programar com 40 dias, e o aviso de férias com 30 depois de aprovado',()=>{const p=abre();comPlano(p);
+  marca(p,'2027-01-04','2027-02-02');const a=linhaPer(p);aprova(p);const b=linhaPer(p);
+  return {ok:/programar até 25\/11\/2026/.test(a)&&/aviso de férias até 05\/12\/2026/.test(b),obs:`planejado: ${(a.match(/programar até [\d/]+/)||['—'])[0]} · aprovado: ${(b.match(/aviso de férias até [\d/]+/)||['—'])[0]}`}});
+
+caso('Férias — lançar','Aprovar não muda o banco de horas',()=>{const p=abre();p.importa(L(3,11,'08:00 12:00 13:00 18:00'));const s0=p.saldo();
+  comPlano(p);marca(p,'2027-01-04','2027-02-02');aprova(p);V(p).fecha();
+  return {ok:p.saldo()===s0&&cicloDe(p,'2025-03-15').periodos[0].estado==='aprovado',obs:`saldo antes ${s0} · depois de aprovar ${p.saldo()}`}});
+
+caso('Férias — lançar','Pré-visualizar não grava nem cria mês; lançar põe só os dias úteis como férias, sem tipoManual',()=>{const p=abre();
+  lancaDezJan(p);const painel=!!p.d.getElementById('fLancaPainel'),semMes=!p.w.cartinhasTeste.estado().months['2026-12'];
+  const linhas=p.d.querySelectorAll('#fLancaPainel tbody tr').length;clica(p,'#fLancaOk');
+  const ds=['2026-12','2027-01'].flatMap(ym=>(p.w.cartinhasTeste.estado().months[ym]||{days:[]}).days).filter(x=>x.lancFerias);
+  const per=cicloDe(p,'2025-03-15').periodos[0];
+  const ok=painel&&semMes&&linhas===20&&ds.length===20&&ds.every(x=>x.tipo==='ferias'&&!x.tipoManual)&&diaP(p,'2026-12-25').tipo==='feriado'&&diaP(p,'2026-12-19').tipo==='folga'&&per.lancado&&per.lancados.length===20;
+  return {ok,obs:`painel: ${painel} · dezembro só criado ao lançar: ${semMes} · dias na pré-visualização: ${linhas} · lançados: ${ds.length}, sem tipoManual: ${ds.every(x=>!x.tipoManual)} · 25/12: ${diaP(p,'2026-12-25').tipo} · 19/12: ${diaP(p,'2026-12-19').tipo}`}});
+
+caso('Férias — lançar','Dia com batidas fica fora por padrão; incluído, o saldo muda exatamente pelo valor mostrado',()=>{const p=abre('2027-01-06');
+  p.importa(L(4,1,'08:00 12:00 13:00 18:00','08:00','Inter Jornada;',2027));const s0=p.saldo();
+  comPlano(p);poePeriodo(p,'2025-03-15',{ini:'2027-01-04',fim:'2027-02-02',estado:'aprovado'});clica(p,'[data-pa="lancar"]');
+  const cx=p.d.querySelector('#fLancaPainel [data-lpula="0"]'),fora=!cx.checked,txt0=p.T('fLancaPainel');
+  cx.checked=true;cx.dispatchEvent(new p.w.Event('change',{bubbles:true}));const txt1=p.T('fLancaPainel');
+  clica(p,'#fLancaOk');V(p).fecha();const s1=p.saldo();
+  const ok=fora&&/tem batidas/.test(txt0)&&/Janeiro de 2027: fica igual \(\+1h00\)/.test(txt0)&&/vai de \+1h00 para 0h00/.test(txt1)&&/1h00/.test(s0)&&/Saldo zerado/.test(s1)&&diaP(p,'2027-01-04').tipo==='ferias';
+  return {ok,obs:`04/01 fora por padrão: ${fora} · antes de incluir: ${(txt0.match(/Janeiro de 2027: [^.·]*/)||[''])[0]} · incluído: ${(txt1.match(/Janeiro de 2027: [^.·]*/)||[''])[0]} · saldo ${s0} → ${s1}`}});
+
+caso('Férias — lançar','Reimportar depois de lançar: o relatório prevalece, as batidas ficam, e o conflito aparece na área',()=>{const p=abre('2027-01-06');
+  comPlano(p);poePeriodo(p,'2025-03-15',{ini:'2027-01-04',fim:'2027-02-02',estado:'aprovado'});clica(p,'[data-pa="lancar"]');clica(p,'#fLancaOk');
+  const antes=diaP(p,'2027-01-05').tipo;p.importa(L(5,1,'08:00 12:00 13:00 17:00','08:00','Inter Jornada;',2027));V(p).render();
+  const x=diaP(p,'2027-01-05'),t=linhaPer(p);
+  return {ok:antes==='ferias'&&x.tipo==='util'&&x.marcas==='08:00 12:00 13:00 17:00'&&/O relatório trouxe 05\/01\/2027 como dia trabalhado/.test(t),
+    obs:`05/01 lançado: ${antes} → depois do relatório: ${x.tipo} (${x.marcas}) · aviso na área: ${/O relatório trouxe/.test(t)}`}});
+
+caso('Férias — lançar','A importação descarta a marca de lançamento do dia: o lançamento depende disso, e este caso quebra se mudar',()=>{const p=abre('2027-01-06');
+  comPlano(p);poePeriodo(p,'2025-03-15',{ini:'2027-01-04',fim:'2027-02-02',estado:'aprovado'});clica(p,'[data-pa="lancar"]');clica(p,'#fLancaOk');
+  const tinha=!!diaP(p,'2027-01-05').lancFerias;p.importa(L(5,1,'08:00 12:00 13:00 17:00','08:00','Inter Jornada;',2027));
+  return {ok:tinha&&!('lancFerias' in diaP(p,'2027-01-05')),obs:`marca antes da importação: ${tinha} · depois: ${'lancFerias' in diaP(p,'2027-01-05')?'CONTINUA':'descartada'}`}});
+
+caso('Férias — lançar','Desfazer: os dias intactos voltam; o editado depois não volta calado, e a edição fica',()=>{const p=abre();lancaDezJan(p);clica(p,'#fLancaOk');
+  diaP(p,'2026-12-15').obs='mudei depois';clica(p,'[data-pa="desfazlanc"]');
+  const painel=/15\/12\/2026/.test(p.T('fDesfazPainel')),intacto=diaP(p,'2026-12-14'),editado=diaP(p,'2026-12-15');
+  const parcial=intacto.tipo==='util'&&!intacto.lancFerias&&editado.tipo==='ferias'&&!!editado.lancFerias;
+  clica(p,'#fDesfazManter');const fim=diaP(p,'2026-12-15'),per=cicloDe(p,'2025-03-15').periodos[0];
+  return {ok:painel&&parcial&&fim.tipo==='ferias'&&!fim.lancFerias&&fim.obs==='mudei depois'&&!per.lancado,
+    obs:`painel com 15/12: ${painel} · 14/12 voltou a ${intacto.tipo}, 15/12 esperou: ${editado.tipo} · depois de "manter": ${fim.tipo}, edição "${fim.obs}", período lançado: ${per.lancado}`}});
+
+caso('Férias — lançar','"Voltar o tipo" devolve o dia útil e mantém a edição feita depois',()=>{const p=abre();lancaDezJan(p);clica(p,'#fLancaOk');
+  diaP(p,'2026-12-15').obs='mudei depois';clica(p,'[data-pa="desfazlanc"]');clica(p,'#fDesfazVoltar');const x=diaP(p,'2026-12-15');
+  return {ok:x.tipo==='util'&&x.obs==='mudei depois'&&!x.lancFerias,obs:`15/12: ${x.tipo}, "${x.obs}"`}});
+
+caso('Férias — lançar','Período lançado não volta a planejado nem é apagado sem desfazer o lançamento antes',()=>{const p=abre();lancaDezJan(p);clica(p,'#fLancaOk');
+  const temVoltar=!!p.d.querySelector('[data-pa="desaprovar"]'),temDesfazer=!!p.d.querySelector('[data-pa="desfazlanc"]');
+  return {ok:!temVoltar&&temDesfazer&&cicloDe(p,'2025-03-15').periodos[0].estado==='aprovado',obs:`botão "voltar a planejado": ${temVoltar?'APARECE':'escondido'} · "desfazer o lançamento": ${temDesfazer}`}});
+
 // ---------- SAÍDA ----------
 Promise.all(PEND).then(()=>{
 R.sort((a,b)=>a.id-b.id);
