@@ -695,6 +695,77 @@ caso('Férias — medidas','Descanso seguido conta as bordas que não se pagam: 
   const a=V(p).avalia('2027-01-04',30);
   return {ok:a.antes===3&&a.depois===0&&a.uteis===22&&a.descanso===33,obs:`antes ${a.antes} (01/01 feriado, 02 e 03 fim de semana) · depois ${a.depois} · úteis ${a.uteis} · descanso ${a.descanso}`}});
 
+// ---------- PROGRAMAÇÃO DE FÉRIAS — fases 7 e 8: dicas e melhor combinação (PLANO-FERIAS.md) ----------
+const brT=s=>s.slice(8)+'/'+s.slice(5,7)+'/'+s.slice(0,4);
+/* força bruta independente da página: todas as combinações de 1 a 3 períodos que fecham o saldo,
+   com o descanso contado pela união dos intervalos [início − borda, fim + borda] */
+function forcaBruta(p,cfg,de,ate,resto){const f=FR(),ctx=V(p).contexto(cfg),P={...f.FERIAS_PARAM,...cfg};
+  const borda=(d,passo)=>{let n=0,x=f.fSoma(d,passo);while(n<60&&ctx.livre(x)){n++;x=f.fSoma(x,passo)}return n};
+  const inis=[];for(let d=de;d<=ate;d=f.fSoma(d,1))if(V(p).inicioCtx(d,ctx).ok)inis.push(d);
+  const cands=[];for(const s of inis)for(let L=Math.min(P.minDemais,resto);L<=resto;L++){const e=f.fSoma(s,L-1);if(e>ate)continue;
+    cands.push({ini:s,fim:e,L,lo:f.fSoma(s,-borda(s,-1)),hi:f.fSoma(e,borda(e,1))})}
+  const uniao=ps=>{const iv=ps.map(x=>[x.lo,x.hi]).sort((a,b)=>a[0]<b[0]?-1:1);let tot=0,cl=null,ch=null;
+    for(const [a,b] of iv){if(ch&&a<=f.fSoma(ch,1)){if(b>ch)ch=b}else{if(cl)tot+=f.fDias(cl,ch)+1;cl=a;ch=b}}if(cl)tot+=f.fDias(cl,ch)+1;return tot};
+  const cabe=(a,b)=>a.fim<b.ini?f.fDias(a.fim,b.ini)-1>=P.intervaloMinDias:f.fDias(b.fim,a.ini)-1>=P.intervaloMinDias;
+  let best=-1;const tenta=ps=>{if(ps.reduce((s,x)=>s+x.L,0)!==resto)return;if(!f.fCombinacao(ps.map(x=>x.L),true).ok)return;
+    if(ps.length>1&&ps.some(x=>x.L<P.minDemais))return;const u=uniao(ps);if(u>best)best=u};
+  for(let i=0;i<cands.length;i++){const a=cands[i];if(a.L===resto)tenta([a]);if(a.L>=resto)continue;
+    for(let j=0;j<cands.length;j++){const b=cands[j];if(b.ini<=a.fim||!cabe(a,b)||a.L+b.L>resto)continue;
+      if(a.L+b.L===resto){tenta([a,b]);continue}
+      for(let k=0;k<cands.length;k++){const c=cands[k];if(c.ini<=b.fim||!cabe(b,c)||!cabe(a,c))continue;tenta([a,b,c])}}}
+  return best}
+const SEM_INTERVALO={diasTrabalhados:[1,2,3,4,5],dsr:0,leituraInicio:'estrita',intervaloMinDias:0};
+
+caso('Férias — dicas','Janeiro, 30 dias de uma vez: a melhor começa em 04/01, logo depois do feriado e do fim de semana',()=>{const p=abre();comPlano(p);
+  const r=V(p).dicas('2027-01');const o=(r.opcoes||[])[0]||{};const inis=(r.opcoes||[]).map(x=>x.ini);
+  return {ok:o.ini==='2027-01-04'&&o.descanso===33&&o.uteis===22&&new Set(inis).size===inis.length&&inis.length===3,
+    obs:(r.opcoes||[]).map(x=>`${brT(x.ini)}: ${x.descanso} fora, ${x.uteis} úteis`).join(' · ')}});
+
+caso('Férias — dicas','A lista mês a mês e o cartão de cada mês dão sempre a mesma dica',()=>{const p=abre();comPlano(p);
+  const linhas=[...p.d.querySelectorAll('#fDicas tr[data-mes]')].map(t=>({ym:t.dataset.mes,ini:t.dataset.ini||null}));const dif=[];
+  for(const l of linhas){if(l.ini)clica(p,`[data-vai="${l.ym}"]`);else vaiMes(p,l.ym);/* mês sem opção não tem "Ver no mês" */
+    const op=p.d.querySelector('#fMesCard [data-op="0"]'),motivo=p.d.querySelector('#fMesCard .fdica .fsem');
+    const ini=op?op.textContent.match(/(\d{2}\/\d{2}\/\d{4})/)[1]:null;if((l.ini?brT(l.ini):null)!==ini)dif.push(`${l.ym}: lista ${l.ini} × cartão ${ini}`);
+    if(!l.ini&&!motivo)dif.push(`${l.ym}: sem opção na lista e sem motivo no cartão`)}
+  return {ok:linhas.length>=4&&!dif.length,obs:dif.length?dif.join(' · '):`${linhas.length} meses conferidos, todos iguais`}});
+
+caso('Férias — dicas','Mês que não cabe aparece na lista com o motivo da regra que barrou',()=>{const p=abre();comPlano(p);concorda(p);
+  marca(p,'2027-02-01','2027-02-14');const jan=p.d.querySelector('#fDicas tr[data-mes="2027-01"]'),dez=p.d.querySelector('#fDicas tr[data-mes="2026-12"]');
+  return {ok:!!jan&&jan.classList.contains('fsem')&&/precisa terminar até 01\/01\/2027/.test(jan.textContent)&&!!dez&&!dez.classList.contains('fsem'),
+    obs:`janeiro: ${jan&&jan.textContent.replace(/\s+/g,' ').trim().slice(0,150)} · dezembro com opção: ${dez&&!dez.classList.contains('fsem')}`}});
+
+caso('Férias — dicas','O cartão compara o que a pessoa marcou com a dica, sem julgar',()=>{const p=abre();comPlano(p);marca(p,'2027-01-05','2027-02-03');
+  vaiMes(p,'2027-01');const c=p.d.querySelector('#fMesCard .fcomp');const t=c?c.textContent:'';
+  return {ok:/Você marcou 05\/01\/2027 a 03\/02\/2027: 30 dias seguidos fora/.test(t)&&/começando em 04\/01\/2027, seriam 33/.test(t)&&/Quem decide é você/.test(t),obs:t.slice(0,170)||'sem comparação'}});
+
+caso('Férias — dicas','"Marcar" da dica cria o mesmo período que marcar clicando, pela mesma validação',()=>{const a=abre();comPlano(a);vaiMes(a,'2027-01');clica(a,'#fMesCard [data-marcasug="0"]');
+  const b=abre();comPlano(b);marca(b,'2027-01-04','2027-02-02');
+  const pa=cicloDe(a,'2025-03-15').periodos[0]||{},pb=cicloDe(b,'2025-03-15').periodos[0]||{};const sem=x=>JSON.stringify({...x,id:0});
+  return {ok:!!pa.ini&&sem(pa)===sem(pb),obs:`pela dica: ${pa.ini} a ${pa.fim} (${pa.estado}) · pelo clique: ${pb.ini} a ${pb.fim} (${pb.estado})`}});
+
+caso('Férias — dicas','As duas estratégias ordenam cada uma pelo seu critério, e a mesma entrada dá a mesma lista',()=>{const p=abre();comPlano(p);
+  const d=V(p).dicas('2026-12',30,'descanso').opcoes,a=V(p).dicas('2026-12',30,'aproveitamento').opcoes,d2=V(p).dicas('2026-12',30,'descanso').opcoes;
+  const ordD=d.every((x,i)=>!i||d[i-1].descanso>=x.descanso),ordA=a.every((x,i)=>!i||d.length&&a[i-1].uteis/a[i-1].dias>=x.uteis/x.dias);
+  return {ok:d.length===3&&a.length===3&&ordD&&ordA&&JSON.stringify(d)===JSON.stringify(d2),
+    obs:`descanso: ${d.map(x=>brT(x.ini).slice(0,5)+' '+x.descanso).join(', ')} · aproveitamento: ${a.map(x=>brT(x.ini).slice(0,5)+' '+x.uteis+'/'+x.dias).join(', ')}`}});
+
+caso('Férias — combinação','Melhor combinação igual à força bruta (intervalo zero, saldo 24, prazo curto)',()=>{const p=abre('2027-01-25');comPlano(p);
+  const r=V(p).melhor(SEM_INTERVALO,{resto:24,concorda:true,todos:[],durs:[]}),fb=forcaBruta(p,SEM_INTERVALO,'2027-01-26','2027-03-14',24);
+  return {ok:!r.vazio&&r.descanso===fb,obs:`programação dinâmica: ${r.descanso} (${(r.periodos||[]).map(x=>brT(x.ini).slice(0,5)+'–'+brT(x.fim).slice(0,5)).join(', ')}) · força bruta: ${fb}`}});
+
+caso('Férias — combinação','Melhor combinação igual à força bruta quando os períodos ficam colados (saldo 10, três semanas)',()=>{const p=abre('2027-02-22');comPlano(p);
+  const r=V(p).melhor(SEM_INTERVALO,{resto:10,concorda:true,todos:[],durs:[]}),fb=forcaBruta(p,SEM_INTERVALO,'2027-02-23','2027-03-14',10);
+  return {ok:!r.vazio&&r.descanso===fb,obs:`programação dinâmica: ${r.descanso} (${(r.periodos||[]).map(x=>brT(x.ini).slice(0,5)+'–'+brT(x.fim).slice(0,5)).join(', ')}) · força bruta: ${fb}`}});
+
+caso('Férias — combinação','"Marcar estas" põe a melhor combinação no plano, e ela passa nas mesmas regras',()=>{const p=abre();comPlano(p);concorda(p);
+  clica(p,'#fMelhor');const prop=[...p.d.querySelectorAll('#fMelhorRes p b')].map(b=>b.textContent).filter(t=>/ a /.test(t));clica(p,'#fMarcaMelhor');
+  const ps=cicloDe(p,'2025-03-15').periodos.map(x=>brT(x.ini)+' a '+brT(x.fim));
+  return {ok:prop.length>=1&&prop.length===ps.length&&prop.every(t=>ps.includes(t)),obs:`proposta: ${prop.join(' + ')} · marcado: ${ps.join(' + ')}`}});
+
+caso('Férias — desempenho','Dicas de todos os meses e a melhor combinação, com divisão permitida, em menos de 100 ms',()=>{const p=abre();comPlano(p);concorda(p);
+  const t0=Date.now();for(const ym of ['2026-11','2026-12','2027-01','2027-02','2027-03'])V(p).dicas(ym,14);V(p).melhor();const ms=Date.now()-t0;
+  return {ok:ms<100,obs:`${ms} ms`}});
+
 // ---------- SAÍDA ----------
 Promise.all(PEND).then(()=>{
 R.sort((a,b)=>a.id-b.id);

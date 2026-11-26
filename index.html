@@ -158,6 +158,11 @@ button.fcol:hover{border-color:var(--b)}button.fcol[disabled]{cursor:default}
 .fnat-interna{background:light-dark(#fff1bf,#3a3200);border-color:#c99700}
 .fnat-aviso{background:light-dark(#e7f0f8,#1d2c3a);border-color:var(--b)}
 .fnat-ok{background:light-dark(#fbe7f1,#3a2532);border-color:#c2417f}
+.fdica{background:var(--bg);border-radius:12px;padding:12px 14px;margin:12px 0}.fdica h4{margin-top:0}
+.fop{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:8px;border:1.5px dashed transparent}
+.fop.at{border-color:#c2417f;background:light-dark(#fdf2f8,#2c1d27)}.fop button{min-height:36px;padding:0 12px}
+.fcol.fsug{outline:2px dashed #c2417f;outline-offset:-3px}
+.fsem{color:var(--mut)}tr.fsem td{color:var(--mut);font-style:italic}
 @media(prefers-reduced-motion:no-preference){.col i{transition:height .35s ease}}
 </style>
 <script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
@@ -694,8 +699,21 @@ const FERIAS_PARAM={
   abonoPrazoDias:15                 /* intenção de abono: 15 dias antes do fim do aquisitivo (comunicado de 31/07/2026) */
 };
 const FERIAS_DIREITOS=[30,24,18,12,0];
-const fSoma=(s,n)=>{const d=new Date(s+'T12:00');d.setDate(d.getDate()+n);return iso(d)};
-const fDias=(a,b)=>Math.round((new Date(b+'T12:00')-new Date(a+'T12:00'))/864e5);  /* de a até b */
+/* Datas como número de dia, sem Date: a busca soma e compara dias dezenas de milhares de vezes.
+   Conversão do calendário civil (algoritmo de Howard Hinnant), só com inteiros: não há fuso
+   horário nem horário de verão no caminho. */
+const fNum=s=>{let y=+s.slice(0,4);const m=+s.slice(5,7),d=+s.slice(8,10);if(m<=2)y--;
+  const era=Math.floor(y/400),yoe=y-era*400,doy=Math.floor((153*(m>2?m-3:m+9)+2)/5)+d-1;
+  return era*146097+yoe*365+Math.floor(yoe/4)-Math.floor(yoe/100)+doy-719468};
+const fDataNum=z=>{z+=719468;const era=Math.floor(z/146097),doe=z-era*146097;
+  const yoe=Math.floor((doe-Math.floor(doe/1460)+Math.floor(doe/36524)-Math.floor(doe/146096))/365);
+  const doy=doe-(365*yoe+Math.floor(yoe/4)-Math.floor(yoe/100)),mp=Math.floor((5*doy+2)/153);
+  const d=doy-Math.floor((153*mp+2)/5)+1,m=mp<10?mp+3:mp-9,y=yoe+era*400+(m<=2?1:0);
+  return y+'-'+(m<10?'0':'')+m+'-'+(d<10?'0':'')+d};
+const fSoma=(s,n)=>fDataNum(fNum(s)+n);
+const fDias=(a,b)=>fNum(b)-fNum(a);  /* de a até b */
+const fWd=s=>((fNum(s)%7)+11)%7;     /* 0 = domingo; o dia 0 da conta, 01/01/1970, foi uma quinta */
+const nomeMesF=(()=>{const m=new Map();return ym=>{let v=m.get(ym);if(!v){v=nomeMes(ym);m.set(ym,v)}return v}})();
 const fDur=p=>fDias(p.ini,p.fim)+1;                                                /* dias corridos, inclusive */
 const fBissexto=y=>(y%4===0&&y%100!==0)||y%400===0;
 /* Aniversário k de uma data-base. Para 29/02, em ano que não é bissexto, o aniversário é
@@ -734,7 +752,7 @@ function fSaldo(c,d,pend,hoje){
   if(!d.direitoInformado)motivos.push('o direito está presumido em '+direito+' dias');
   if(pend&&pend.fila)motivos.push(pend.fila>1?pend.fila+' períodos achados no histórico ainda não foram confirmados':'um período achado no histórico ainda não foi confirmado');
   if(pend&&pend.semRelatorio&&pend.semRelatorio.length){const s=pend.semRelatorio;
-    motivos.push(s.length<=2?'falta o relatório de '+s.map(nomeMes).join(' e '):'faltam os relatórios de '+s.length+' meses, de '+nomeMes(s[0])+' a '+nomeMes(s[s.length-1]))}
+    motivos.push(s.length<=2?'falta o relatório de '+s.map(nomeMes).join(' e '):'faltam os relatórios de '+s.length+' meses, de '+nomeMesF(s[0])+' a '+nomeMesF(s[s.length-1]))}
   if(!d.abonoInformado&&c&&hoje&&hoje<=fSoma(c.aqFim,-FERIAS_PARAM.abonoPrazoDias))motivos.push('o abono ainda não foi informado');
   return {direito,abono,usufruido,aprovado,planejado,consumido:usufruido+abono,comprometido:aprovado,pretendido:planejado,
     livre:direito-usufruido-abono-aprovado-planejado,provisorio:motivos.length>0,motivos};
@@ -847,18 +865,19 @@ function confereFeriasDoArquivo(){
   if(!modoFerias){status('Há um plano de férias para conferir. <button id="btnFerConf" type="button">Abrir</button>',true);const b=$('btnFerConf');if(b)b.onclick=abreFerias}}
 
 /* Toda mudança no plano passa por aqui: sobe a revisão, guarda a cópia e grava o arquivo. */
-function mudaFerias(fn,importante){if(!ferias)return;fAvisoTxt='';
+function mudaFerias(fn,importante){if(!ferias)return;fAvisoTxt='';fMemo={};
   fn(ferias);ferias.rev=(ferias.rev||0)+1;ferias.alteradoEm=new Date().toISOString();
   if(importante)ferias.revImportante=ferias.rev;
   gravaCopiaNavegador(ferias);save();renderFerias()}
 const dadosCiclo=(c,criar)=>{if(!ferias)return cicloNovo();
   if(!ferias.ciclos[c.chave]){if(!criar)return cicloNovo();ferias.ciclos[c.chave]=cicloNovo()}
   return ferias.ciclos[c.chave]};
-const ciclosAgora=()=>ferias&&ferias.admissao?fCiclos(ferias.admissao,ferias.aquisitivoIni,todayISO):null;
+const ciclosAgora=()=>ferias&&ferias.admissao?(fMemo.cs||(fMemo.cs=fCiclos(ferias.admissao,ferias.aquisitivoIni,todayISO))):null;
 const proxMes=ym=>fSoma(ym+'-15',31).slice(0,7);
 /* O que ainda pode mudar o saldo de um ciclo: fila a confirmar e meses já passados do
    concessivo sem relatório — a não ser que a pessoa diga que conferiu (seção 7.1). */
-function pendencias(c){
+function pendencias(c){const k='pend:'+c.chave;return fMemo[k]||(fMemo[k]=pendencias0(c))}
+function pendencias0(c){
   const d=dadosCiclo(c,false);
   const fila=fFila().filter(p=>p.sugestao===c.chave||(!p.sugestao&&p.ini<=c.coFim&&p.fim>=c.coIni)).length;
   const sem=[];
@@ -917,6 +936,7 @@ const FER_NACIONAIS=new Set(['01-01','04-21','05-01','09-07','10-12','11-02','11
 const FER_UF={DF:{'11-30':'Dia do Evangélico (lei do DF)'}};
 const UFS=['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
 const NOMES_DIA=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+let fMemo={};  /* contas repetidas dentro de um mesmo desenho da área; zerada a cada mudança */
 /* Os parâmetros valendo: os da norma, com o que é da pessoa (ferias.config) por cima. */
 function fParam(){const c=(ferias&&ferias.config)||{},P={...FERIAS_PARAM};
   if(Array.isArray(c.diasTrabalhados)&&c.diasTrabalhados.length)P.diasTrabalhados=c.diasTrabalhados;
@@ -926,24 +946,28 @@ function fParam(){const c=(ferias&&ferias.config)||{},P={...FERIAS_PARAM};
    sustenta a vedação legal do art. 134 §3º. */
 function fCalendario(cfg,disp){cfg=cfg||{};disp=disp||DISP;
   const uf=FER_UF[cfg.uf]||{},locais=new Map((cfg.feriadosLocais||[]).map(x=>[x.data,x.nome||'feriado local']));
-  const nacional=d=>FER_NACIONAIS.has(d.slice(5))||d===sextaSanta(+d.slice(0,4));
+  /* a Páscoa de cada ano, uma vez só: dela saem a Sexta-feira Santa e os facultativos móveis */
+  const anos=new Map(),ano=y=>{let a=anos.get(y);if(!a){const p=iso(pascoa(y));a={sexta:sextaSanta(y),pascoa:p};anos.set(y,a)}return a};
+  const nacional=d=>FER_NACIONAIS.has(d.slice(5))||d===ano(+d.slice(0,4)).sexta;
   const local=d=>!!uf[d.slice(5)]||locais.has(d)||locais.has(d.slice(5));
   /* pontos facultativos que mudam de data: Carnaval (segunda e terça) e Corpus Christi */
-  const facultativo=d=>{const e=fDias(iso(pascoa(+d.slice(0,4))),d);return e===-48||e===-47||e===60};
+  const facultativo=d=>{const e=fDias(ano(+d.slice(0,4)).pascoa,d);return e===-48||e===-47||e===60};
   const nome=d=>nacional(d)?'feriado nacional':uf[d.slice(5)]?uf[d.slice(5)]:locais.has(d)?locais.get(d):locais.has(d.slice(5))?locais.get(d.slice(5))
     :disp[d]?String(disp[d]):facultativo(d)?'ponto facultativo':'';
   return {nacional,local,feriadoDaLotacao:d=>nacional(d)||local(d),dispensa:d=>!!disp[d],facultativo,nome}}
 /* Tudo o que a conta de férias precisa saber de um dia, num objeto só (seções 8.3 e 8.5). */
 function fContexto(cfgTeste,dispTeste){
   const cfg=cfgTeste||(ferias&&ferias.config)||{},P=cfgTeste?{...FERIAS_PARAM,...cfgTeste}:fParam(),cal=fCalendario(cfg,dispTeste);
-  const naoTrabalha=d=>!P.diasTrabalhados.includes(wd(d)),ehDSR=d=>wd(d)===P.dsr;
+  const naoTrabalha=d=>!P.diasTrabalhados.includes(fWd(d)),ehDSR=d=>fWd(d)===P.dsr;
   const factLivre=d=>cal.facultativo(d)&&!!cfg.facultativosLivres;
   const livre=d=>naoTrabalha(d)||cal.feriadoDaLotacao(d)||cal.dispensa(d)||factLivre(d);
   /* base de cada vedação de início; dispensa não entra em nenhuma */
   const baseLegal=d=>cal.feriadoDaLotacao(d)||ehDSR(d)||(P.facultativoVedaInicio&&cal.facultativo(d));
   const baseEstrita=d=>baseLegal(d)||naoTrabalha(d);
   const tipo=d=>cal.feriadoDaLotacao(d)?'feriado':cal.dispensa(d)?'dispensa':factLivre(d)?'facultativo':naoTrabalha(d)?'folga':'util';
-  return {P,cal,cfg,naoTrabalha,ehDSR,livre,baseLegal,baseEstrita,tipo}}
+  /* cada resposta por dia é guardada: a busca pergunta o mesmo dia muitas vezes */
+  const guarda=f=>{const m=new Map();return d=>{let v=m.get(d);if(v===undefined){v=f(d);m.set(d,v)}return v}};
+  return {P,cal,cfg,naoTrabalha,ehDSR,livre:guarda(livre),baseLegal:guarda(baseLegal),baseEstrita:guarda(baseEstrita),tipo:guarda(tipo),ini0:new Map()}}
 
 /* ---- histórico: férias que o relatório trouxe, juntadas em períodos (seção 7.3) ---- */
 const novoIdFer=()=>Math.random().toString(36).slice(2,9);
@@ -962,7 +986,8 @@ function fHistorico(){
     if(junta){ult.fim=x.d;if(origem==='digitado')ult.origem='digitado'}else out.push({ini:x.d,fim:x.d,origem})}
   return out}
 /* A fila "a confirmar": o que o histórico achou e ainda não foi associado nem descartado. */
-function fFila(){if(!ferias)return [];
+function fFila(){if(!ferias)return [];return fMemo.fila||(fMemo.fila=fFila0())}
+function fFila0(){
   const ps=todosPeriodos(),desc=ferias.descartados||[],cs=ciclosAgora();
   return fHistorico().filter(h=>!ps.some(p=>p.ini===h.ini&&p.fim===h.fim&&p.estado==='usufruido')&&!desc.some(x=>x.ini===h.ini&&x.fim===h.fim)
     &&!ps.some(p=>p.estado==='usufruido'&&sobrepoe(p,h)))
@@ -975,15 +1000,16 @@ let fMes=null,fIni=null,fPainel=null;  /* mês mostrado; início escolhido esper
 const NATUREZA={legal:'Proibição legal',interna:'Restrição interna dos Correios',aviso:'Aviso',logica:'Não dá'};
 /* Dia de início: R1a (legal), R1c e R1b (normas internas a confirmar), separadas de propósito,
    cada uma com a sua natureza e o seu porquê (seções 8.2 e 8.3). */
-function fInicio(d,ctx){const P=ctx.P,ks=[1,2].slice(0,P.diasAntesVedados),s=k=>k>1?'s':'';
+function fInicio(d,ctx){if(!ctx.ini0)return fInicio0(d,ctx);let r=ctx.ini0.get(d);if(!r){r=fInicio0(d,ctx);ctx.ini0.set(d,r)}return r}
+function fInicio0(d,ctx){const P=ctx.P,ks=[1,2].slice(0,P.diasAntesVedados),s=k=>k>1?'s':'';
   for(const k of ks){const x=fSoma(d,k);
-    if(ctx.ehDSR(x))return {ok:false,regra:'R1a',natureza:'legal',msg:`Proibido pela CLT (art. 134 §3º): ${NOMES_DIA[wd(d)]} fica a ${k} dia${s(k)} do repouso semanal (${NOMES_DIA[P.dsr]}).`};
+    if(ctx.ehDSR(x))return {ok:false,regra:'R1a',natureza:'legal',msg:`Proibido pela CLT (art. 134 §3º): ${NOMES_DIA[fWd(d)]} fica a ${k} dia${s(k)} do repouso semanal (${NOMES_DIA[P.dsr]}).`};
     if(ctx.cal.feriadoDaLotacao(x)||(P.facultativoVedaInicio&&ctx.cal.facultativo(x)))return {ok:false,regra:'R1a',natureza:'legal',msg:`Proibido pela CLT (art. 134 §3º): fica a ${k} dia${s(k)} do feriado de ${br(x)} (${ctx.cal.nome(x)}).`}}
   if(P.inicioNoProprioDia&&ctx.baseLegal(d))return {ok:false,regra:'R1c',natureza:'interna',msg:`Regra dos Correios (a confirmar no MANPES): não começar férias ${ctx.ehDSR(d)?'no dia do repouso semanal':'em feriado ('+ctx.cal.nome(d)+')'}.`};
   if(P.leituraInicio==='estrita'){
-    if(ctx.naoTrabalha(d))return {ok:false,regra:'R1b',natureza:'interna',msg:`Regra da tabela dos Correios (a confirmar no MANPES): não começar férias em dia que você não trabalha (${NOMES_DIA[wd(d)]}).`};
+    if(ctx.naoTrabalha(d))return {ok:false,regra:'R1b',natureza:'interna',msg:`Regra da tabela dos Correios (a confirmar no MANPES): não começar férias em dia que você não trabalha (${NOMES_DIA[fWd(d)]}).`};
     for(const k of ks){const x=fSoma(d,k);if(ctx.baseEstrita(x))return {ok:false,regra:'R1b',natureza:'interna',
-      msg:`Restrição da tabela de férias dos Correios (a confirmar no MANPES): ${NOMES_DIA[wd(d)]} fica a ${k} dia${s(k)} de ${NOMES_DIA[wd(x)]}, que você não trabalha. Pela CLT, sozinha, seria permitida. Se a sua unidade aceita, mude o dia de início em "Sua jornada e o seu calendário".`}}}
+      msg:`Restrição da tabela de férias dos Correios (a confirmar no MANPES): ${NOMES_DIA[fWd(d)]} fica a ${k} dia${s(k)} de ${NOMES_DIA[fWd(x)]}, que você não trabalha. Pela CLT, sozinha, seria permitida. Se a sua unidade aceita, mude o dia de início em "Sua jornada e o seu calendário".`}}}
   return {ok:true}}
 /* R3, contada como no plano (8.2): entre o último dia de um período e o primeiro do seguinte
    precisam existir N dias corridos inteiros. Fim em 10/07: o seguinte só a partir de 10/08. */
@@ -1005,40 +1031,41 @@ function fCabeNasDatas(c,todos,durs,resto,ctx){
   const P=ctx.P,amanha=fSoma(todayISO,1),de=amanha>c.coIni?amanha:c.coIni,ate=c.coFim,vagas=P.maxPeriodos-durs.length;
   const splits=[];if(vagas>=1&&fCombinacao(durs.concat(resto),true).ok)splits.push([resto]);
   if(vagas>=2)for(let a=1;a+a<=resto;a++)if(fCombinacao(durs.concat(a,resto-a),true).ok)splits.push([resto-a,a]);
-  if(!splits.length)return false;
-  const inicios=[];for(let d=de;d<=ate;d=fSoma(d,1))if(fInicio(d,ctx).ok)inicios.push(d);
-  const pesa=p=>p.chave===c.chave||P.intervaloEntreCiclos;
-  const cabe=(ini,L,ocup)=>{const n={ini,fim:fSoma(ini,L-1),chave:c.chave};if(n.fim>ate)return null;
-    for(const p of ocup){if(sobrepoe(p,n))return null;
-      if(pesa(p)&&P.intervaloMinDias&&(p.fim<ini?fDias(p.fim,ini):fDias(n.fim,p.ini))-1<P.intervaloMinDias)return null}
-    return n};
-  const coloca=(sp,i,ocup)=>{if(i===sp.length)return true;for(const ini of inicios){const n=cabe(ini,sp[i],ocup);if(n&&coloca(sp,i+1,ocup.concat(n)))return true}return false};
-  return splits.some(sp=>coloca(sp,0,todos))}
+  const N=fDias(de,ate)+1;if(!splits.length||N<=0)return false;
+  /* tudo em número de dia a partir do primeiro dia possível: a busca não monta texto de data */
+  const inicios=[];for(let i=0,d=de;i<N;i++,d=fSoma(d,1))if(fInicio(d,ctx).ok)inicios.push(i);
+  const gap=P.intervaloMinDias,ocup0=todos.map(p=>({a:fDias(de,p.ini),b:fDias(de,p.fim),w:p.chave===c.chave||P.intervaloEntreCiclos}));
+  const cabe=(s,L,ocup)=>{const e=s+L-1;if(e>=N)return null;
+    for(const o of ocup){if(s<=o.b&&o.a<=e)return null;if(o.w&&gap&&(o.b<s?s-o.b-1:o.a-e-1)<gap)return null}
+    return {a:s,b:e,w:true}};
+  const coloca=(sp,i,ocup)=>{if(i===sp.length)return true;for(const x of inicios){const n=cabe(x,sp[i],ocup);if(n&&coloca(sp,i+1,ocup.concat(n)))return true}return false};
+  return splits.some(sp=>coloca(sp,0,ocup0))}
 /* O ciclo de um período: aquele em cujo prazo (concessivo) ele começa. Se dois prazos se
    sobrepõem (aquisitivo ajustado), o mais antigo que ainda tem saldo. */
 function fCicloDaData(ini,cs){const cand=cs.lista.filter(c=>c.coIni<=ini&&ini<=c.coFim);
   return cand.find(c=>fSaldo(c,dadosCiclo(c,false),null,todayISO).livre>0)||cand[0]||null}
 /* Validação na ordem da seção 9: para na primeira recusa, para a mensagem ser a causa real. */
-function fValida(ini,fim,ctx,ignorarId){
+function fValida(ini,fim,ctx,ignorarId,semDatas){
   const cs=ciclosAgora(),P=ctx.P,novo={ini,fim},dur=fDur(novo),avisos=[],c=fCicloDaData(ini,cs);
   const recusa=(regra,natureza,msg)=>({recusa:{regra,natureza,msg},ciclo:c});
   if(ini<=todayISO)return recusa('passado','logica','Essa data já passou. Férias já tiradas entram em "Acrescentar férias já tiradas".');
   if(!c){const prox=cs.lista.find(x=>x.coIni>ini);return recusa('R4','legal','Essa data não cai no prazo de nenhum ciclo.'+(prox?' O próximo prazo começa em '+br(prox.coIni)+'.':''))}
   if(fim>c.coFim)return recusa('R4','legal',`Esse período passa do prazo para tirar as férias do ${nomeCiclo(c).toLowerCase()}, que termina em ${br(c.coFim)}.`);
-  const todos=todosPeriodos().filter(p=>p.id!==ignorarId),choca=todos.find(p=>sobrepoe(p,novo));
+  const todosC=todosPeriodos(),todos=todosC.filter(p=>p.id!==ignorarId),choca=todos.find(p=>sobrepoe(p,novo));
   if(choca)return recusa('R10','logica',`Esses dias já estão em outro período: ${br(choca.ini)} a ${br(choca.fim)} (${ESTADO_TXT[choca.estado]}).`);
-  const d=dadosCiclo(c,false),s=fSaldo(c,d,pendencias(c),todayISO);
-  if(dur>s.livre)return recusa('saldo','legal',`Sobram ${Math.max(0,s.livre)} dias livres no ${nomeCiclo(c).toLowerCase()}; esse período pede ${dur}.`);
+  /* ignorarId: comparar um período marcado com o que a dica daria no lugar dele (seção 13.5) */
+  const d=dadosCiclo(c,false),s=fSaldo(c,d,pendencias(c),todayISO),ign=ignorarId&&todosC.find(p=>p.id===ignorarId),livre=s.livre+(ign&&ign.chave===c.chave?fDur(ign):0);
+  if(dur>livre)return recusa('saldo','legal',`Sobram ${Math.max(0,livre)} dias livres no ${nomeCiclo(c).toLowerCase()}; esse período pede ${dur}.`);
   const i0=fInicio(ini,ctx);if(!i0.ok)return recusa(i0.regra,i0.natureza,i0.msg);
-  const doCiclo=(d.periodos||[]).filter(p=>p.id!==ignorarId),durs=doCiclo.map(fDur),resto=s.livre-dur;
+  const doCiclo=(d.periodos||[]).filter(p=>p.id!==ignorarId),durs=doCiclo.map(fDur),resto=livre-dur;
   const unico=!doCiclo.length&&resto===0;   /* o saldo inteiro de uma vez (R2): não precisa de concordância nem de mínimos */
   if(!unico){
-    if(P.fracionarExigeConcordancia&&!d.concordaFracionar)return recusa('R11','legal',`Para dividir as férias é preciso a sua concordância (CLT, art. 134 §1º). Marque a concordância no cartão do ${nomeCiclo(c).toLowerCase()}, ou tire os ${s.livre} dias de uma vez.`);
+    if(P.fracionarExigeConcordancia&&!d.concordaFracionar)return recusa('R11','legal',`Para dividir as férias é preciso a sua concordância (CLT, art. 134 §1º). Marque a concordância no cartão do ${nomeCiclo(c).toLowerCase()}, ou tire os ${livre} dias de uma vez.`);
     if(doCiclo.length+1>P.maxPeriodos)return recusa('R2f','legal',`Você já tem ${P.maxPeriodos} períodos neste ciclo, o máximo.`);
     if(dur<P.minDemais)return recusa('R2f','legal',`Período de menos de ${P.minDemais} dias só é possível se for o saldo inteiro de uma vez.`);
     if(!fCompletavel(durs.concat(dur),resto,true))return recusa('R2c','legal',`Com esse período sobram ${resto} dias, e eles não fecham em nenhuma divisão permitida: ${motivoNaoFecha(durs.concat(dur),resto,P)}.`)}
   const iv=fIntervalo(novo,todos.filter(p=>p.chave===c.chave||P.intervaloEntreCiclos),P);if(iv)return recusa(iv.regra,iv.natureza,iv.msg);
-  if(!unico&&resto>0&&!fCabeNasDatas(c,todos.concat({...novo,chave:c.chave}),durs.concat(dur),resto,ctx))
+  if(!semDatas&&!unico&&resto>0&&!fCabeNasDatas(c,todos.concat({...novo,chave:c.chave}),durs.concat(dur),resto,ctx))
     return recusa('R2c','legal',`Com esse período sobram ${resto} dias, mas não há datas no prazo deste ciclo onde eles caibam — respeitando o dia de início${P.intervaloMinDias?', o intervalo de '+P.intervaloMinDias+' dias':''} e o fim do prazo, em ${br(c.coFim)}.`);
   const falta=fDias(todayISO,ini);
   if(falta<P.antecedenciaDias)avisos.push({regra:'R8',natureza:'aviso',msg:`Faltam ${falta} dias para essa data: menos que os ${P.antecedenciaDias} da programação ordinária. Dá para pedir, mas é tratamento excepcional.`});
@@ -1054,10 +1081,13 @@ function fCliqueDia(d){fAvisoTxt='';fConfirma=null;
   if(!fIni&&d<=todayISO){fPainel={tipo:'msg',natureza:'aviso',msg:'Esse dia já passou. Férias já tiradas entram em "Acrescentar férias já tiradas".'};renderFerias();return}
   if(!fIni){fIni=d;fPainel=null;renderFerias();return}
   let ini=fIni,fim=d;fIni=null;if(fim<ini)[ini,fim]=[fim,ini];
+  fMarca(ini,fim)}
+/* Marcar passa sempre por aqui, venha do clique ou do botão da dica: não há caminho que pule regra. */
+function fMarca(ini,fim){
   const r=fValida(ini,fim,fContexto());
-  if(r.recusa){fPainel={tipo:'recusa',ini,fim,...r.recusa};renderFerias();return}
+  if(r.recusa){fPainel={tipo:'recusa',ini,fim,...r.recusa};renderFerias();return false}
   const id=novoIdFer();fPainel={tipo:'marcado',id,avisos:r.avisos};
-  mudaFerias(()=>{dadosCiclo(r.ciclo,true).periodos.push({id,ini,fim,estado:'planejado',origem:'digitado',confirmado:true})})}
+  mudaFerias(()=>{dadosCiclo(r.ciclo,true).periodos.push({id,ini,fim,estado:'planejado',origem:'digitado',confirmado:true})});return true}
 function htmlPainel(ctx){const p=fPainel;if(!p)return '';
   if(p.tipo==='recusa')return `<div class="fnat fnat-${p.natureza}" role="alert"><b>${NATUREZA[p.natureza]}.</b> ${esc(p.msg)} <span class="msg">(${br(p.ini)} a ${br(p.fim)} não foi marcado.)</span></div>`;
   if(p.tipo==='msg')return `<div class="fnat fnat-${p.natureza}" role="status">${esc(p.msg)}</div>`;
@@ -1071,18 +1101,167 @@ function fJanela(cs){const ms=[...cs.emConcessivo];if(cs.emAquisitivo)ms.push(cs
 const mesAnt=ym=>fSoma(ym+'-15',-31).slice(0,7);
 const TIPO_DIA_TXT={util:'dia útil',folga:'dia que você não trabalha',feriado:'feriado',dispensa:'dispensa',facultativo:'ponto facultativo, folga na sua unidade'};
 function htmlMes(cs,ctx){const j=fJanela(cs);if(!fMes||fMes<j.de||fMes>j.ate)fMes=todayISO.slice(0,7);
-  const ps=todosPeriodos(),dias=[],d0=new Date(fMes+'-01T12:00'),m=d0.getMonth(),nm=nomeMes(fMes).split(' ')[0];
+  fOpMes=fOpcoesMes(cs,ctx);
+  const ps=todosPeriodos(),dias=[],d0=new Date(fMes+'-01T12:00'),m=d0.getMonth(),nm=nomeMesF(fMes).split(' ')[0];
   for(const x=new Date(d0);x.getMonth()===m;x.setDate(x.getDate()+1))dias.push(iso(x));
   const cols=dias.map(d=>{const t=ctx.tipo(d),p=ps.find(x=>x.ini<=d&&d<=x.fim),ini=fIni===d,pass=d<=todayISO,nome=ctx.cal.nome(d);
-    const lab=`${+d.slice(8)} de ${nm}, ${NOMES_DIA[wd(d)]}, ${TIPO_DIA_TXT[t]}${nome&&t!=='util'?' ('+nome+')':''}${p?', férias '+ESTADO_FEM[p.estado]:''}${ini?', início escolhido':''}${pass?', já passou':''}`;
-    return `<button type="button" class="col fcol ${t==='util'?'util':t==='folga'?'folga':'feriado'}${p?' p-'+p.estado:''}${ini?' fini':''}${pass?' fpass':''}" data-d="${d}" aria-pressed="${p?'true':'false'}" aria-label="${esc(lab)}" title="${esc(lab)}"><span class="fsinal" aria-hidden="true">${p?{planejado:'●',aprovado:'▬',usufruido:'■'}[p.estado]:''}</span><span>${+d.slice(8)}</span></button>`}).join('');
+    const lab=`${+d.slice(8)} de ${nm}, ${NOMES_DIA[fWd(d)]}, ${TIPO_DIA_TXT[t]}${nome&&t!=='util'?' ('+nome+')':''}${p?', férias '+ESTADO_FEM[p.estado]:''}${ini?', início escolhido':''}${pass?', já passou':''}`;
+    return `<button type="button" class="col fcol ${t==='util'?'util':t==='folga'?'folga':'feriado'}${p?' p-'+p.estado:''}${ini?' fini':''}${pass?' fpass':''}${fNaSug(d)?' fsug':''}" data-d="${d}" aria-pressed="${p?'true':'false'}" aria-label="${esc(lab)}" title="${esc(lab)}"><span class="fsinal" aria-hidden="true">${p?{planejado:'●',aprovado:'▬',usufruido:'■'}[p.estado]:''}</span><span>${+d.slice(8)}</span></button>`}).join('');
   return `<div class="fcard" id="fMesCard"><h3>Marcar no mês</h3>
-<div class="row fmesnav"><button type="button" id="fMesAnt"${fMes<=j.de?' disabled':''} aria-label="Mês anterior">‹</button><b>${esc(cap(nomeMes(fMes)))}</b><button type="button" id="fMesProx"${fMes>=j.ate?' disabled':''} aria-label="Próximo mês">›</button></div>
+<div class="row fmesnav"><button type="button" id="fMesAnt"${fMes<=j.de?' disabled':''} aria-label="Mês anterior">‹</button><b>${esc(cap(nomeMesF(fMes)))}</b><button type="button" id="fMesProx"${fMes>=j.ate?' disabled':''} aria-label="Próximo mês">›</button></div>
 <p class="msg" aria-live="polite">${fIni?`Início em <b>${br(fIni)}</b>. Agora clique no último dia das férias — pode ser em outro mês. <button type="button" class="lnk" id="fIniCancela">cancelar</button> (ou Esc)`:'Clique no primeiro dia das férias e depois no último.'}</p>
-<div class="bars fbars" role="group" aria-label="Dias de ${esc(nomeMes(fMes))}">${cols}</div>
+<div class="bars fbars" role="group" aria-label="Dias de ${esc(nomeMesF(fMes))}">${cols}</div>
 <div class="legend"><span><em style="background:var(--colbg);outline:1px solid var(--line)"></em>dia útil</span><span><em style="background:var(--fs)"></em>não trabalha</span><span><em style="background:var(--fe)"></em>feriado ou dispensa</span><span><em class="lg-pl"></em>● planejado</span><span><em class="lg-ap"></em>▬ aprovado</span><span><em class="lg-us"></em>■ usufruído</span></div>
-${htmlPainel(ctx)}</div>`}
+${htmlDicaMes(cs,ctx)}${htmlPainel(ctx)}</div>`}
 document.addEventListener('keydown',e=>{if(modoFerias&&e.key==='Escape'&&fIni){fIni=null;renderFerias()}});
+/* passar o mouse, ou o foco do teclado, numa opção da dica troca o pontilhado do gráfico para ela */
+['mouseover','focusin'].forEach(tp=>$('ferias').addEventListener(tp,e=>{const o=e.target.closest&&e.target.closest('[data-op]');if(o&&+o.dataset.op!==fSugAtiva){fSugAtiva=+o.dataset.op;pintaSug()}}));
+
+/* ---- fases 7 e 8: dicas mês a mês e a melhor combinação do ciclo (PLANO-FERIAS.md, seção 10) ---- */
+let fFocoSel=null,fDicaDur=null,fSugAtiva=0,fOpMes=null,fDicaMesRes=null,fMelhorRes=null;
+const estr=()=>(ferias&&ferias.config&&ferias.config.estrategia)||'descanso';
+/* O ciclo que se está programando: o escolhido, ou o primeiro com saldo para planejar. */
+function fCicloFoco(cs){if(!cs)return null;const cand=[...cs.emConcessivo];if(cs.emAquisitivo&&!cand.includes(cs.emAquisitivo))cand.push(cs.emAquisitivo);
+  return cand.find(c=>c.chave===fFocoSel)||cand.find(c=>fSaldo(c,dadosCiclo(c,false),null,todayISO).livre>0)||cand[0]||null}
+/* Quantos dias pode ter o próximo período: o saldo inteiro de uma vez e, com a concordância, cada
+   tamanho que ainda deixa o resto fechar (seção 8.4). Do maior para o menor. */
+function fDuracoes(c){const d=dadosCiclo(c,false),P=fParam(),livre=fSaldo(c,d,null,todayISO).livre,durs=(d.periodos||[]).map(fDur),out=new Set();
+  if(livre<=0)return [];const pode=d.concordaFracionar||!P.fracionarExigeConcordancia;
+  if(fCompletavel(durs.concat(livre),0,true)&&(!durs.length||pode))out.add(livre);
+  if(pode)for(let L=P.minDemais;L<livre;L++)if(fCompletavel(durs.concat(L),livre-L,true))out.add(L);
+  return [...out].sort((a,b)=>b-a)}
+/* As duas estratégias da seção 10.3. O último critério, a data, deixa a lista estável. */
+const ORDENA={descanso:(a,b)=>b.descanso-a.descanso||b.uteis-a.uteis||(a.ini<b.ini?-1:1),
+  aproveitamento:(a,b)=>b.uteis*a.dias-a.uteis*b.dias||b.descanso-a.descanso||(a.ini<b.ini?-1:1)};
+const PRIORIDADE_MOTIVO=['R4','saldo','R3','R2c','R11','R2f','R10','passado','R1a','R1c','R1b'];
+/* As n melhores opções de um mês para um período de L dias, cada uma começando num dia diferente.
+   Ordena tudo o que passa nas regras baratas e só roda a conta cara (as datas do resto) nos
+   primeiros da fila, até achar n. A lista de meses e o cartão do mês usam esta mesma função. */
+function fDicasDoMes(ym,c,L,ctx,n,estrategia,ignorarId){
+  const amanha=fSoma(todayISO,1),out=[],rec=[];
+  for(let d=ym+'-01';d.slice(0,7)===ym;d=fSoma(d,1)){if(d<amanha||d<c.coIni||d>c.coFim)continue;
+    const r=fValida(d,fSoma(d,L-1),ctx,ignorarId,true);if(r.recusa){rec.push(r.recusa);continue}
+    if(r.ciclo&&r.ciclo.chave!==c.chave)continue;out.push(fAvalia(d,L,ctx))}
+  out.sort(ORDENA[estrategia]||ORDENA.descanso);
+  const ok=[];for(const x of out){if(ok.length>=n)break;const r=fValida(x.ini,x.fim,ctx,ignorarId);if(r.recusa){rec.push(r.recusa);continue}ok.push({...x,avisos:r.avisos})}
+  if(ok.length)return {opcoes:ok};
+  const m=PRIORIDADE_MOTIVO.map(g=>rec.find(x=>x.regra===g)).find(Boolean);
+  return {vazio:true,motivo:m?m.msg:'Nenhum dia deste mês serve para começar.'}}
+function fMesesDoCiclo(c){const ms=[],fim=c.coFim.slice(0,7);for(let ym=(todayISO>c.coIni?todayISO:c.coIni).slice(0,7);ym<=fim;ym=proxMes(ym))ms.push(ym);return ms}
+/* Enquanto houver regra a confirmar no MANPES, ou saldo provisório, a dica diz que é condicional. */
+function condicional(ctx,s){const P=ctx.P,r=[];
+  if(P.intervaloMinDias)r.push('o intervalo de '+P.intervaloMinDias+' dias entre períodos');
+  if(P.leituraInicio==='estrita')r.push('a tabela dos Correios para o dia de início');
+  if(P.inicioNoProprioDia)r.push('não começar em feriado ou no repouso semanal');
+  let t=r.length?'<b>Dicas condicionais:</b> usam regras ainda a confirmar no MANPES — '+r.join(', ')+'.':'';
+  if(s&&s.provisorio)t+=(t?' ':'')+'<b>Saldo provisório</b> ('+esc(s.motivos.join('; '))+'): as dicas são simulação.';
+  return t}
+/* As opções do mês mostrado, calculadas antes das colunas, para o pontilhado sair junto. */
+function fOpcoesMes(cs,ctx){fDicaMesRes=null;const c=fCicloFoco(cs);if(!c)return null;
+  const Ls=fDuracoes(c);if(!Ls.length)return null;const L=Ls.includes(fDicaDur)?fDicaDur:Ls[0];
+  if(fMes<(todayISO>c.coIni?todayISO:c.coIni).slice(0,7)||fMes>c.coFim.slice(0,7))return null;
+  const r=fDicasDoMes(fMes,c,L,ctx,3,estr());fDicaMesRes={...r,L,c};
+  if(r.opcoes&&fSugAtiva>=r.opcoes.length)fSugAtiva=0;return r.opcoes||null}
+const fNaSug=d=>{const o=fOpMes&&fOpMes[fSugAtiva];return !!o&&o.ini<=d&&d<=o.fim};
+function pintaSug(){const o=fOpMes&&fOpMes[fSugAtiva];
+  for(const b of document.querySelectorAll('#fMesCard [data-d]'))b.classList.toggle('fsug',!!o&&o.ini<=b.dataset.d&&b.dataset.d<=o.fim);
+  for(const e of document.querySelectorAll('#fMesCard [data-op]'))e.classList.toggle('at',+e.dataset.op===fSugAtiva)}
+/* O cartão "Dica para o mês" (seção 13.5): a melhor e até duas alternativas, o motivo quando o mês
+   não cabe, e a comparação com o que a pessoa marcou — sem julgamento. */
+function htmlDicaMes(cs,ctx){const r=fDicaMesRes,nm=nomeMesF(fMes).split(' ')[0];
+  /* a comparação com o que a pessoa marcou neste mês, em qualquer ciclo, mesmo sem saldo para novas dicas */
+  const meus=todosPeriodos().filter(p=>p.estado==='planejado'&&p.ini.slice(0,7)===fMes);
+  const comp=meus.map(p=>{const c=cs.lista.find(x=>x.chave===p.chave);if(!c)return '';
+    const a=fAvalia(p.ini,fDur(p),ctx),alt=fDicasDoMes(fMes,c,fDur(p),ctx,1,estr(),p.id),b=alt.opcoes&&alt.opcoes[0];
+    if(!b||b.ini===p.ini)return `<p class="msg">O que você marcou (${br(p.ini)} a ${br(p.fim)}) já é a melhor opção deste mês para ${fDur(p)} dias.</p>`;
+    return `<p class="msg fcomp">Você marcou ${br(p.ini)} a ${br(p.fim)}: ${a.descanso} dias seguidos fora e ${a.uteis} úteis poupados. Com os mesmos ${fDur(p)} dias, começando em ${br(b.ini)}, seriam ${b.descanso} seguidos fora e ${b.uteis} úteis poupados. Quem decide é você.</p>`}).join('');
+  if(!r&&!comp)return '';
+  let h=`<div class="fdica"><h4>Dica para ${esc(nm)}${r&&!r.vazio?' — '+r.L+' dias do '+esc(nomeCiclo(r.c).toLowerCase()):''}</h4>`;
+  if(r&&r.vazio)h+=`<p class="fsem">${esc(r.motivo)}</p>`;
+  else if(r)h+=r.opcoes.map((o,i)=>`<div class="fop${i===fSugAtiva?' at':''}" data-op="${i}" tabindex="0"><span><b>${br(o.ini)} a ${br(o.fim)}</b> · ${o.dias} dias · <b>${o.descanso}</b> seguidos fora · <b>${o.uteis}</b> úteis poupados${i===0?' <span class="tag ok">a melhor</span>':''}${o.avisos.some(a=>a.regra==='R8')?' <span class="tag p">menos de 40 dias</span>':''}</span><button type="button" data-marcasug="${i}">Marcar</button></div>`).join('');
+  return h+comp+'</div>'}
+function htmlDicas(cs,ctx){const c=fCicloFoco(cs);if(!c)return '';
+  const cand=[...cs.emConcessivo];if(cs.emAquisitivo&&!cand.includes(cs.emAquisitivo))cand.push(cs.emAquisitivo);
+  const d=dadosCiclo(c,false),s=fSaldo(c,d,pendencias(c),todayISO),Ls=fDuracoes(c),est=estr();
+  let h=`<div class="fcard" id="fDicas"><h3>Dicas mês a mês</h3>`;
+  if(cand.length>1)h+=`<div class="row frow"><label class="fcampo">Programar o<select id="fFoco">${cand.map(x=>`<option value="${x.chave}"${x.chave===c.chave?' selected':''}>${esc(nomeCiclo(x))} — prazo até ${br(x.coFim)}</option>`).join('')}</select></label></div>`;
+  if(!Ls.length)return h+`<p class="msg">${s.livre<=0?'Não há saldo para planejar no '+esc(nomeCiclo(c).toLowerCase())+'.':'Para planejar mais um período neste ciclo é preciso dividir as férias — marque a concordância no cartão do ciclo.'}</p></div>`;
+  const L=Ls.includes(fDicaDur)?fDicaDur:Ls[0];
+  h+=`<p class="msg">Para cada mês, o período que começa nele e rende mais, dentro das regras. Pagando os mesmos dias de férias, muda quanto tempo você fica fora: as bordas — fim de semana e feriado colados no período — não se pagam.</p>
+<div class="row frow"><label class="fcampo">Dias neste período<select id="fDicaDur">${Ls.map(x=>`<option value="${x}"${x===L?' selected':''}>${x} dias${x===s.livre&&!(d.periodos||[]).length?' (de uma vez)':''}</option>`).join('')}</select></label>
+<label class="fcampo">O que pesa mais<select id="fEstrategia">${opcoesSel([['descanso','mais dias seguidos fora'],['aproveitamento','mais dias úteis poupados por dia de férias']],est)}</select></label></div>`;
+  const cond=condicional(ctx,s);if(cond)h+=`<p class="fprov">${cond}</p>`;
+  const linhas=fMesesDoCiclo(c).map(ym=>{const r=fDicasDoMes(ym,c,L,ctx,1,est),nm=cap(nomeMesF(ym));
+    if(r.vazio)return `<tr class="fsem" data-mes="${ym}"><td>${esc(nm)}</td><td colspan="3">${esc(r.motivo)}</td><td></td></tr>`;
+    const o=r.opcoes[0];return `<tr data-mes="${ym}" data-ini="${o.ini}"><td>${esc(nm)}</td><td>${br(o.ini)} a ${br(o.fim)}${o.avisos.some(a=>a.regra==='R8')?' <span class="tag p">menos de 40 dias</span>':''}</td><td class="n"><b>${o.descanso}</b></td><td class="n">${o.uteis}</td><td><button type="button" data-vai="${ym}">Ver no mês</button></td></tr>`}).join('');
+  return h+`<div class="scroll"><table class="fper fdicas"><thead><tr><th>Mês</th><th>Melhor período</th><th class="n">Dias seguidos fora</th><th class="n">Úteis poupados</th><th></th></tr></thead><tbody>${linhas}</tbody></table></div>
+<p class="msg">O limite de 20% da unidade em férias ao mesmo tempo não entra na conta: o Cartinhas não sabe quem mais marcou.</p>
+<div class="row"><button type="button" id="fMelhor">Melhor combinação do ciclo</button></div>${htmlMelhor()}</div>`}
+
+/* Seção 10.2: distribuir o saldo que falta em até três períodos, maximizando o descanso contado
+   pela UNIÃO dos intervalos [início − borda, fim + borda]: o fim de semana entre dois períodos
+   conta uma vez só. Programação dinâmica com "o último escolhido" no estado: os próximos que podem
+   dividir borda com ele (os que começam até a maior corrida de dias livres depois da borda dele)
+   são olhados um a um; os demais vêm de uma tabela de sufixos. Com o intervalo de 30 dias o
+   primeiro grupo fica vazio por construção, e a conta vira a soma simples. */
+function fMelhorCombinacao(c,ctx,op){op=op||{};if(!c)return {vazio:true,motivo:'Sem ciclo para programar.'};
+  const P=ctx.P,d=dadosCiclo(c,false),durs=(op.durs||(d.periodos||[]).map(fDur));
+  const resto=op.resto!=null?op.resto:fSaldo(c,d,null,todayISO).livre;if(resto<=0)return {vazio:true,motivo:'Não há saldo para distribuir neste ciclo.'};
+  const concorda=op.concorda!=null?op.concorda:(d.concordaFracionar||!P.fracionarExigeConcordancia);
+  const vagas=P.maxPeriodos-durs.length;if(vagas<=0)return {vazio:true,motivo:'Este ciclo já tem '+P.maxPeriodos+' períodos.'};
+  const todos=op.todos||todosPeriodos(),pesa=p=>p.chave===c.chave||P.intervaloEntreCiclos;
+  const amanha=fSoma(todayISO,1),de=amanha>c.coIni?amanha:c.coIni,ate=c.coFim;if(de>ate)return {vazio:true,motivo:'O prazo deste ciclo já acabou.'};
+  /* a janela em índices de dia, com 62 dias de folga dos dois lados para as bordas */
+  const base=fSoma(de,-62),N=fDias(base,ate)+63,dia=i=>fSoma(base,i);
+  const liv=new Uint8Array(N);for(let i=0;i<N;i++)liv[i]=ctx.livre(dia(i))?1:0;
+  const antes=new Int16Array(N),depois=new Int16Array(N),util=new Int32Array(N+1);
+  for(let i=1;i<N;i++)antes[i]=liv[i-1]?antes[i-1]+1:0;
+  for(let i=N-2;i>=0;i--)depois[i]=liv[i+1]?depois[i+1]+1:0;
+  for(let i=0;i<N;i++)util[i+1]=util[i]+(liv[i]?0:1);
+  let maxRun=0;for(let i=0;i<N;i++)if(antes[i]>maxRun)maxRun=antes[i];
+  const i0=fDias(base,de),i1=fDias(base,ate);
+  const Ls=[];if(concorda)for(let L=P.minDemais;L<=resto;L++)Ls.push(L);
+  if(!durs.length&&!Ls.includes(resto))Ls.push(resto);                 /* o saldo inteiro de uma vez */
+  const pesados=todos.filter(pesa),grupos=[],cands=[];
+  for(let si=i0;si<=i1;si++){const ds=dia(si);if(!fInicio(ds,ctx).ok)continue;const g={s:si,cands:[]};
+    for(const L of Ls){const e=si+L-1;if(e>i1)continue;const n={ini:ds,fim:dia(e)};
+      if(todos.some(p=>sobrepoe(p,n))||fIntervalo(n,pesados,P))continue;
+      const cn={L,s:si,e,lo:si-antes[si],hi:e+depois[e],desc:antes[si]+L+depois[e],uteis:util[e+1]-util[si],g:grupos.length,id:cands.length};
+      g.cands.push(cn);cands.push(cn)}
+    if(g.cands.length)grupos.push(g)}
+  if(!grupos.length)return {vazio:true,motivo:'Não há datas no prazo deste ciclo onde o saldo caiba, com as regras de início e de intervalo.'};
+  const G=grupos.length,R=resto+1,K=vagas+1,ST=R*K*2,at=(r,k,h)=>(r*K+k)*2+h,NEG=-1e9,gap=P.intervaloMinDias;
+  const prim=x=>{let lo=0,hi=G;while(lo<hi){const m=(lo+hi)>>1;if(grupos[m].s<x)lo=m+1;else hi=m}return lo};
+  const BEST=new Float64Array((G+1)*ST).fill(NEG),BARG=new Int32Array((G+1)*ST).fill(-1);
+  const T=new Float64Array((G+1)*ST).fill(NEG),TARG=new Int32Array((G+1)*ST).fill(-1);
+  const W=new Float64Array(cands.length*ST).fill(NEG),WNX=new Int32Array(cands.length*ST).fill(-1);
+  const valido=k=>durs.length+(vagas-k)<=1;   /* um período só: bloco único, sem exigir o de 14 */
+  for(let gi=G-1;gi>=0;gi--){
+    for(const cn of grupos[gi].cands){
+      const nx=prim(cn.e+gap+1),far=Math.max(nx,prim(cn.hi+maxRun+1));
+      for(let r=0;r<R;r++)for(let k=0;k<K;k++)for(let h=0;h<2;h++){const w=cn.id*ST+at(r,k,h);
+        if(r===0){if(valido(k)||h){W[w]=cn.desc;WNX[w]=-1}continue}
+        if(k===0)continue;let best=NEG,arg=-1;
+        for(let g2=nx;g2<far;g2++){const b=g2*ST+at(r,k,h),v=BEST[b];if(v<=NEG/2)continue;
+          const ov=Math.max(0,cn.hi-cands[BARG[b]].lo+1);if(v-ov>best){best=v-ov;arg=BARG[b]}}
+        const tf=far*ST+at(r,k,h);if(T[tf]>best){best=T[tf];arg=TARG[tf]}
+        if(arg>=0&&best>NEG/2){W[w]=cn.desc+best;WNX[w]=arg}}}
+    for(let r=1;r<R;r++)for(let k=1;k<K;k++)for(let h=0;h<2;h++){const b=gi*ST+at(r,k,h);
+      for(const cn of grupos[gi].cands){if(cn.L>r)continue;const v=W[cn.id*ST+at(r-cn.L,k-1,h||cn.L>=P.minMaior?1:0)];if(v>BEST[b]){BEST[b]=v;BARG[b]=cn.id}}
+      const nt=(gi+1)*ST+at(r,k,h);T[b]=BEST[b];TARG[b]=BARG[b];if(T[nt]>T[b]){T[b]=T[nt];TARG[b]=TARG[nt]}}}
+  const h0=durs.some(x=>x>=P.minMaior)?1:0,raiz=at(resto,vagas,h0),total=T[raiz];
+  if(total<=NEG/2)return {vazio:true,motivo:'Não há combinação que feche o saldo neste ciclo, com as regras de início, de intervalo e de fracionamento.'};
+  const ps=[];let i=TARG[raiz],r=resto,k=vagas,h=h0;
+  while(i>=0){const cn=cands[i];ps.push({ini:dia(cn.s),fim:dia(cn.e),descanso:cn.desc,uteis:cn.uteis});r-=cn.L;k--;h=h||cn.L>=P.minMaior?1:0;i=WNX[cn.id*ST+at(r,k,h)]}
+  return {periodos:ps,descanso:total,uteis:ps.reduce((a,p)=>a+p.uteis,0),dias:resto}}
+function htmlMelhor(){const r=fMelhorRes;if(!r)return '';
+  if(r.vazio)return `<p class="fsem">${esc(r.motivo)}</p>`;
+  return `<div class="fdica" id="fMelhorRes"><h4>Melhor combinação para os ${r.dias} dias que faltam</h4>
+${r.periodos.map(p=>`<p><b>${br(p.ini)} a ${br(p.fim)}</b> · ${fDur(p)} dias · ${p.descanso} seguidos fora · ${p.uteis} úteis poupados</p>`).join('')}
+<p>No total: <b>${r.descanso} dias fora</b> e <b>${r.uteis} dias úteis poupados</b>${r.periodos.length>1?' — o mesmo fim de semana entre dois períodos conta uma vez só':''}.</p>
+<p class="msg">É a que mais rende pelo critério "dias seguidos fora", não necessariamente a melhor para você.</p>
+<div class="row"><button type="button" class="pri" id="fMarcaMelhor">Marcar estas</button></div></div>`}
+function marcaMelhor(){const r=fMelhorRes;if(!r||!r.periodos)return;fMelhorRes=null;for(const p of r.periodos)if(!fMarca(p.ini,p.fim))return}
 
 /* ---- a área: aparece e some; o banco de horas fica intocado (D2, D3) ---- */
 let fRebase=null,fConfirma=null;  /* mudança de data esperando confirmação (6.3); apagar esperando o segundo clique */
@@ -1190,7 +1369,7 @@ function htmlRebase(){const r=fRebase,novos=fCiclos(r.campo==='admissao'?r.v:fer
 <p class="msg">Direito, abono e concordância ficam com os ciclos que continuarem com a mesma data; os que mudarem de data voltam ao padrão, para você conferir.</p>
 <div class="row"><button type="button" class="pri" id="fRbOk">Confirmar a mudança</button><button type="button" id="fRbCancela">Cancelar</button></div></div>`}
 function renderFerias(){
-  const el=$('ferias');if(!el)return;const hoje=todayISO;
+  const el=$('ferias');if(!el)return;const hoje=todayISO;fMemo={};
   let h=`<h2 class="ftit">Programação de Férias</h2><p class="msg">Proposta para a escala: quem programa é o gestor, no Populis, e a época é da conveniência do serviço. Nada nesta área muda o seu banco de horas.</p>`;
   if(fAvisoTxt)h+=`<p class="faviso" role="status">${fAvisoTxt}</p>`;
   if(ofertaFerias)h+=htmlOferta();
@@ -1203,7 +1382,7 @@ ${fEditaAdm?'':'<p class="msg">Já tinha um plano em outro computador, ou uma ve
   const cs=ciclosAgora(),ctx=fContexto();
   if(fRebase)h+=htmlRebase();
   h+=htmlFila(cs);
-  h+=htmlMes(cs,ctx);
+  h+=htmlDicas(cs,ctx)+htmlMes(cs,ctx);
   const mostrar=[...cs.emConcessivo];if(cs.emAquisitivo&&!mostrar.includes(cs.emAquisitivo))mostrar.push(cs.emAquisitivo);
   h+=mostrar.map(htmlCiclo).join('');
   h+=htmlAcrescentar(cs)+htmlConfig()+htmlAjuste(cs)+htmlCopia();
@@ -1251,6 +1430,8 @@ $('ferias').addEventListener('click',e=>{const t=e.target.closest('button');if(!
   if(t.dataset.d){const d=t.dataset.d;fCliqueDia(d);const b=document.querySelector('#fMesCard [data-d="'+d+'"]');if(b)try{b.focus({preventScroll:true})}catch(x){}return}
   if(t.dataset.desmarca){const id=t.dataset.desmarca;fPainel=null;
     mudaFerias(f=>{for(const k of Object.keys(f.ciclos)){const ps=f.ciclos[k].periodos||[],i=ps.findIndex(x=>x.id===id&&x.estado==='planejado');if(i>=0)ps.splice(i,1)}});return}
+  if(t.dataset.vai){fMes=t.dataset.vai;fSugAtiva=0;fMelhorRes=null;renderFerias();const m=$('fMesCard');if(m)try{m.scrollIntoView({block:'start'})}catch(x){}return}
+  if(t.dataset.marcasug!=null){const o=(fOpMes||[])[+t.dataset.marcasug];if(o)fMarca(o.ini,o.fim);return}
   if(t.dataset.pa){acaoPeriodo(t);return}
   if(t.dataset.ff){acaoFila(t);return}
   if(t.dataset.locdel!=null){const i=+t.dataset.locdel;mudaFerias(f=>{f.config.feriadosLocais.splice(i,1)});return}
@@ -1268,15 +1449,20 @@ $('ferias').addEventListener('click',e=>{const t=e.target.closest('button');if(!
     case 'fAjusteTira':trocaBase('aquisitivoIni',null);return;
     case 'fRbOk':aplicaRebase();return;
     case 'fRbCancela':fRebase=null;renderFerias();return;
-    case 'fMesAnt':fMes=mesAnt(fMes);renderFerias();return;
-    case 'fMesProx':fMes=proxMes(fMes);renderFerias();return;
+    case 'fMesAnt':fMes=mesAnt(fMes);fSugAtiva=0;renderFerias();return;
+    case 'fMesProx':fMes=proxMes(fMes);fSugAtiva=0;renderFerias();return;
     case 'fIniCancela':fIni=null;renderFerias();return;
+    case 'fMelhor':fMelhorRes=fMelhorCombinacao(fCicloFoco(ciclosAgora()),fContexto());renderFerias();return;
+    case 'fMarcaMelhor':marcaMelhor();return;
     case 'fUsAdd':acrescentaUsufruido();return;
     case 'fLocAdd':acrescentaLocal();return;
     case 'fCopia':salvaCopiaExterna();return;
     case 'fAbreCopia':abreCopiaExterna();return}});
 $('ferias').addEventListener('change',e=>{const t=e.target;
   if(t.dataset.rb!=null&&fRebase){fRebase.assoc[+t.dataset.rb].nova=t.value;return}
+  if(t.id==='fFoco'){fFocoSel=t.value;fDicaDur=null;fMelhorRes=null;renderFerias();return}
+  if(t.id==='fDicaDur'){fDicaDur=+t.value;fMelhorRes=null;renderFerias();return}
+  if(t.id==='fEstrategia'){mudaFerias(f=>{f.config=f.config||{};f.config.estrategia=t.value});return}
   const cfg={fJornada:f=>{f.config.diasTrabalhados=t.value.split(',').map(Number)},fDsr:f=>{f.config.dsr=+t.value},fUf:f=>{f.config.uf=t.value},
     fLeitura:f=>{f.config.leituraInicio=t.value},fFacult:f=>{f.config.facultativosLivres=t.checked}}[t.id];
   if(cfg){mudaFerias(f=>{f.config=f.config||{};cfg(f)});return}
@@ -1294,8 +1480,11 @@ if(location.hash==='#ferias')abreFerias();
 /* ponte usada só pela auditoria automática (publico/testes/auditoria.test.js) */
 window.cartinhasTeste={calcDay,uneDias,validaArq,aplicaArq,conferiaDia,relerMeses,hoje:()=>todayISO,estado:()=>({cur,days,months}),
   conecta:(h,g)=>conecta(h,g),gravaArq:()=>gravaArq(),confereArq:()=>confereArq(),pacote:()=>pacote(),ferias:FERIAS_REGRAS,
-  fer:{estado:()=>ferias,oferta:()=>ofertaFerias,abre:()=>abreFerias(),fecha:()=>fechaFerias(),avaliaCopia:(c,n)=>avaliaCopia(c,n),confere:()=>confereFeriasDoArquivo(),modo:()=>modoFerias,contexto:(c,d)=>fContexto(c,d),fila:()=>fFila(),render:()=>renderFerias(),
-    valida:(i,f)=>fValida(i,f,fContexto()),inicio:d=>fInicio(d,fContexto()),avalia:(i,n)=>fAvalia(i,n,fContexto())}};
+  fer:{estado:()=>ferias,oferta:()=>ofertaFerias,abre:()=>abreFerias(),fecha:()=>fechaFerias(),avaliaCopia:(c,n)=>avaliaCopia(c,n),confere:()=>confereFeriasDoArquivo(),modo:()=>modoFerias,contexto:(c,d)=>fContexto(c,d),fila:()=>{fMemo={};return fFila()},render:()=>renderFerias(),
+    valida:(i,f)=>{fMemo={};return fValida(i,f,fContexto())},inicioCtx:(d,ctx)=>fInicio(d,ctx),
+    foco:()=>fCicloFoco(ciclosAgora()),duracoes:()=>{fMemo={};return fDuracoes(fCicloFoco(ciclosAgora()))},
+    dicas:(ym,L,est)=>{fMemo={};const c=fCicloFoco(ciclosAgora());return fDicasDoMes(ym,c,L||fDuracoes(c)[0],fContexto(),3,est||estr())},
+    melhor:(cfg,op)=>{fMemo={};return fMelhorCombinacao(fCicloFoco(ciclosAgora()),cfg?fContexto(cfg):fContexto(),op)},inicio:d=>fInicio(d,fContexto()),avalia:(i,n)=>fAvalia(i,n,fContexto())}};
 
 /* ---- arquivo de dados único na pasta (Chrome/Edge): todos os navegadores leem e gravam o mesmo arquivo ---- */
 const NOME_ARQ='cartinhas-dados.json';
