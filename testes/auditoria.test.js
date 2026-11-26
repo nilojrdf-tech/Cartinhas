@@ -348,6 +348,71 @@ caso('Hora digitada','Hora impossível no campo ("2532") é acusada',()=>{const 
   p.digita('03/11',3,'2532');
   return {ok:p.invalido('03/11'),obs:`campos: ${p.campos('03/11').filter(Boolean).join(' ')} · em vermelho: ${p.invalido('03/11')}`}});
 
+// ---------- PROGRAMAÇÃO DE FÉRIAS — fase 1: regras puras (PLANO-FERIAS.md) ----------
+const FR=(()=>{let f=null;return ()=>f||(f=abre().w.cartinhasTeste.ferias)})();
+
+caso('Férias — ciclos','Nenhum dia sem ciclo nem em dois: quatro admissões, doze ciclos cada (seção 6.1)',()=>{const f=FR();const furos=[];
+  for(const adm of ['2026-03-01','2024-02-29','2025-01-31','2020-03-15'])for(let n=1;n<=12;n++){const a=f.fCiclo(adm,n),b=f.fCiclo(adm,n+1);
+    if(f.fSoma(a.coFim,1)!==b.coIni)furos.push(`${adm} ciclo ${n}: concessivo acaba ${a.coFim}, o seguinte começa ${b.coIni}`);
+    if(f.fSoma(a.aqFim,1)!==b.aqIni)furos.push(`${adm} ciclo ${n}: aquisitivo acaba ${a.aqFim}, o seguinte começa ${b.aqIni}`);
+    if(a.coIni!==f.fSoma(a.aqFim,1))furos.push(`${adm} ciclo ${n}: concessivo não emenda no aquisitivo`)}
+  return {ok:!furos.length,obs:furos.length?furos.slice(0,2).join(' · '):'48 ciclos contínuos (o caso de 01/03/2026 era o que quebrava na versão 3 do plano)'}});
+
+caso('Férias — ciclos','Admissão em 15/03/2020 produz a tabela do levantamento',()=>{const f=FR();const c=n=>f.fCiclo('2020-03-15',n);
+  const t=[c(1),c(2),c(7)].map(x=>`${x.aqIni}→${x.aqFim} / ${x.coIni}→${x.coFim}`);
+  const ok=t[0]==='2020-03-15→2021-03-14 / 2021-03-15→2022-03-14'&&t[1]==='2021-03-15→2022-03-14 / 2022-03-15→2023-03-14'&&t[2]==='2026-03-15→2027-03-14 / 2027-03-15→2028-03-14';
+  return {ok,obs:t.join(' · ')}});
+
+caso('Férias — ciclos','29/02: o aniversário vira 01/03 nos anos que não são bissextos',()=>{const f=FR();const c1=f.fCiclo('2024-02-29',1),c4=f.fCiclo('2024-02-29',4);
+  const ok=c1.aqFim==='2025-02-28'&&c4.aqIni==='2027-03-01'&&c4.aqFim==='2028-02-28'&&c4.coIni==='2028-02-29';
+  return {ok,obs:`1º aquisitivo até ${c1.aqFim}; 4º de ${c4.aqIni} a ${c4.aqFim}, concessivo a partir de ${c4.coIni}`}});
+
+caso('Férias — ciclos','31/01: o ciclo fecha em 30/01, sem escorregar de mês',()=>{const f=FR();const c=f.fCiclo('2025-01-31',1);
+  return {ok:c.aqFim==='2026-01-30'&&c.coIni==='2026-01-31'&&c.coFim==='2027-01-30',obs:`aquisitivo até ${c.aqFim}; concessivo ${c.coIni} a ${c.coFim}`}});
+
+caso('Férias — ciclos','Aquisitivo ajustado: o ciclo interrompido sai e o vão aparece com as datas',()=>{const f=FR();
+  const r=f.fCiclos('2020-03-15','2026-09-01','2026-11-25');
+  const aq=r.emAquisitivo,co=r.emConcessivo[0];
+  const ok=!!r.emenda&&r.emenda.tipo==='vao'&&r.emenda.de==='2027-03-15'&&r.emenda.ate==='2027-08-31'
+    &&aq&&aq.ajustado&&aq.aqIni==='2026-09-01'&&co&&co.coIni==='2026-03-15'&&!r.lista.some(c=>c.aqIni==='2026-03-15');
+  return {ok,obs:`emenda: ${r.emenda?r.emenda.tipo+' de '+r.emenda.de+' a '+r.emenda.ate:'nenhuma'} · aquisitivo em curso ${aq&&aq.aqIni} · concessivo em curso ${co&&co.coIni}`}});
+
+caso('Férias — fracionamento','As sete combinações permitidas da tabela dos Correios passam',()=>{const f=FR();
+  const L=[[30],[15,15],[14,16],[20,10],[14,8,8],[15,10,5],[20,5,5]];const ruins=L.filter(d=>!f.fCombinacao(d,true).ok);
+  return {ok:!ruins.length,obs:ruins.length?'recusou '+ruins.map(d=>d.join('+')).join(', '):'30 · 15+15 · 14+16 · 20+10 · 14+8+8 · 15+10+5 · 20+5+5'}});
+
+caso('Férias — fracionamento','As três combinações proibidas são recusadas, pela regra do fracionamento',()=>{const f=FR();
+  const L=[[10,10,10],[12,12,6],[13,12,5]];const r=L.map(d=>f.fCombinacao(d,true));
+  return {ok:r.every(x=>!x.ok&&x.regra==='R2f'),obs:r.map((x,i)=>L[i].join('+')+': '+(x.ok?'ACEITA':x.motivo)).join(' · ')}});
+
+caso('Férias — fracionamento','Bloco único curto: 12 dias de uma vez, sem concordância',()=>{const f=FR();
+  return {ok:f.fCombinacao([12],false).ok&&f.fCompletavel([],12,false),obs:'12 dias de uma vez é combinação válida, e não exige o período de 14'}});
+
+caso('Férias — fracionamento','Saldo de 18 não fraciona; 19 é o mínimo (14 + 5)',()=>{const f=FR();let alguma=null;
+  for(let a=1;a<18;a++)if(f.fCombinacao([a,18-a],true).ok)alguma=a+'+'+(18-a);
+  for(let a=1;a<18;a++)for(let b=1;a+b<18;b++)if(f.fCombinacao([a,b,18-a-b],true).ok)alguma=[a,b,18-a-b].join('+');
+  return {ok:!alguma&&!f.fPodeFracionar(18)&&f.fPodeFracionar(19)&&f.fCompletavel([],18,true),obs:alguma?'aceitou '+alguma:'nenhuma divisão de 18 passa; 18 de uma vez passa'}});
+
+caso('Férias — fracionamento','Começar pelo bloco de 5: com 25 restando e concordância, fecha; sem concordância, não',()=>{const f=FR();
+  const com=f.fCompletavel([5],25,true),sem=f.fCompletavel([5],25,false);
+  return {ok:com&&!sem,obs:`com concordância: ${com?'completável (5+25)':'não'} · sem: ${sem?'COMPLETÁVEL':'não'}`}});
+
+caso('Férias — fracionamento','Abono de 10: os 20 que sobram fecham em 20, 14+6 ou 15+5, nunca em três',()=>{const f=FR();
+  const bons=[[20],[14,6],[15,5]].every(d=>f.fCombinacao(d,true).ok);const dez=f.fCombinacao([10,10],true).ok;let trio=null;
+  for(let a=1;a<20;a++)for(let b=1;a+b<20;b++)if(f.fCombinacao([a,b,20-a-b],true).ok)trio=[a,b,20-a-b].join('+');
+  return {ok:bons&&!dez&&!trio,obs:`20, 14+6, 15+5: ${bons?'aceitos':'RECUSADOS'} · 10+10: ${dez?'ACEITO':'recusado'} · trio: ${trio||'nenhum'}`}});
+
+caso('Férias — saldo','Saldo provisório: 30 presumidos e 10 na fila; ao confirmar, 20, ainda provisório',()=>{const f=FR();const c=f.fCiclo('2020-03-15',6);
+  const a=f.fSaldo(c,{direitoInformado:false,abonoInformado:true,periodos:[]},{fila:1},'2026-11-25');
+  const b=f.fSaldo(c,{direitoInformado:false,abonoInformado:true,periodos:[{ini:'2026-07-01',fim:'2026-07-10',estado:'usufruido'}]},{fila:0},'2026-11-25');
+  const k=f.fSaldo(c,{direitoInformado:true,abonoInformado:true,periodos:[{ini:'2026-07-01',fim:'2026-07-10',estado:'usufruido'}]},{fila:0},'2026-11-25');
+  const ok=a.livre===30&&a.provisorio&&a.motivos.length===2&&b.livre===20&&b.provisorio&&k.livre===20&&!k.provisorio;
+  return {ok,obs:`antes: ${a.livre} (${a.motivos.join('; ')}) · confirmado: ${b.livre}, ${b.provisorio?'provisório':'firme'} · direito informado: ${k.livre}, ${k.provisorio?'provisório':'firme'}`}});
+
+caso('Férias — saldo','Planejado e aprovado não aparecem como consumido',()=>{const f=FR();const c=f.fCiclo('2020-03-15',6);
+  const s=f.fSaldo(c,{direitoInformado:true,abonoInformado:true,abono:10,periodos:[{ini:'2027-01-04',fim:'2027-01-17',estado:'planejado'},{ini:'2026-12-01',fim:'2026-12-05',estado:'aprovado'}]},null,'2026-11-25');
+  return {ok:s.consumido===10&&s.comprometido===5&&s.pretendido===14&&s.livre===1,obs:`consumido ${s.consumido} (só o abono) · comprometido ${s.comprometido} · pretendido ${s.pretendido} · livre ${s.livre}`}});
+
 // ---------- SAÍDA ----------
 Promise.all(PEND).then(()=>{
 R.sort((a,b)=>a.id-b.id);

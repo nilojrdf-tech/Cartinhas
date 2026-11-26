@@ -629,9 +629,105 @@ agendaVirada();
 window.addEventListener('focus',conferiaDia);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)conferiaDia()});
 
+/* =====================================================================================
+   PROGRAMAÇÃO DE FÉRIAS — regras puras (PLANO-FERIAS.md, seções 6, 7 e 8).
+   Nada aqui lê nem grava o estado da página: entra data e número, sai resposta.
+   Os números das regras moram só em FERIAS_PARAM. "A CONFIRMAR" = veio de levantamento,
+   não do MANPES lido direto (seção 18 do plano); zero desliga a regra.
+   ===================================================================================== */
+const FERIAS_PARAM={
+  /* configurável: da pessoa (a área grava a escolha dela em ferias.config) */
+  diasTrabalhados:[1,2,3,4,5],      /* 0 = domingo … 6 = sábado */
+  dsr:0,                            /* dia do repouso semanal remunerado */
+  leituraInicio:'estrita',          /* 'estrita' | 'clt' (seção 8.3) */
+  /* legal: CLT */
+  maxPeriodos:3,                    /* art. 134 §1º */
+  minMaior:14,                      /* art. 134 §1º, só no fracionamento */
+  minDemais:5,                      /* art. 134 §1º, só no fracionamento */
+  fracionarExigeConcordancia:true,  /* art. 134 §1º */
+  diasAntesVedados:2,               /* art. 134 §3º */
+  abonoFracao:1/3,                  /* art. 143 */
+  /* norma interna: MANPES 19/1/8 */
+  inicioNoProprioDia:true,          /* R1c: não começar no feriado ou no DSR — A CONFIRMAR */
+  facultativoVedaInicio:false,      /* ponto facultativo conta para R1a? — A CONFIRMAR */
+  intervaloMinDias:30,              /* item 2.2.1 — A CONFIRMAR */
+  intervaloEntreCiclos:true,        /* o intervalo vale entre ciclos diferentes? — A CONFIRMAR */
+  antecedenciaDias:40,              /* programar ou alterar */
+  avisoDias:30,                     /* aviso de férias */
+  abonoPrazoDias:15                 /* intenção de abono: 15 dias antes do fim do aquisitivo (comunicado de 31/07/2026) */
+};
+const FERIAS_DIREITOS=[30,24,18,12,0];
+const fSoma=(s,n)=>{const d=new Date(s+'T12:00');d.setDate(d.getDate()+n);return iso(d)};
+const fDias=(a,b)=>Math.round((new Date(b+'T12:00')-new Date(a+'T12:00'))/864e5);  /* de a até b */
+const fDur=p=>fDias(p.ini,p.fim)+1;                                                /* dias corridos, inclusive */
+const fBissexto=y=>(y%4===0&&y%100!==0)||y%400===0;
+/* Aniversário k de uma data-base. Para 29/02, em ano que não é bissexto, o aniversário é
+   01/03 — convenção da seção 6.1, que mantém os ciclos contínuos. */
+const fAniv=(base,k)=>{const y=+base.slice(0,4)+k,md=base.slice(5);return md==='02-29'&&!fBissexto(y)?y+'-03-01':y+'-'+md};
+/* Ciclo n (1, 2, …) de uma data-base. Tudo sai da mesma sequência de aniversários, então todo
+   fim é a véspera de um início: nenhum dia sem ciclo, nenhum dia em dois (seção 6.1). */
+const fCiclo=(base,n)=>({n,base,chave:fAniv(base,n-1),aqIni:fAniv(base,n-1),aqFim:fSoma(fAniv(base,n),-1),
+  coIni:fAniv(base,n),coFim:fSoma(fAniv(base,n+1),-1)});
+/* Os ciclos até um pouco depois de hoje. Com aquisitivo ajustado à mão (seção 6.2): ficam os
+   ciclos da admissão cujo aquisitivo terminou antes do ajuste; o ciclo que foi interrompido sai,
+   e os seguintes contam do ajuste. A emenda entre os dois — vão ou sobreposição dos concessivos —
+   é devolvida para a tela mostrar com as datas. Nada é "consertado". */
+function fCiclos(adm,ajuste,hoje){
+  const lista=[];let emenda=null;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(adm||''))return {lista,emConcessivo:null,emAquisitivo:null,emenda};
+  for(let n=1;n<200;n++){const c=fCiclo(adm,n);if(ajuste&&c.aqFim>=ajuste)break;lista.push(c);if(c.aqIni>hoje)break}
+  if(ajuste){const ult=lista[lista.length-1];const ini=lista.length;
+    for(let n=1;n<200;n++){const c={...fCiclo(ajuste,n),ajustado:true};lista.push(c);if(c.aqIni>hoje)break}
+    const prox=lista[ini];
+    if(ult&&prox){const entre=fDias(ult.coFim,prox.coIni)-1;
+      if(entre>0)emenda={tipo:'vao',de:fSoma(ult.coFim,1),ate:fSoma(prox.coIni,-1)};
+      else if(entre<0)emenda={tipo:'sobreposicao',de:prox.coIni,ate:ult.coFim}}}
+  return {lista,emenda,
+    emConcessivo:lista.filter(c=>c.coIni<=hoje&&hoje<=c.coFim),
+    emAquisitivo:lista.find(c=>c.aqIni<=hoje&&hoje<=c.aqFim)||null};
+}
+/* Saldo de um ciclo (seção 7.1). d = os dados do ciclo no arquivo; pend = o que ainda pode
+   mudar o saldo. O saldo é provisório enquanto houver qualquer pendência, e diz qual. */
+function fSaldo(c,d,pend,hoje){
+  d=d||{};const per=Array.isArray(d.periodos)?d.periodos:[];
+  const soma=e=>per.filter(p=>p.estado===e).reduce((s,p)=>s+fDur(p),0);
+  const direito=d.direito!=null?d.direito:30,abono=d.abono||0;
+  const usufruido=soma('usufruido'),aprovado=soma('aprovado'),planejado=soma('planejado');
+  const motivos=[];
+  if(!d.direitoInformado)motivos.push('o direito está presumido em '+direito+' dias');
+  if(pend&&pend.fila)motivos.push(pend.fila>1?pend.fila+' períodos achados no histórico ainda não foram confirmados':'um período achado no histórico ainda não foi confirmado');
+  if(pend&&pend.semRelatorio&&pend.semRelatorio.length)motivos.push('falta o relatório de '+pend.semRelatorio.map(nomeMes).join(', '));
+  if(!d.abonoInformado&&c&&hoje&&hoje<=fSoma(c.aqFim,-FERIAS_PARAM.abonoPrazoDias))motivos.push('o abono ainda não foi informado');
+  return {direito,abono,usufruido,aprovado,planejado,consumido:usufruido+abono,comprometido:aprovado,pretendido:planejado,
+    livre:direito-usufruido-abono-aprovado-planejado,provisorio:motivos.length>0,motivos};
+}
+/* Combinação final (R2, R2f, R11): o saldo inteiro de uma vez, de qualquer tamanho; ou até três
+   períodos, um com pelo menos 14 dias e os demais com pelo menos 5, com a concordância. */
+function fCombinacao(durs,concorda){
+  const P=FERIAS_PARAM;
+  if(durs.length<=1)return {ok:true};
+  if(P.fracionarExigeConcordancia&&!concorda)return {ok:false,regra:'R11'};
+  if(durs.length>P.maxPeriodos)return {ok:false,regra:'R2f',motivo:'mais de '+P.maxPeriodos+' períodos'};
+  if(Math.max(...durs)<P.minMaior)return {ok:false,regra:'R2f',motivo:'nenhum período chega a '+P.minMaior+' dias'};
+  if(Math.min(...durs)<P.minDemais)return {ok:false,regra:'R2f',motivo:'há período com menos de '+P.minDemais+' dias'};
+  return {ok:true}}
+/* R2c, camada aritmética (seção 8.4): com os períodos que o ciclo já tem (durs) e os dias que
+   ainda faltam distribuir (resto), existe divisão que feche numa combinação válida? */
+function fCompletavel(durs,resto,concorda){
+  if(resto<0)return false;
+  if(resto===0)return fCombinacao(durs,concorda).ok;
+  const vagas=FERIAS_PARAM.maxPeriodos-durs.length;
+  if(vagas>=1&&fCombinacao(durs.concat(resto),concorda).ok)return true;
+  if(vagas>=2)for(let a=1;a<resto;a++)if(fCombinacao(durs.concat(a,resto-a),concorda).ok)return true;
+  if(vagas>=3)for(let a=1;a<resto;a++)for(let b=1;a+b<resto;b++)if(fCombinacao(durs.concat(a,b,resto-a-b),concorda).ok)return true;
+  return false}
+/* Fracionar exige saldo de pelo menos 19 dias (14 + 5). Abaixo disso, só de uma vez. */
+const fPodeFracionar=saldo=>saldo>=FERIAS_PARAM.minMaior+FERIAS_PARAM.minDemais;
+const FERIAS_REGRAS={FERIAS_PARAM,FERIAS_DIREITOS,fSoma,fDias,fDur,fAniv,fCiclo,fCiclos,fSaldo,fCombinacao,fCompletavel,fPodeFracionar};
+
 /* ponte usada só pela auditoria automática (publico/testes/auditoria.test.js) */
 window.cartinhasTeste={calcDay,uneDias,validaArq,aplicaArq,conferiaDia,relerMeses,hoje:()=>todayISO,estado:()=>({cur,days,months}),
-  conecta:(h,g)=>conecta(h,g),gravaArq:()=>gravaArq(),confereArq:()=>confereArq(),pacote:()=>pacote()};
+  conecta:(h,g)=>conecta(h,g),gravaArq:()=>gravaArq(),confereArq:()=>confereArq(),pacote:()=>pacote(),ferias:FERIAS_REGRAS};
 
 /* ---- arquivo de dados único na pasta (Chrome/Edge): todos os navegadores leem e gravam o mesmo arquivo ---- */
 const NOME_ARQ='cartinhas-dados.json';
