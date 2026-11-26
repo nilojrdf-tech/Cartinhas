@@ -527,6 +527,102 @@ casoA('Férias — arquivo','Só uma janela mudou o plano: a mudança dela vale,
   const o=JSON.parse(h.conteudo);const y=o.ferias.ciclos['2025-03-15']||{};const obs=o.months['2026-11'].days.find(x=>x.d==='2026-11-03').obs;
   return {ok:y.concordaFracionar===true&&obs==='ponto de A',obs:`concordância de B no arquivo: ${y.concordaFracionar} · observação de A no arquivo: ${obs}`}});
 
+// ---------- PROGRAMAÇÃO DE FÉRIAS — fases 3 e 4: calendário, configuração e histórico (PLANO-FERIAS.md) ----------
+const SEGSEX={diasTrabalhados:[1,2,3,4,5],dsr:0};
+/* outubro/2026 com férias de 05 a 09 e de 13 a 16, fim de semana e o feriado de 12/10 no meio */
+const relFeriasOut=()=>[5,6,7,8,9].map(d=>dia(d,10)+' Férias;').concat([dia(10,10)+' Folga;',dia(11,10)+' Folga;',dia(12,10)+' 08:00 Feriado;'],[13,14,15,16].map(d=>dia(d,10)+' Férias;')).join('\n');
+const clica=(p,sel)=>{const b=p.d.querySelector(sel);if(!b)throw new Error('não achei '+sel);b.click()};
+const cicloDe=(p,k)=>(p.w.cartinhasTeste.fer.estado().ciclos[k]||{periodos:[]});
+/* põe um período no plano direto no estado (a marcação pelo gráfico chega na fase 5) */
+function poePeriodo(p,k,per){const f=p.w.cartinhasTeste.fer.estado();if(!f.ciclos[k])f.ciclos[k]={direito:30,abono:0,periodos:[]};f.ciclos[k].periodos.push({id:'t'+Math.random().toString(36).slice(2,7),origem:'digitado',confirmado:true,...per});p.w.cartinhasTeste.fer.render()}
+
+caso('Férias — calendário','Dispensa conta como dia livre, mas não é feriado: não gera vedação legal',()=>{const p=abre();
+  const c=p.w.cartinhasTeste.fer.contexto(SEGSEX,{'2026-12-31':'Dispensa: abono para todos'});
+  const ok=c.livre('2026-12-31')&&!c.baseLegal('2026-12-31')&&c.tipo('2026-12-31')==='dispensa'&&c.baseLegal('2026-12-25');
+  return {ok,obs:`31/12: livre ${c.livre('2026-12-31')}, base de vedação legal ${c.baseLegal('2026-12-31')}, tipo ${c.tipo('2026-12-31')} · 25/12: base legal ${c.baseLegal('2026-12-25')}`}});
+
+caso('Férias — calendário','Feriado de outra lotação não vale: 30/11 só para quem está no DF',()=>{const p=abre();
+  const df=p.w.cartinhasTeste.fer.contexto({...SEGSEX,uf:'DF'}),sp=p.w.cartinhasTeste.fer.contexto({...SEGSEX,uf:'SP'});
+  const ok=df.cal.feriadoDaLotacao('2026-11-30')&&!sp.cal.feriadoDaLotacao('2026-11-30')&&df.cal.feriadoDaLotacao('2026-11-20')&&sp.cal.feriadoDaLotacao('2026-11-20');
+  return {ok,obs:`30/11 no DF: ${df.cal.feriadoDaLotacao('2026-11-30')} · em SP: ${sp.cal.feriadoDaLotacao('2026-11-30')} · 20/11 nos dois: ${df.cal.feriadoDaLotacao('2026-11-20')&&sp.cal.feriadoDaLotacao('2026-11-20')}`}});
+
+caso('Férias — calendário','Carnaval e Corpus Christi de 2027 são ponto facultativo; só contam como livres se a pessoa disser',()=>{const p=abre();
+  const n=p.w.cartinhasTeste.fer.contexto(SEGSEX),s=p.w.cartinhasTeste.fer.contexto({...SEGSEX,facultativosLivres:true});
+  const datas=['2027-02-08','2027-02-09','2027-05-27'];
+  const ok=datas.every(d=>n.cal.facultativo(d)&&!n.livre(d)&&s.livre(d))&&!n.cal.facultativo('2027-02-10');
+  return {ok,obs:datas.map(d=>`${d.slice(8)}/${d.slice(5,7)}: facultativo ${n.cal.facultativo(d)}, livre ${n.livre(d)}→${s.livre(d)}`).join(' · ')}});
+
+caso('Férias — calendário','Jornada de segunda a sábado: o sábado deixa de ser livre',()=>{const p=abre();
+  const a=p.w.cartinhasTeste.fer.contexto(SEGSEX),b=p.w.cartinhasTeste.fer.contexto({diasTrabalhados:[1,2,3,4,5,6],dsr:0});
+  return {ok:a.livre('2026-11-28')&&!b.livre('2026-11-28')&&b.livre('2026-11-29'),obs:`sábado 28/11: ${a.livre('2026-11-28')?'livre':'útil'} → ${b.livre('2026-11-28')?'livre':'útil'}; domingo segue livre`}});
+
+caso('Férias — calendário','Feriado local acrescentado na tela entra no calendário, e repete todo ano',()=>{const p=abre();comPlano(p);
+  p.d.getElementById('fLocData').value='2026-06-13';p.d.getElementById('fLocNome').value='Santo Antônio';clica(p,'#fLocAdd');
+  const c=p.w.cartinhasTeste.fer.contexto();
+  return {ok:c.cal.feriadoDaLotacao('2026-06-13')&&c.cal.feriadoDaLotacao('2027-06-13')&&/Santo Antônio/.test(p.T('ferias')),obs:`13/06/2026: ${c.cal.feriadoDaLotacao('2026-06-13')} · 13/06/2027: ${c.cal.feriadoDaLotacao('2027-06-13')}`}});
+
+caso('Férias — histórico','Férias do relatório viram um período só, com fim de semana e feriado no meio, e esperam confirmação',()=>{const p=abre();
+  p.importa(relFeriasOut());comPlano(p);const fila=p.w.cartinhasTeste.fer.fila();const t=p.T('ferias');
+  const ok=fila.length===1&&fila[0].ini==='2026-10-05'&&fila[0].fim==='2026-10-16'&&fila[0].origem==='relatorio'&&fila[0].sugestao==='2025-03-15'
+    &&/não entram no saldo/.test(t)&&/período achado no histórico ainda não foi confirmado/.test(t);
+  return {ok,obs:fila.map(h=>`${h.ini} a ${h.fim} (${h.origem}, sugestão ${h.sugestao})`).join(' · ')||'fila vazia'}});
+
+caso('Férias — histórico','Confirmar põe o período no ciclo e tira 12 dias do saldo; reimportar não muda nada',()=>{const p=abre();
+  p.importa(relFeriasOut());comPlano(p);clica(p,'[data-fila="0"] [data-ff="confirma"]');
+  const y=cicloDe(p,'2025-03-15'),livre1=/Livre para planejar\s*18/.test(p.T('ferias'));
+  p.importa(relFeriasOut());p.w.cartinhasTeste.fer.render();
+  const y2=cicloDe(p,'2025-03-15');
+  const ok=y.periodos.length===1&&y.periodos[0].estado==='usufruido'&&y.periodos[0].confirmado&&livre1&&p.w.cartinhasTeste.fer.fila().length===0&&y2.periodos.length===1;
+  return {ok,obs:`períodos no ciclo: ${y.periodos.length} · saldo livre 18: ${livre1} · depois de reimportar: fila ${p.w.cartinhasTeste.fer.fila().length}, períodos ${y2.periodos.length}`}});
+
+caso('Férias — histórico','A pessoa pode escolher outro ciclo que não o sugerido, e é o que fica',()=>{const p=abre();
+  p.importa(relFeriasOut());comPlano(p);const s=p.d.querySelector('[data-fila="0"] [data-ff-ciclo]');s.value='2024-03-15';clica(p,'[data-fila="0"] [data-ff="confirma"]');
+  return {ok:cicloDe(p,'2024-03-15').periodos.length===1&&cicloDe(p,'2025-03-15').periodos.length===0,obs:`no ciclo 2024/2025: ${cicloDe(p,'2024-03-15').periodos.length} · no sugerido: ${cicloDe(p,'2025-03-15').periodos.length}`}});
+
+caso('Férias — histórico','Relatório igual a um período aprovado promove o período, sem criar outro',()=>{const p=abre();comPlano(p);
+  poePeriodo(p,'2025-03-15',{ini:'2026-10-05',fim:'2026-10-16',estado:'aprovado'});p.importa(relFeriasOut());p.w.cartinhasTeste.fer.render();
+  const ofereceu=/É o mesmo período que estava aprovado/.test(p.T('ferias'));clica(p,'[data-fila="0"] [data-ff="promove"]');
+  const y=cicloDe(p,'2025-03-15');
+  return {ok:ofereceu&&y.periodos.length===1&&y.periodos[0].estado==='usufruido'&&y.periodos[0].origem==='relatorio',obs:`ofereceu promover: ${ofereceu} · períodos: ${y.periodos.length}, ${y.periodos[0]&&y.periodos[0].estado}`}});
+
+caso('Férias — histórico','Relatório que coincide em parte pergunta qual vale, e não ajusta sozinho',()=>{const p=abre();comPlano(p);
+  poePeriodo(p,'2025-03-15',{ini:'2026-10-05',fim:'2026-10-17',estado:'planejado'});p.importa(relFeriasOut());p.w.cartinhasTeste.fer.render();
+  const antes=JSON.stringify(cicloDe(p,'2025-03-15').periodos);const perguntou=/Coincide em parte/.test(p.T('ferias'));
+  clica(p,'[data-fila="0"] [data-ff="vale-relatorio"]');const y=cicloDe(p,'2025-03-15').periodos[0];
+  return {ok:perguntou&&/2026-10-17/.test(antes)&&y.fim==='2026-10-16'&&y.estado==='usufruido',obs:`perguntou: ${perguntou} · antes de escolher: até ${JSON.parse(antes)[0].fim} · depois: até ${y.fim}, ${y.estado}`}});
+
+caso('Férias — histórico','Mudar a admissão com períodos registrados: nada se move sem confirmação; cancelar devolve tudo',()=>{const p=abre();
+  p.importa(relFeriasOut());comPlano(p);clica(p,'[data-fila="0"] [data-ff="confirma"]');
+  const muda=()=>{clica(p,'#fAdmMuda');p.d.getElementById('fAdm').value='2020-06-01';clica(p,'#fAdmOk')};
+  muda();const painel=/Conferir antes de mudar a data/.test(p.T('ferias')),igual=p.w.cartinhasTeste.fer.estado().admissao==='2020-03-15';
+  clica(p,'#fRbCancela');const cancelou=p.w.cartinhasTeste.fer.estado().admissao==='2020-03-15'&&cicloDe(p,'2025-03-15').periodos.length===1;
+  muda();clica(p,'#fRbOk');const f=p.w.cartinhasTeste.fer.estado();
+  const ok=painel&&igual&&cancelou&&f.admissao==='2020-06-01'&&(f.ciclos['2025-06-01']||{periodos:[]}).periodos.length===1&&!f.ciclos['2025-03-15'];
+  return {ok,obs:`painel: ${painel} · sem mudança antes de confirmar: ${igual} · cancelar devolveu: ${cancelou} · depois de confirmar: admissão ${f.admissao}, período no ciclo ${Object.keys(f.ciclos).join(',')}`}});
+
+caso('Férias — histórico','Histórico irregular (10 + 10) avisa e segue com o saldo certo',()=>{const p=abre();comPlano(p);
+  poePeriodo(p,'2025-03-15',{ini:'2026-04-06',fim:'2026-04-15',estado:'usufruido'});poePeriodo(p,'2025-03-15',{ini:'2026-07-06',fim:'2026-07-15',estado:'usufruido'});
+  const t=p.T('ferias');
+  return {ok:/não fecha com as regras de fracionamento/.test(t)&&/Livre para planejar\s*10/.test(t),obs:`aviso: ${/não fecha/.test(t)} · livre 10: ${/Livre para planejar\s*10/.test(t)}`}});
+
+caso('Férias — histórico','Acrescentar férias já tiradas, e recusar dias que já estão em outro período',()=>{const p=abre();comPlano(p);
+  const add=(a,b)=>{p.d.getElementById('fUsIni').value=a;p.d.getElementById('fUsFim').value=b;clica(p,'#fUsAdd')};
+  add('2026-04-06','2026-04-15');const um=cicloDe(p,'2025-03-15').periodos.length;
+  add('2026-04-10','2026-04-20');const recusou=/já estão em outro período/.test(p.T('ferias'))&&cicloDe(p,'2025-03-15').periodos.length===1;
+  return {ok:um===1&&recusou&&cicloDe(p,'2025-03-15').periodos[0].origem==='digitado',obs:`acrescentou: ${um} · sobreposto recusado: ${recusou}`}});
+
+caso('Férias — histórico','Apagar período aprovado pede o segundo clique',()=>{const p=abre();comPlano(p);
+  poePeriodo(p,'2025-03-15',{ini:'2027-01-04',fim:'2027-01-17',estado:'aprovado'});
+  clica(p,'[data-pid] [data-pa="apagar"]');const pediu=/Confirmar: apagar/.test(p.T('ferias'))&&cicloDe(p,'2025-03-15').periodos.length===1;
+  clica(p,'[data-pid] [data-pa="apagar"]');
+  return {ok:pediu&&cicloDe(p,'2025-03-15').periodos.length===0,obs:`pediu confirmação: ${pediu} · apagou no segundo clique: ${cicloDe(p,'2025-03-15').periodos.length===0}`}});
+
+caso('Férias — saldo','Meses sem relatório deixam o saldo provisório, até a pessoa dizer que conferiu',()=>{const p=abre();comPlano(p);
+  const antes=/faltam os relatórios de \d+ meses/.test(p.T('ferias'));
+  const ch=p.d.querySelector('[data-ciclo="2025-03-15"] [data-fc="historico"]');ch.checked=true;ch.dispatchEvent(new p.w.Event('change',{bubbles:true}));
+  const card=p.d.querySelector('[data-ciclo="2025-03-15"]').textContent;
+  return {ok:antes&&!/faltam os relatórios/.test(card),obs:`antes: ${antes?'faltam relatórios':'—'} · depois de conferir: ${/faltam os relatórios/.test(card)?'AINDA FALTA':'pendência resolvida'}`}});
+
 // ---------- SAÍDA ----------
 Promise.all(PEND).then(()=>{
 R.sort((a,b)=>a.id-b.id);
