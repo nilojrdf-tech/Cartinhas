@@ -45,4 +45,10 @@ Para atualizar depois, peça o "atualizar.bat": um arquivo só, que troca o prog
 sem mexer nos seus dados nem no atalho.
 
 DESINSTALAR
-Dê dois cliques em "desinstalar.bat". Seus dados (cartinhas-dados.json) não são apagados.
+Dê dois cliques em "desinstalar.bat" — ele também fica na pasta do programa,
+em C:\Users\<seu usuario>\Cartinhas, então não precisa guardar este pacote.
+
+Ele remove o programa e o atalho desta instalação. Os seus dados NÃO são
+apagados: o cartinhas-dados.json fica guardado na mesma pasta. Para ter o
+Cartinhas de volta um dia, rode o instalar.bat e conecte nesse mesmo arquivo.
+Para apagar os dados também, apague a pasta à mão.
