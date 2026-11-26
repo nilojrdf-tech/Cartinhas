@@ -409,8 +409,8 @@ function pintaDias() {
       ${r.fora && x.d >= h ? '<div class="nota">ainda não entra no saldo</div>' : ''}
       ${naFila ? '<div class="nota">editado aqui, ainda não enviado</div>' : ''}
       <div class="campos">
-        <div><label>Marcações (horas separadas por espaço)</label>
-          <input data-f="marcas" value="${esc(x.marcas || '')}" inputmode="numeric"></div>
+        <div><label>Marcações — um campo para cada hora</label>
+          <div class="mk">${R.emCampos(x.marcas).map((v, k) => `<input data-m="${k}" value="${esc(v)}" inputmode="numeric" placeholder="--:--" aria-label="${esc(R.ROTM[k] || 'Batida ' + (k + 1))}" title="${esc(R.ROTM[k] || 'Batida ' + (k + 1))}">`).join('')}</div></div>
         <div class="grade2">
           <div><label>Abono</label><input data-f="abono" value="${esc(x.abono || '')}" placeholder="0:00"></div>
           <div><label>Tipo do dia</label><select data-f="tipo">${R.TIPOS.map((t) =>
@@ -430,14 +430,26 @@ function pintaDias() {
     for (const campo of el.querySelectorAll('[data-f]')) {
       campo.onchange = () => editaDia(el.dataset.d, campo.dataset.f, campo.value);
     }
+    /* Um campo por hora: a linha de marcações é remontada na ordem dos campos. */
+    const mk = el.querySelector('.mk');
+    if (mk) for (const campo of mk.querySelectorAll('input[data-m]')) {
+      campo.onchange = () => {
+        const este = R.comDoisPontos(campo.value).trim();
+        /* colar a linha inteira num campo só vale pela linha inteira, em vez de somar com o resto */
+        const linha = este.split(/\s+/).filter(Boolean).length > 1 ? este
+          : [...mk.querySelectorAll('input[data-m]')].map((c) => R.comDoisPontos(c.value).trim()).filter(Boolean).join(' ');
+        editaDia(el.dataset.d, 'marcas', linha);
+      };
+    }
   }
 }
 
 function editaDia(data, campo, valor) {
   const x = dias.find((d) => d.d === data);
   if (!x) return;
+  if (campo === 'marcas') valor = R.comDoisPontos(valor);
   if (campo === 'marcas' && R.marcInvalida(valor)) {
-    avisa('avisoConflito', `Não entendi “${esc(valor)}”. Escreva as horas assim: 08:00 12:00 13:00 17:00.`, 'ruim');
+    avisa('avisoConflito', `Não entendi “${esc(valor)}”. Escreva cada hora como 08:00, ou sem os dois pontos: 0800.`, 'ruim');
     return;
   }
   avisa('avisoConflito', '');

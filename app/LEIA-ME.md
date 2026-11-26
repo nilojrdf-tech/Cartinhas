@@ -14,7 +14,7 @@ celular e no computador. O Cartinhas de um arquivo só (`../index.html` e
 | 1 | Contas, convites pelo WhatsApp, confirmação por e-mail, recuperação de senha e gravação por conta e dia | Pronto, com 39 verificações |
 | 2 | Tela de celular, PWA, importação do PDF no aparelho, calculadora e fila de edições por conta | Pronto, com 11 verificações |
 | 3 | Trazer os meses do `cartinhas-dados.json` | Pronto, com 10 verificações (`migrar.cjs`) |
-| 4 | Testes | 180 verificações ao todo, incluindo as 62 do Cartinhas do computador |
+| 4 | Testes | 187 verificações ao todo, incluindo as 69 do Cartinhas do computador |
 | 5 | Ícone nos celulares e endereço nos favoritos | Depende da fase 0 |
 | 6 | Backup diário, retenção de 30 dias e restauração | Pronto, com 6 verificações (`backup.cjs`) |
 

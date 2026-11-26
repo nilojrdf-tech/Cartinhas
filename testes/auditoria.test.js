@@ -15,7 +15,21 @@ function abre(hoje){const html=hoje?BASE.replace(`let todayISO='${HOJE}';`,`let 
     est(){return JSON.parse(w.localStorage.getItem('cartinhas.v4')||'{}')},
     mes(ym){const s=d.getElementById('mesSel');s.value=ym;s.dispatchEvent(new w.Event('change'))},
     linha(dd){return [...d.querySelectorAll('#tb tr')].find(tr=>tr.querySelector('td')&&tr.querySelector('td').textContent.startsWith(dd))},
-    edita(dd,campo,val){const tr=api.linha(dd);const i=tr.querySelector(`[data-f=${campo}]`);i.value=val;i.dispatchEvent(new w.Event('change',{bubbles:true}))},
+    /* A coluna de marcações tem um campo por hora: o caso digita a linha inteira e aqui ela
+       é espalhada pelos campos, do mesmo jeito que a tela espalha ao desenhar. */
+    marcas(dd,val){const cs=[...api.linha(dd).querySelectorAll('input[data-m]')];
+      const t=String(val).trim()?String(val).trim().split(/\s+/):[];
+      const v=t.length===2?[t[0],'','',t[1]]:t;
+      cs.forEach((c,k)=>{c.value=v[k]||''});
+      if(v.length>cs.length)cs[cs.length-1].value=v.slice(cs.length-1).join(' ');
+      cs[0].dispatchEvent(new w.Event('change',{bubbles:true}))},
+    campos(dd){return [...api.linha(dd).querySelectorAll('input[data-m]')].map(c=>c.value)},
+    /* digita em UM campo de hora, como a pessoa faz */
+    digita(dd,k,val){const c=[...api.linha(dd).querySelectorAll('input[data-m]')][k];
+      c.value=val;c.dispatchEvent(new w.Event('change',{bubbles:true}))},
+    invalido(dd){return [...api.linha(dd).querySelectorAll('input[data-m]')].some(c=>c.classList.contains('inv'))},
+    edita(dd,campo,val){if(campo==='marcas')return api.marcas(dd,val);
+      const tr=api.linha(dd);const i=tr.querySelector(`[data-f=${campo}]`);i.value=val;i.dispatchEvent(new w.Event('change',{bubbles:true}))},
     cel(dd){const tr=api.linha(dd);if(!tr)return null;const c=tr.querySelectorAll('td');return {trab:c[3].textContent.trim(),abono:c[4].querySelector('input')?c[4].querySelector('input').value:'',cred:c[5].textContent.trim(),deb:c[6].textContent.trim(),tipo:tr.querySelector('select').value,classe:tr.className}},
     saldo(){return T('bigLbl')+' | '+T('big')},
     calc(v){for(const [k,x] of Object.entries(v)){const e=d.getElementById(k);e.value=x;e.dispatchEvent(new w.Event('input'))}return T('hoje')}};
@@ -92,7 +106,7 @@ caso('Cálculo','Turno noturno 22:00–06:00 com carga 07:15',()=>{const c=umDia
 caso('Cálculo','Batidas fora de ordem digitadas na tabela (17:00 antes de 08:00)',()=>{const p=abre();p.importa(L(3,11,'08:00 12:00 13:00 17:00'));p.edita('03/11','marcas','13:00 17:00 08:00 12:00');const c=p.cel('03/11');
   return {ok:c.trab==='08:00',obs:`trabalhadas ${c.trab} (o sistema entende a batida menor como do dia seguinte)`}});
 caso('Cálculo','Hora inválida digitada ("25:00", "10:3o")',()=>{const p=abre();p.importa(L(3,11,'08:00 12:00 13:00 17:00'));p.edita('03/11','marcas','08:00 12:00 13:00 25:00');const c=p.cel('03/11');
-  const inv=p.linha('03/11').querySelector('[data-f=marcas]').classList.contains('inv');return {ok:inv&&c.trab!=='16:00',aviso:true,obs:`campo em vermelho: ${inv}; trabalhadas ${c.trab||'(ignora a hora inválida)'}`}});
+  const inv=p.invalido('03/11');return {ok:inv&&c.trab!=='16:00',aviso:true,obs:`campo em vermelho: ${inv}; trabalhadas ${c.trab||'(ignora a hora inválida)'}`}});
 caso('Cálculo','Trabalho em sábado (folga) — fora do banco',()=>{const p=abre();p.importa(dia(7,11)+' 08:00 12:00 Folga;');const c=p.cel('07/11');
   return {ok:!c.cred,obs:`crédito ${c.cred||'nenhum'}, trabalhadas ${c.trab}`}});
 
@@ -292,6 +306,47 @@ caso('Leitura do relatório','Relatório de outra pessoa não é gravado sem con
   const depois=marcas04();
   return {ok:barrou&&depois==='08:00 12:00 13:00 19:00',
     obs:`sem confirmar: 04/11 seguiu "${antes||'vazio'}" e o mês em nome de ${nome||'—'} · depois de "Importar mesmo assim": "${depois||'vazio'}"`}});
+
+// ---------- HORA DIGITADA (um campo por hora) ----------
+const comQuatro=()=>{const p=abre();p.importa(L(3,11,'08:00 12:00 13:00 17:00'));return p};
+
+caso('Hora digitada','"1832" no campo da saída vira 18:32',()=>{const p=comQuatro();
+  p.digita('03/11',3,'1832');const c=p.cel('03/11');
+  return {ok:p.campos('03/11').join('|')==='08:00|12:00|13:00|18:32'&&c.trab==='09:32',
+    obs:`campos: ${p.campos('03/11').filter(Boolean).join(' ')} · trabalhadas ${c.trab}`}});
+
+caso('Hora digitada','"8" vira 08:00 e "932" vira 09:32',()=>{const p=comQuatro();
+  p.digita('03/11',0,'8');p.digita('03/11',1,'932');
+  const v=p.campos('03/11');
+  return {ok:v[0]==='08:00'&&v[1]==='09:32',obs:`ficou ${v.filter(Boolean).join(' ')}`}});
+
+caso('Hora digitada','Abono "0032" vira 0:32',()=>{const p=comQuatro();
+  p.edita('03/11','abono','0032');
+  return {ok:p.cel('03/11').abono==='0:32',obs:`campo de abono: ${p.cel('03/11').abono}`}});
+
+caso('Hora digitada','Cada hora em seu campo: duas batidas ficam em entrada e saída',()=>{const p=abre();
+  p.importa(L(25,11,'13:07 17:38'));const v=p.campos('25/11');
+  p.digita('25/11',1,'1400');
+  const d=(p.est().months['2026-11'].days.find(x=>x.d==='2026-11-25')||{}).marcas;
+  return {ok:v.join('|')==='13:07|||17:38'&&d==='13:07 14:00 17:38',
+    obs:`campos ao abrir: "${v.join('|')}" · depois de digitar a saída do almoço: "${d}"`}});
+
+caso('Hora digitada','Linha inteira colada num campo só se reparte',()=>{const p=abre();
+  p.importa(L(3,11,'08:00'));p.digita('03/11',0,'0932135214521700');
+  const d=(p.est().months['2026-11'].days.find(x=>x.d==='2026-11-03')||{}).marcas;
+  p.digita('03/11',0,'09:32 13:52');
+  const e=(p.est().months['2026-11'].days.find(x=>x.d==='2026-11-03')||{}).marcas;
+  return {ok:d==='09:32 13:52 14:52 17:00'&&e==='09:32 13:52',
+    obs:`emendado: "${d}" · com espaço: "${e}"`}});
+
+caso('Hora digitada','Hora pela metade não desaparece calada ("07:0")',()=>{const p=comQuatro();
+  p.digita('03/11',0,'07:0');const c=p.cel('03/11');
+  return {ok:p.invalido('03/11')&&c.trab!=='08:00',
+    obs:`campo em vermelho: ${p.invalido('03/11')} · trabalhadas ${c.trab||'—'} (não conta a hora pela metade)`}});
+
+caso('Hora digitada','Hora impossível no campo ("2532") é acusada',()=>{const p=comQuatro();
+  p.digita('03/11',3,'2532');
+  return {ok:p.invalido('03/11'),obs:`campos: ${p.campos('03/11').filter(Boolean).join(' ')} · em vermelho: ${p.invalido('03/11')}`}});
 
 // ---------- SAÍDA ----------
 Promise.all(PEND).then(()=>{

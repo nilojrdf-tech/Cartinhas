@@ -6,7 +6,7 @@
    da conta. Assim nenhum saldo antigo aparece como se fosse o de agora, e nada do ponto de
    uma pessoa fica no cache para a proxima que usar o aparelho. */
 
-const CASCA = 'cartinhas-casca-3';
+const CASCA = 'cartinhas-casca-4';
 const ARQUIVOS = [
   '/', '/index.html', '/app.mjs', '/regras.mjs', '/logo.svg', '/logo.png',
   '/manifest.webmanifest', '/vendor/pdf.min.mjs', '/vendor/pdf.worker.min.mjs',

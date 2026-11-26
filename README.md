@@ -12,6 +12,9 @@
 - **Até o fim do mês**: quanto você pode trabalhar a menos, ou precisa fazer a mais, nos dias úteis que faltam.
 - **Cálculo do dia**: digite entrada e almoço e veja a que horas pode ir embora, para o saldo que você escolher.
 - **Vários meses**, cada um com sua tela; o relatório importado entra sozinho no mês certo.
+- **Uma hora em cada campo**: entrada, saída para o almoço, volta e saída, cada uma no seu campo.
+  Pode digitar sem os dois pontos — `0032` vira 00:32, `932` vira 09:32, `8` vira 08:00 — e uma hora
+  pela metade fica em vermelho em vez de sumir calada.
 - **Abono** por dia (consulta, atestado etc.): digite as horas abonadas e elas cobrem o débito do dia.
 - **Conferência** com os totais do próprio relatório do SRP.
 - **Dados num arquivo seu** (`cartinhas-dados.json`), lido e gravado por qualquer navegador (Chrome ou Edge).
@@ -48,7 +51,7 @@ lado a lado. Veja [`app/LEIA-ME.md`](app/LEIA-ME.md).
 
 ## Testes
 
-`testes/auditoria.test.js` roda 62 situações (relatórios fora do padrão, tolerância, turno noturno, meses, abono, virada da meia-noite, arquivo de dados fora do formato etc.) num navegador simulado:
+`testes/auditoria.test.js` roda 69 situações (relatórios fora do padrão, tolerância, turno noturno, meses, abono, virada da meia-noite, arquivo de dados fora do formato etc.) num navegador simulado:
 
 ```
 cd testes
@@ -58,7 +61,7 @@ node auditoria.test.js ../index.html
 
 Termina com código de erro se algum caso falhar, e grava o detalhe em `testes/resultado.json`.
 
-Para rodar tudo, essas 62 mais as 118 do aplicativo (180 ao todo):
+Para rodar tudo, essas 69 mais as 118 do aplicativo (187 ao todo):
 
 ```
 cd app

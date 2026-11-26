@@ -20,7 +20,8 @@ const DESTINO = path.join(__dirname, 'web', 'regras.mjs');
 
 /* Na ordem em que aparecem no index.html. */
 const QUERO = [
-  'WD', 'esc', 'toM', 'dur', 'marcInvalida', 'parseList', 'normM', 'fmt', 'hm', 'clock',
+  'WD', 'esc', 'toM', 'dur', 'comDoisPontos', 'marcInvalida', 'parseList', 'ROTM', 'emCampos',
+  'normM', 'fmt', 'hm', 'clock',
   'iso', 'br', 'wd', 'FER', 'pascoa', 'sextaSanta', 'ehFeriado', 'mk', 'cap', 'nomeMes',
   'seguidas', 'calcDay', 'totals', 'parseMeta', 'parseReport', 'uneDias',
 ];

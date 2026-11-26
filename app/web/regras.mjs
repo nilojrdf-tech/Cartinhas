@@ -28,71 +28,86 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 /* index.html:223 */
 const toM=t=>{const m=/^(\d{1,2}):(\d{2})$/.exec(String(t).trim());return m&&+m[1]<24&&+m[2]<60?+m[1]*60+ +m[2]:null};
 
-/* index.html:225 */
-/* duração digitada: "4:00", "4h", "1h30", "30min", "1,5", "4" (até 12 = horas; acima = minutos) */
+/* index.html:226 */
 const dur=t=>{t=String(t||'').trim().toLowerCase().replace(/\s/g,'').replace(/^[+]/,'');if(!t)return null;let m;
   if(m=/^(\d{1,3}):(\d{2})$/.exec(t))return +m[1]*60+ +m[2];
   if(m=/^(\d{1,2})h(\d{1,2})?(?:m|min)?$/.exec(t))return +m[1]*60+(+m[2]||0);
   if(m=/^(\d{1,3})(?:m|min)$/.exec(t))return +m[1];
   if(m=/^(\d{1,2})[,.](\d{1,2})$/.exec(t))return Math.round(parseFloat(m[1]+'.'+m[2])*60);
+  if((m=/^(\d{2})(\d{2})$/.exec(t))&&+m[2]<60)return +m[1]*60+ +m[2];
   if(m=/^(\d{1,3})$/.exec(t))return +m[1]<=12?+m[1]*60:+m[1];
   return null};
 
-/* index.html:233 */
-/* marcação digitada com algo inválido (25:00, 10:3o, letras) */
-const marcInvalida=s=>{s=String(s||'');const tok=s.match(/\d{1,2}:\d{2}/g)||[];return tok.some(x=>toM(x)==null)||/[^\d:\s*]/.test(s.replace(/\d{1,2}:\d{2}/g,''))};
-
-/* index.html:234 */
-const parseList=s=>(String(s||'').match(/\d{1,2}:\d{2}/g)||[]).map(toM).filter(v=>v!=null);
-
-/* index.html:235 */
-const normM=s=>parseList(s).map(m=>hm(m)).join(' ');
-
-/* index.html:236 */
-const fmt=(m,sign)=>{const s=m<0?'−':(sign&&m>0?'+':'');m=Math.abs(Math.round(m));return s+Math.floor(m/60)+'h'+String(m%60).padStart(2,'0')};
-
-/* index.html:237 */
-const hm=m=>{m=Math.abs(m);return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
-
 /* index.html:238 */
-const clock=m=>{m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
-
-/* index.html:239 */
-const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-
-/* index.html:241 */
-const br=s=>s.slice(8)+'/'+s.slice(5,7)+'/'+s.slice(0,4);
-
-/* index.html:242 */
-const wd=s=>new Date(s+'T12:00').getDay();
+const comDoisPontos=s=>String(s??'').replace(/(?<![:\d])\d+(?![:\d])/g,d=>
+  d.length<=2?d.padStart(2,'0')+':00':
+  d.length===3?'0'+d[0]+':'+d.slice(1):
+  d.length%4?d:
+  d.match(/\d{4}/g).map(p=>p.slice(0,2)+':'+p.slice(2)).join(' '));
 
 /* index.html:244 */
+/* marcação digitada com algo inválido (25:00, 10:3o, 07:0, letras) */
+const marcInvalida=s=>{s=comDoisPontos(s);const tok=s.match(/\d{1,2}:\d{2}/g)||[];return tok.some(x=>toM(x)==null)||/[^\s*]/.test(s.replace(/\d{1,2}:\d{2}/g,''))};
+
+/* index.html:245 */
+const parseList=s=>(comDoisPontos(s).match(/\d{1,2}:\d{2}/g)||[]).map(toM).filter(v=>v!=null);
+
+/* index.html:248 */
+const ROTM=['Entrada','Saída para o almoço','Volta do almoço','Saída'];
+
+/* index.html:249 */
+const emCampos=s=>{const t=String(s||'').trim().split(/\s+/).filter(Boolean);
+  if(t.length===2)return [t[0],'','',t[1]];
+  return Array.from({length:Math.max(4,t.length)},(_,k)=>t[k]||'')};
+
+/* index.html:252 */
+const normM=s=>parseList(s).map(m=>hm(m)).join(' ');
+
+/* index.html:253 */
+const fmt=(m,sign)=>{const s=m<0?'−':(sign&&m>0?'+':'');m=Math.abs(Math.round(m));return s+Math.floor(m/60)+'h'+String(m%60).padStart(2,'0')};
+
+/* index.html:254 */
+const hm=m=>{m=Math.abs(m);return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
+
+/* index.html:255 */
+const clock=m=>{m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
+
+/* index.html:256 */
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+
+/* index.html:258 */
+const br=s=>s.slice(8)+'/'+s.slice(5,7)+'/'+s.slice(0,4);
+
+/* index.html:259 */
+const wd=s=>new Date(s+'T12:00').getDay();
+
+/* index.html:261 */
 /* feriados nacionais de data fixa + 30/11 (Dia do Evangélico, DF); confira no seu espelho */
 const FER=new Set(['01-01','04-21','05-01','09-07','10-12','11-02','11-15','11-20','11-30','12-25']);
 
-/* index.html:245 */
+/* index.html:262 */
 function pascoa(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;return new Date(y,mo-1,da,12)}
 
-/* index.html:246 */
+/* index.html:263 */
 function sextaSanta(y){const p=pascoa(y);p.setDate(p.getDate()-2);return iso(p)}
 
-/* index.html:249 */
+/* index.html:266 */
 const ehFeriado=d=>!!DISP[d]||FER.has(d.slice(5))||d===sextaSanta(+d.slice(0,4));
 
-/* index.html:250 */
+/* index.html:267 */
 const mk=(d,tipo,marcas)=>({d,tipo,marcas,srpMarcas:marcas,obs:''});
 
-/* index.html:255 */
+/* index.html:272 */
 const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
 
-/* index.html:256 */
+/* index.html:273 */
 const nomeMes=ym=>new Date(ym+'-15T12:00').toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
 
-/* index.html:278 */
+/* index.html:295 */
 /* turno que passa da meia-noite: cada batida menor que a anterior é do dia seguinte */
 const seguidas=ms=>{const o=[];let add=0;ms.forEach((m,i)=>{if(i&&m+add<o[i-1])add+=1440;o.push(m+add)});return o};
 
-/* index.html:279 */
+/* index.html:296 */
 function calcDay(x,marcas){
   const marks=seguidas(parseList(marcas??x.marcas));
   const J=x.carga||480;
@@ -110,14 +125,14 @@ function calcDay(x,marcas){
   return r;
 }
 
-/* index.html:295 */
+/* index.html:312 */
 function totals(useExc,srp,arr){
   let cred=0,deb=0,irr=0;
   for(const x of (arr||days)){const r=calcDay(x,srp?x.srpMarcas:undefined);cred+=r.cred;deb+=r.deb;irr+=r.irr}
   return {cred,deb,irr,saldo:(useExc?cred:0)-deb};
 }
 
-/* index.html:427 */
+/* index.html:444 */
 function parseMeta(text){
   const g=re=>{const m=re.exec(text);return m?m[1]:null};
   const i=text.search(/\bGeral\b/);const s=i<0?'':text.slice(i);
@@ -126,7 +141,7 @@ function parseMeta(text){
     atraso:h(/Atraso\s+(\d+:\d{2})/),falta:h(/Falta\s+(\d+:\d{2})/),he:h(/HE N[ãa]o Autorizado\s+(\d+:\d{2})/),trab:h(/Trabalhada\s+(\d+:\d{2})/),carga:h(/Carga hor[áa]ria\s+(\d+:\d{2})/)};
 }
 
-/* index.html:434 */
+/* index.html:451 */
 function parseReport(text){
   const out=[];const L=text.split(/\r?\n/);
   const gi=L.findIndex(l=>/^\s*Geral\b/.test(l));const body=gi<0?L:L.slice(0,gi);
@@ -166,7 +181,7 @@ function parseReport(text){
   return out.sort((a,b)=>a.d<b.d?-1:1);
 }
 
-/* index.html:477 */
+/* index.html:494 */
 function uneDias(antigos,novos,ym){
   const old=new Map(antigos.map(x=>[x.d,x]));
   const doMes=novos.filter(n=>n.d.slice(0,7)===ym);
@@ -177,4 +192,4 @@ function uneDias(antigos,novos,ym){
   return {days:trocados.concat(antigos.filter(x=>!vindos.has(x.d))).sort((a,b)=>a.d<b.d?-1:1),vindos,old};
 }
 
-export { WD, esc, toM, dur, marcInvalida, parseList, normM, fmt, hm, clock, iso, br, wd, FER, pascoa, sextaSanta, ehFeriado, mk, cap, nomeMes, seguidas, calcDay, totals, parseMeta, parseReport, uneDias };
+export { WD, esc, toM, dur, comDoisPontos, marcInvalida, parseList, ROTM, emCampos, normM, fmt, hm, clock, iso, br, wd, FER, pascoa, sextaSanta, ehFeriado, mk, cap, nomeMes, seguidas, calcDay, totals, parseMeta, parseReport, uneDias };
