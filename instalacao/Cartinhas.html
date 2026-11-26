@@ -123,6 +123,57 @@ td input.ed{font-weight:600;color:var(--b)}tr.fut td{opacity:.7}tfoot td{border-
 .msg button{min-height:32px;padding:0 10px;margin-left:6px}
 @media(max-width:860px){.hero,.imp{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:8em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;white-space:normal;color:var(--mut)}.stack td:empty{display:none}.col span{font-size:0}}
+.modo-ferias .ponto,.modo-ferias .mesw{display:none}
+.bfer{font-weight:700}
+.ftit{font:800 clamp(26px,3.4vw,36px)/1.1 "Inter Tight",system-ui,sans-serif;margin:0 0 4px}
+.fcard{background:var(--card);border-radius:14px;padding:18px 20px;margin:16px 0}.fcard h3{margin-bottom:6px}.fcard p{margin:6px 0}
+.fnums{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:12px 0}
+.fnums div{background:var(--bg);border-radius:10px;padding:10px 12px}.fnums small{display:block;font-size:12px;color:var(--mut)}.fnums b{font:800 26px/1.15 "Inter Tight",system-ui,sans-serif}
+.fprov{border-left:3px solid var(--y);padding-left:10px;font-size:14px}
+.faviso{background:light-dark(#fff1bf,#3a3200);color:light-dark(#5c4500,#ffd84d);border-radius:10px;padding:12px 14px;margin:12px 0;font-size:15px}
+.frow{align-items:flex-end;margin:10px 0}
+.fcampo{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--mut)}.fcampo input,.fcampo select{min-height:44px;border:1px solid var(--line);border-radius:8px;padding:0 10px;background:var(--bg);color:var(--ink);font-size:16px}
+.fchk{display:flex;align-items:center;gap:8px;min-height:44px;font-size:15px}.fchk input{width:20px;height:20px}
+.fopc{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:10px}.fopc>div{background:var(--bg);color:var(--ink);border-radius:10px;padding:12px}
+.fper{margin:10px 0}.fper td,.fper th{font-size:14px}.fac{white-space:nowrap}.fac button,.fitem button{min-height:36px;padding:0 10px;margin:2px}
+.fitem{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}.fperigo{border-color:var(--neg)!important;color:var(--neg)!important}.floc{margin:6px 0;padding-left:20px}
+.fcard h4{font:600 15px Inter,system-ui,sans-serif;margin:14px 0 4px}
+.fbars{min-height:170px}.fbars:before{display:none}
+button.fcol{min-height:0;padding:0 0 2px;border:1px solid transparent;border-radius:3px;color:var(--rulink);font-weight:600;font-size:12px;justify-content:space-between;align-items:center}
+button.fcol:hover{border-color:var(--b)}button.fcol[disabled]{cursor:default}
+.fcol.fpass{opacity:.55}.fcol.fini{outline:3px solid var(--b);outline-offset:1px}
+.fcol .fsinal{font-size:11px;line-height:1.5;color:light-dark(#6b1d45,#ffd3ea)}
+.fcol.util.p-planejado,.legend em.lg-pl{background:color-mix(in oklab,var(--fr) 55%,var(--colbg))}
+.fcol.util.p-aprovado,.legend em.lg-ap{background:var(--fr)}
+.fcol.util.p-usufruido,.legend em.lg-us{background:color-mix(in oklab,var(--fr) 70%,#7a2150)}
+.fcol.folga.p-planejado{background:color-mix(in oklab,var(--fs) 65%,var(--fr))}
+.fcol.folga.p-aprovado{background:color-mix(in oklab,color-mix(in oklab,var(--fs) 55%,var(--fr)) 86%,#000)}
+.fcol.folga.p-usufruido{background:color-mix(in oklab,color-mix(in oklab,var(--fs) 45%,var(--fr)) 72%,#000)}
+.fcol.feriado.p-planejado{background:color-mix(in oklab,var(--fe) 65%,var(--fr))}
+.fcol.feriado.p-aprovado{background:color-mix(in oklab,color-mix(in oklab,var(--fe) 55%,var(--fr)) 86%,#000)}
+.fcol.feriado.p-usufruido{background:color-mix(in oklab,color-mix(in oklab,var(--fe) 45%,var(--fr)) 72%,#000)}
+.fmesnav{gap:12px;margin:4px 0 8px}.fmesnav b{font:700 18px "Inter Tight",system-ui,sans-serif;min-width:180px;text-align:center}.fmesnav button{min-height:40px;padding:0 14px}
+.fnat{border-radius:10px;padding:10px 12px;margin:10px 0;font-size:15px;border-left:4px solid}.fnat p{margin:8px 0 0}
+.fnat-legal,.fnat-logica{background:light-dark(#fde2e2,#3d2426);border-color:var(--neg)}
+.fnat-interna{background:light-dark(#fff1bf,#3a3200);border-color:#c99700}
+.fnat-aviso{background:light-dark(#e7f0f8,#1d2c3a);border-color:var(--b)}
+.fnat-ok{background:light-dark(#fbe7f1,#3a2532);border-color:#c2417f}
+.fdica{background:var(--bg);border-radius:12px;padding:12px 14px;margin:12px 0}.fdica h4{margin-top:0}
+.fop{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:8px;border:1.5px dashed transparent}
+.fop.at{border-color:#c2417f;background:light-dark(#fdf2f8,#2c1d27)}.fop button{min-height:36px;padding:0 12px}
+.fcol.fsug{outline:2px dashed #c2417f;outline-offset:-3px}
+.fsem{color:var(--mut)}tr.fsem td{color:var(--mut);font-style:italic}
+.ffaixa{position:sticky;top:0;z-index:3;background:var(--bb);color:#fff;border-radius:12px;padding:12px 16px;margin:12px 0;box-shadow:0 4px 14px #0003}
+.ffaixa .fn{font:800 clamp(17px,2.4vw,22px)/1.25 "Inter Tight",system-ui,sans-serif}.ffaixa .fcic{display:block;font-size:13px;opacity:.85}
+.ffaixa-det{background:light-dark(#e7f0f8,#1d2c3a);border-radius:12px;padding:10px 14px;margin:-4px 0 12px;font-size:14px}.ffaixa-det p{margin:4px 0}
+.ffaixa.fx-ok{background:light-dark(#0a7a3d,#1f5c3b)}.ffaixa.fx-urg{background:light-dark(#b3141a,#7a2c2f)}
+.fcardx{border-radius:12px;padding:12px 14px;margin:10px 0;border-left:5px solid}.fcardx p{margin:6px 0}.fcardx button{min-height:38px}
+.fx-urgente{background:light-dark(#fde2e2,#3d2426);border-color:var(--neg)}.fx-atencao{background:light-dark(#fff1bf,#3a3200);border-color:#c99700}.fx-info{background:light-dark(#e7f0f8,#1d2c3a);border-color:var(--b)}
+.fopcoes{margin:12px 0;background:var(--bg);border-radius:10px;padding:6px 12px}.fopcoes summary{cursor:pointer;font-weight:600;min-height:40px;display:flex;align-items:center}
+.fitem-op{border-top:1px solid var(--line);padding-top:8px;margin-top:8px}.fitem-op h4{margin:4px 0}
+.fexpl{font-size:14px;background:light-dark(#f2f6f9,#14222f);border-radius:8px;padding:8px 10px;margin:6px 0}
+.fescolha{display:flex;flex-wrap:wrap;gap:4px 16px;margin:4px 0}.fescolha label{display:flex;align-items:center;gap:6px;min-height:40px}.fescolha input{width:20px;height:20px}
+.femail textarea{min-height:280px;font:15px/1.55 Inter,system-ui,sans-serif}.femail #fEmAssunto{width:100%}
 @media(prefers-reduced-motion:no-preference){.col i{transition:height .35s ease}}
 </style>
 <script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
@@ -198,9 +249,9 @@ window.pdfjsPronto.catch(()=>{});/* se falhar, a mensagem aparece quando o usuá
   <path d="M86 160 L229 268 Q229 268 229 268 L372 160" fill="none" stroke="#FFCC00" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
   <circle cx="378" cy="358" r="98" fill="#ffffff" stroke="#003E6B" stroke-width="22"/>
   <path d="M378 300 V358 L418 384" fill="none" stroke="#003E6B" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
-</svg><div><h1>Cartinhas</h1><p class="sub" style="font-weight:600">Banco de horas: estou devendo?</p></div><div class="ctl"><button type="button" class="tema" id="btnTema" aria-label="Mudar tema"></button><label class="mesw"><span>Mês</span><select id="mesSel" class="mes" aria-label="Escolher o mês"></select></label><span class="nuvem" id="nuvem">Salvo neste navegador</span></div></div>
-  <p class="sub" id="periodo">Jornada flexível de 8 h · crédito máximo de 2 h por dia</p>
-  <div class="hero">
+</svg><div><h1>Cartinhas</h1><p class="sub" style="font-weight:600">Banco de horas: estou devendo?</p></div><div class="ctl"><button type="button" class="tema" id="btnTema" aria-label="Mudar tema"></button><label class="mesw"><span>Mês</span><select id="mesSel" class="mes" aria-label="Escolher o mês"></select></label><button type="button" class="tema bfer" id="btnFerias">Programação de Férias</button><span class="nuvem" id="nuvem">Salvo neste navegador</span></div></div>
+  <p class="sub ponto" id="periodo">Jornada flexível de 8 h · crédito máximo de 2 h por dia</p>
+  <div class="hero ponto">
     <div class="read" id="readBox">
       <small id="bigLbl">Saldo do mês</small>
       <div class="big" id="big">—</div>
@@ -216,7 +267,8 @@ window.pdfjsPronto.catch(()=>{});/* se falhar, a mensagem aparece quando o usuá
 </div></section>
 
 
-<section class="band" style="padding-top:0"><div class="wrap">
+<section class="band" id="secFerias" hidden><div class="wrap"><div id="ferias"></div></div></section>
+<section class="band ponto" style="padding-top:0"><div class="wrap">
   <h3 id="mesTit">Dias do mês</h3>
   <div class="opts">
     <label><input type="checkbox" id="optExc" checked> Contar excedentes (HE não autorizado) como crédito</label>
@@ -231,7 +283,7 @@ window.pdfjsPronto.catch(()=>{});/* se falhar, a mensagem aparece quando o usuá
   <p class="note aviso"><b>Ferramenta de apoio, não oficial.</b> O registro que vale é o do SRP. Tudo roda no seu computador: nenhum dado é enviado para lugar nenhum.</p>
   <p class="note">Regras, iguais às do SRP: dia útil = 8 h; o crédito do dia vai até 2 h, e o que passar é "crédito irregular", que não entra no saldo; passando de 8 h no dia, o intervalo precisa ter 1 h, e o que faltar é descontado; com número ímpar de batidas, a batida sem par é ignorada. O dia de hoje com batida aberta e os dias futuros não entram no saldo. Fins de semana, feriados e férias não têm carga. Ponto facultativo (Carnaval, Corpus Christi etc.): se não houve expediente, mude o Tipo do dia para Feriado. Abono (consulta, atestado etc.): digite as horas abonadas na coluna Abono (ex.: 4:00); elas cobrem o débito do dia. Os abonos do relatório do SRP já vêm preenchidos. Para corrigir um dia, edite as marcações; a marcação original do SRP fica anotada embaixo. Os dados ficam salvos só neste navegador.</p>
 </div></section>
-<section class="band"><div class="wrap">
+<section class="band ponto"><div class="wrap">
   <div class="plan">
     <div class="pcard"><h3>Até o fim do mês</h3><div id="prev"></div></div>
     <div class="pcard"><h3>Cálculo do dia</h3>
@@ -248,7 +300,7 @@ window.pdfjsPronto.catch(()=>{});/* se falhar, a mensagem aparece quando o usuá
   </div>
 </div></section>
 
-<section class="band" style="padding-top:0"><div class="wrap">
+<section class="band ponto" style="padding-top:0"><div class="wrap">
   <h3 id="importar">Importar o espelho do SRP</h3>
   <ol class="passos"><li>No SRP, abra <b>Meu Espelho Ponto</b>, escolha o mês e gere o <b>Relatório Espelho de Ponto</b> em PDF.</li><li>Arraste o PDF para a caixa abaixo (ou clique nela e escolha o arquivo). Ele entra sozinho no mês certo.</li><li>No topo, clique em <b>Conectar cartinhas-dados.json</b> para guardar seus dados num arquivo da sua pasta (Chrome ou Edge).</li></ol>
   <div class="imp">
@@ -273,6 +325,7 @@ const KEY='cartinhas.v3';
 const SAMPLE_TXT="";
 let days=[],meta=null,undo=null,months={},cur=null;
 let FH=null,pronto=false,fila=null,gravando=false,ultMod=0,ultJS='',ultTxt=null;/* ultTxt: o arquivo como esta janela o viu por último */
+let ferias=null,extrasArq={},modoFerias=false;/* Programação de Férias: ver o bloco PROGRAMAÇÃO DE FÉRIAS, mais abaixo */
 const KEYM='cartinhas.v4';
 const PV=3; /* versão da leitura do relatório: ao mudar, os meses com relatório guardado são relidos */
 const $=id=>document.getElementById(id);
@@ -388,7 +441,7 @@ function render(){
   renderPrev(T,rest);
   const hojeYM=todayISO.slice(0,7);const Th=cur===hojeYM?T:(months[hojeYM]?totals(useExc,false,months[hojeYM].days):{saldo:0});
   renderHoje(Th);$('calcMes').textContent=cur===hojeYM?'':'Usa o saldo de '+nomeMes(hojeYM)+', o mês de hoje.';
-  try{const h='#mes-'+cur;if(location.hash!==h)history.replaceState(null,'',h)}catch(e){}
+  if(!modoFerias)try{const h='#mes-'+cur;if(location.hash!==h)history.replaceState(null,'',h)}catch(e){}
   const max=Math.max(120,...rs.map(r=>Math.max(r.cred,r.deb)));
   $('bars').innerHTML=days.map((x,i)=>{const r=rs[i];const off=x.tipo!=='util'||r.fora;
     return `<div class="col${off?' off':''}${x.tipo!=='util'?' '+x.tipo:''}${r.odd&&!r.fora?' odd':''}" data-i="${i}" title="${esc(br(x.d)+': '+(r.fora?(x.d>todayISO?'ainda não chegou':'em andamento'):fmt(r.cred-r.deb,true)))}"><div class="u"><i style="height:${r.cred/max*100}%"></i></div><div class="d"><i style="height:${r.deb/max*100}%"></i></div><span>${+x.d.slice(8)}</span></div>`}).join('');
@@ -686,15 +739,1182 @@ agendaVirada();
 window.addEventListener('focus',conferiaDia);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)conferiaDia()});
 
+/* =====================================================================================
+   PROGRAMAÇÃO DE FÉRIAS — regras puras (PLANO-FERIAS.md, seções 6, 7 e 8).
+   Nada aqui lê nem grava o estado da página: entra data e número, sai resposta.
+   Os números das regras moram só em FERIAS_PARAM. "A CONFIRMAR" = veio de levantamento,
+   não do MANPES lido direto (seção 18 do plano); zero desliga a regra.
+   ===================================================================================== */
+const FERIAS_PARAM={
+  /* configurável: da pessoa (a área grava a escolha dela em ferias.config) */
+  diasTrabalhados:[1,2,3,4,5],      /* 0 = domingo … 6 = sábado */
+  dsr:0,                            /* dia do repouso semanal remunerado */
+  leituraInicio:'estrita',          /* 'estrita' | 'clt' (seção 8.3) */
+  /* legal: CLT */
+  maxPeriodos:3,                    /* art. 134 §1º */
+  minMaior:14,                      /* art. 134 §1º, só no fracionamento */
+  minDemais:5,                      /* art. 134 §1º, só no fracionamento */
+  fracionarExigeConcordancia:true,  /* art. 134 §1º */
+  diasAntesVedados:2,               /* art. 134 §3º */
+  abonoFracao:1/3,                  /* art. 143 */
+  /* norma interna: MANPES 19/1/8 */
+  inicioNoProprioDia:true,          /* R1c: não começar no feriado ou no DSR — A CONFIRMAR */
+  facultativoVedaInicio:false,      /* ponto facultativo conta para R1a? — A CONFIRMAR */
+  intervaloMinDias:30,              /* item 2.2.1 — A CONFIRMAR */
+  intervaloEntreCiclos:true,        /* o intervalo vale entre ciclos diferentes? — A CONFIRMAR */
+  antecedenciaDias:40,              /* programar ou alterar */
+  avisoDias:30,                     /* aviso de férias */
+  abonoPrazoDias:15                 /* intenção de abono: 15 dias antes do fim do aquisitivo (comunicado de 31/07/2026) */
+};
+const FERIAS_DIREITOS=[30,24,18,12,0];
+/* Datas como número de dia, sem Date: a busca soma e compara dias dezenas de milhares de vezes.
+   Conversão do calendário civil (algoritmo de Howard Hinnant), só com inteiros: não há fuso
+   horário nem horário de verão no caminho. */
+const fNum=s=>{let y=+s.slice(0,4);const m=+s.slice(5,7),d=+s.slice(8,10);if(m<=2)y--;
+  const era=Math.floor(y/400),yoe=y-era*400,doy=Math.floor((153*(m>2?m-3:m+9)+2)/5)+d-1;
+  return era*146097+yoe*365+Math.floor(yoe/4)-Math.floor(yoe/100)+doy-719468};
+const fDataNum=z=>{z+=719468;const era=Math.floor(z/146097),doe=z-era*146097;
+  const yoe=Math.floor((doe-Math.floor(doe/1460)+Math.floor(doe/36524)-Math.floor(doe/146096))/365);
+  const doy=doe-(365*yoe+Math.floor(yoe/4)-Math.floor(yoe/100)),mp=Math.floor((5*doy+2)/153);
+  const d=doy-Math.floor((153*mp+2)/5)+1,m=mp<10?mp+3:mp-9,y=yoe+era*400+(m<=2?1:0);
+  return y+'-'+(m<10?'0':'')+m+'-'+(d<10?'0':'')+d};
+const fSoma=(s,n)=>fDataNum(fNum(s)+n);
+const fDias=(a,b)=>fNum(b)-fNum(a);  /* de a até b */
+const fWd=s=>((fNum(s)%7)+11)%7;     /* 0 = domingo; o dia 0 da conta, 01/01/1970, foi uma quinta */
+const nomeMesF=(()=>{const m=new Map();return ym=>{let v=m.get(ym);if(!v){v=nomeMes(ym);m.set(ym,v)}return v}})();
+const fDur=p=>fDias(p.ini,p.fim)+1;                                                /* dias corridos, inclusive */
+const fBissexto=y=>(y%4===0&&y%100!==0)||y%400===0;
+/* Aniversário k de uma data-base. Para 29/02, em ano que não é bissexto, o aniversário é
+   01/03 — convenção da seção 6.1, que mantém os ciclos contínuos. */
+const fAniv=(base,k)=>{const y=+base.slice(0,4)+k,md=base.slice(5);return md==='02-29'&&!fBissexto(y)?y+'-03-01':y+'-'+md};
+/* Ciclo n (1, 2, …) de uma data-base. Tudo sai da mesma sequência de aniversários, então todo
+   fim é a véspera de um início: nenhum dia sem ciclo, nenhum dia em dois (seção 6.1). */
+const fCiclo=(base,n)=>({n,base,chave:fAniv(base,n-1),aqIni:fAniv(base,n-1),aqFim:fSoma(fAniv(base,n),-1),
+  coIni:fAniv(base,n),coFim:fSoma(fAniv(base,n+1),-1)});
+/* Os ciclos até um pouco depois de hoje. Com aquisitivo ajustado à mão (seção 6.2): ficam os
+   ciclos da admissão cujo aquisitivo terminou antes do ajuste; o ciclo que foi interrompido sai,
+   e os seguintes contam do ajuste. A emenda entre os dois — vão ou sobreposição dos concessivos —
+   é devolvida para a tela mostrar com as datas. Nada é "consertado". */
+function fCiclos(adm,ajuste,hoje){
+  const lista=[];let emenda=null;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(adm||''))return {lista,emConcessivo:null,emAquisitivo:null,emenda};
+  for(let n=1;n<200;n++){const c=fCiclo(adm,n);if(ajuste&&c.aqFim>=ajuste)break;lista.push(c);if(c.aqIni>hoje)break}
+  if(ajuste){const ult=lista[lista.length-1];const ini=lista.length;
+    for(let n=1;n<200;n++){const c={...fCiclo(ajuste,n),ajustado:true};lista.push(c);if(c.aqIni>hoje)break}
+    const prox=lista[ini];
+    if(ult&&prox){const entre=fDias(ult.coFim,prox.coIni)-1;
+      if(entre>0)emenda={tipo:'vao',de:fSoma(ult.coFim,1),ate:fSoma(prox.coIni,-1)};
+      else if(entre<0)emenda={tipo:'sobreposicao',de:prox.coIni,ate:ult.coFim}}}
+  return {lista,emenda,
+    emConcessivo:lista.filter(c=>c.coIni<=hoje&&hoje<=c.coFim),
+    emAquisitivo:lista.find(c=>c.aqIni<=hoje&&hoje<=c.aqFim)||null};
+}
+/* Saldo de um ciclo (seção 7.1). d = os dados do ciclo no arquivo; pend = o que ainda pode
+   mudar o saldo. O saldo é provisório enquanto houver qualquer pendência, e diz qual. */
+function fSaldo(c,d,pend,hoje){
+  d=d||{};const per=Array.isArray(d.periodos)?d.periodos:[];
+  const soma=e=>per.filter(p=>p.estado===e).reduce((s,p)=>s+fDur(p),0);
+  const direito=d.direito!=null?d.direito:30,abono=d.abono||0;
+  const usufruido=soma('usufruido'),aprovado=soma('aprovado'),planejado=soma('planejado');
+  const motivos=[];
+  if(!d.direitoInformado)motivos.push('o direito está presumido em '+direito+' dias');
+  if(pend&&pend.fila)motivos.push(pend.fila>1?pend.fila+' períodos achados no histórico ainda não foram confirmados':'um período achado no histórico ainda não foi confirmado');
+  if(pend&&pend.semRelatorio&&pend.semRelatorio.length){const s=pend.semRelatorio;
+    motivos.push(s.length<=2?'falta o relatório de '+s.map(nomeMes).join(' e '):'faltam os relatórios de '+s.length+' meses, de '+nomeMesF(s[0])+' a '+nomeMesF(s[s.length-1]))}
+  if(!d.abonoInformado&&c&&hoje&&hoje<=fSoma(c.aqFim,-FERIAS_PARAM.abonoPrazoDias))motivos.push('o abono ainda não foi informado');
+  return {direito,abono,usufruido,aprovado,planejado,consumido:usufruido+abono,comprometido:aprovado,pretendido:planejado,
+    livre:direito-usufruido-abono-aprovado-planejado,provisorio:motivos.length>0,motivos};
+}
+/* Combinação final (R2, R2f, R11): o saldo inteiro de uma vez, de qualquer tamanho; ou até três
+   períodos, um com pelo menos 14 dias e os demais com pelo menos 5, com a concordância. */
+function fCombinacao(durs,concorda){
+  const P=FERIAS_PARAM;
+  if(durs.length<=1)return {ok:true};
+  if(P.fracionarExigeConcordancia&&!concorda)return {ok:false,regra:'R11'};
+  if(durs.length>P.maxPeriodos)return {ok:false,regra:'R2f',motivo:'mais de '+P.maxPeriodos+' períodos'};
+  if(Math.max(...durs)<P.minMaior)return {ok:false,regra:'R2f',motivo:'nenhum período chega a '+P.minMaior+' dias'};
+  if(Math.min(...durs)<P.minDemais)return {ok:false,regra:'R2f',motivo:'há período com menos de '+P.minDemais+' dias'};
+  return {ok:true}}
+/* R2c, camada aritmética (seção 8.4): com os períodos que o ciclo já tem (durs) e os dias que
+   ainda faltam distribuir (resto), existe divisão que feche numa combinação válida? */
+function fCompletavel(durs,resto,concorda){
+  if(resto<0)return false;
+  if(resto===0)return fCombinacao(durs,concorda).ok;
+  const vagas=FERIAS_PARAM.maxPeriodos-durs.length;
+  if(vagas>=1&&fCombinacao(durs.concat(resto),concorda).ok)return true;
+  if(vagas>=2)for(let a=1;a<resto;a++)if(fCombinacao(durs.concat(a,resto-a),concorda).ok)return true;
+  if(vagas>=3)for(let a=1;a<resto;a++)for(let b=1;a+b<resto;b++)if(fCombinacao(durs.concat(a,b,resto-a-b),concorda).ok)return true;
+  return false}
+/* Fracionar exige saldo de pelo menos 19 dias (14 + 5). Abaixo disso, só de uma vez. */
+const fPodeFracionar=saldo=>saldo>=FERIAS_PARAM.minMaior+FERIAS_PARAM.minDemais;
+const FERIAS_REGRAS={FERIAS_PARAM,FERIAS_DIREITOS,fSoma,fDias,fDur,fAniv,fCiclo,fCiclos,fSaldo,fCombinacao,fCompletavel,fPodeFracionar};
+
+/* =====================================================================================
+   PROGRAMAÇÃO DE FÉRIAS — o plano no arquivo de dados e a área (PLANO-FERIAS.md, 3, 11, 13).
+   O plano mora no campo `ferias` do cartinhas-dados.json (decisão de 26/11/2026). Uma versão
+   antiga do Cartinhas regrava o arquivo sem ele; por isso há cópia no navegador, cópia fora
+   dele, e uma restauração que compara antes de escrever e nunca toca no ponto (seção 11.2).
+   ===================================================================================== */
+const VERSAO_ARQ=2;   /* a maior versão de arquivo de dados que esta página sabe ler e gravar */
+const CAMPOS_ARQ=new Set(['app','versao','salvoEm','cur','months','calc','tema','ferias']);
+const KF=KEYM+'.ferias',KFC=KEYM+'.ferias.copiaExterna';
+const ESTADOS_FER=['planejado','aprovado','usufruido'],ORIGENS_FER=['relatorio','digitado'];
+let ofertaFerias=null,fAvisoTxt='',fEditaAdm=false;
+/* JSON com as chaves em ordem: dois planos iguais dão o mesmo texto, qualquer que seja a ordem */
+const canonJ=x=>JSON.stringify(x,(k,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.keys(v).sort().reduce((o,c)=>(o[c]=v[c],o),{}):v);
+const dataOk=s=>typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&iso(new Date(s+'T12:00'))===s;
+const feriasNovo=adm=>({rev:0,alteradoEm:'',admissao:adm,aquisitivoIni:null,
+  config:{diasTrabalhados:[1,2,3,4,5],dsr:0,leituraInicio:'estrita',estrategia:'descanso',uf:'',feriadosLocais:[]},
+  ciclos:{},aConfirmar:[],unidade:{sei:'',gestor:''}});
+const cicloNovo=()=>({direito:30,direitoInformado:false,abono:0,abonoInformado:false,concordaFracionar:false,historicoConfirmado:false,periodos:[]});
+
+function validaPeriodoFer(p){
+  if(!p||typeof p!=='object'||Array.isArray(p))return 'período fora do formato';
+  if(!dataOk(p.ini)||!dataOk(p.fim)||p.ini>p.fim)return 'período com datas inválidas';
+  if(!ESTADOS_FER.includes(p.estado))return 'estado de período desconhecido: '+String(p.estado);
+  if(p.origem!=null&&!ORIGENS_FER.includes(p.origem))return 'origem de período desconhecida: '+String(p.origem);
+  if(p.id!=null&&typeof p.id!=='string')return 'período com identificador inválido';
+  if(p.lancados!=null&&(!Array.isArray(p.lancados)||p.lancados.some(d=>!dataOk(d))))return 'datas lançadas fora do formato';
+  return null}
+/* Confere o campo `ferias` inteiro antes de aceitar o arquivo, como validaArq faz com o ponto. */
+function validaFerias(f){
+  if(!f||typeof f!=='object'||Array.isArray(f))return 'o plano de férias não é um objeto';
+  if(f.admissao&&!dataOk(f.admissao))return 'data de admissão inválida';
+  if(f.aquisitivoIni!=null&&!dataOk(f.aquisitivoIni))return 'início do aquisitivo inválido';
+  if(f.rev!=null&&!Number.isInteger(f.rev))return 'revisão do plano fora do formato';
+  const c=f.config;
+  if(c!=null&&(typeof c!=='object'||Array.isArray(c)))return 'configuração das férias fora do formato';
+  if(c&&c.diasTrabalhados!=null&&(!Array.isArray(c.diasTrabalhados)||c.diasTrabalhados.some(x=>!Number.isInteger(x)||x<0||x>6)))return 'jornada das férias fora do formato';
+  if(c&&c.dsr!=null&&!(Number.isInteger(c.dsr)&&c.dsr>=0&&c.dsr<=6))return 'repouso semanal fora do formato';
+  if(c&&c.leituraInicio!=null&&!['estrita','clt'].includes(c.leituraInicio))return 'leitura da regra de início desconhecida';
+  if(c&&c.feriadosLocais!=null&&!Array.isArray(c.feriadosLocais))return 'feriados locais fora do formato';
+  if(c&&Array.isArray(c.feriadosLocais)&&c.feriadosLocais.some(x=>!x||typeof x!=='object'||!(/^\d{2}-\d{2}$/.test(x.data)||dataOk(x.data))))return 'feriado local com data inválida';
+  if(c&&c.uf!=null&&c.uf!==''&&!UFS.includes(c.uf))return 'UF da lotação desconhecida: '+String(c.uf);
+  if(f.ciclos==null||typeof f.ciclos!=='object'||Array.isArray(f.ciclos))return 'ciclos de férias fora do formato';
+  for(const k of Object.keys(f.ciclos)){const y=f.ciclos[k];
+    if(!dataOk(k))return 'ciclo de férias com chave inválida: '+k;
+    if(!y||typeof y!=='object'||Array.isArray(y))return 'ciclo de férias '+k+' fora do formato';
+    const dir=y.direito!=null?y.direito:30;
+    if(!FERIAS_DIREITOS.includes(dir))return 'direito fora do esperado no ciclo '+k+': '+String(y.direito);
+    const ab=y.abono||0;if(!Number.isInteger(ab)||ab<0||ab>Math.floor(dir*FERIAS_PARAM.abonoFracao+1e-9))return 'abono fora do esperado no ciclo '+k;
+    if(y.periodos!=null&&!Array.isArray(y.periodos))return 'períodos fora do formato no ciclo '+k;
+    for(const p of y.periodos||[]){const e=validaPeriodoFer(p);if(e)return e+' no ciclo '+k}
+    for(const x of ['dataEscolha','dataAutomatica'])if(y[x]!=null&&y[x]!==''&&!dataOk(y[x]))return 'data do Populis inválida no ciclo '+k;
+    if(y.fonteDatas!=null&&typeof y.fonteDatas!=='string')return 'origem das datas fora do formato no ciclo '+k;
+    if(y.opcoes!=null){const e=validaOpcoes(y.opcoes);if(e)return e+' no ciclo '+k}}
+  if(f.aConfirmar!=null&&!Array.isArray(f.aConfirmar))return 'fila de férias a confirmar fora do formato';
+  for(const p of f.aConfirmar||[])if(!p||!dataOk(p.ini)||!dataOk(p.fim)||p.ini>p.fim)return 'período a confirmar fora do formato';
+  if(f.descartados!=null&&(!Array.isArray(f.descartados)||f.descartados.some(p=>!p||!dataOk(p.ini)||!dataOk(p.fim))))return 'lista de períodos descartados fora do formato';
+  const u=f.unidade;
+  if(u!=null&&(typeof u!=='object'||['sei','gestor'].some(x=>u[x]!=null&&typeof u[x]!=='string')))return 'dados da unidade fora do formato';
+  return null}
+
+/* ---- cópia no navegador: é também o plano de quem ainda não conectou o arquivo ---- */
+function feriasDoNavegador(){try{const v=JSON.parse(localStorage.getItem(KF));return v&&!validaFerias(v)?v:null}catch(e){return null}}
+function gravaCopiaNavegador(f){try{if(f)localStorage.setItem(KF,JSON.stringify(f))}catch(e){}}
+function copiaExterna(){try{return JSON.parse(localStorage.getItem(KFC))}catch(e){return null}}
+
+/* Duas janelas gravando: o plano é um item só. Se só esta janela mexeu, vale o desta; se as duas
+   mexeram, fica o do arquivo e o desta continua guardado (mesma regra dos dias). */
+function reaplicaFerias(base,meu){
+  const b=(base&&base.ferias)||null,m=(meu&&meu.ferias)||null;
+  if(canonJ(m)===canonJ(b))return {n:0,conflitos:0};
+  if(canonJ(ferias)!==canonJ(b))return {n:0,conflitos:1};
+  ferias=m;return {n:1,conflitos:0}}
+const textoFeriasJunta=rf=>rf.n?' O plano de férias desta janela continua valendo.'
+  :rf.conflitos?' O plano de férias foi alterado nos dois navegadores; ficou valendo o do arquivo, e o desta janela está guardado.':'';
+
+/* Depois de ler o arquivo: o plano dele, comparado com a cópia do navegador (seção 11.2).
+   Cópia mais velha não é oferecida; mais nova, ou igual na revisão e diferente, vira escolha. */
+function confereFeriasDoArquivo(){
+  const c=feriasDoNavegador();
+  if(!c||!c.admissao){if(ferias)gravaCopiaNavegador(ferias);ofertaFerias=null;return}
+  const atual={nome:'Plano do arquivo de dados',f:ferias,atual:true},nav={nome:'Cópia deste navegador',f:c};
+  if(!ferias)ofertaFerias={motivo:'O arquivo de dados está sem o plano de férias, e este navegador guardou uma cópia dele. Isso acontece quando uma versão antiga do Cartinhas grava o arquivo.',opcoes:[nav]};
+  else if((c.rev||0)>(ferias.rev||0))ofertaFerias={motivo:'Este navegador tem um plano de férias mais novo que o do arquivo de dados.',opcoes:[atual,nav]};
+  else if((c.rev||0)===(ferias.rev||0)&&canonJ(c)!==canonJ(ferias))ofertaFerias={motivo:'O plano do arquivo e a cópia deste navegador estão na mesma revisão, mas não são iguais.',opcoes:[atual,nav]};
+  else{ofertaFerias=null;gravaCopiaNavegador(ferias);return}
+  if(!modoFerias){status('Há um plano de férias para conferir. <button id="btnFerConf" type="button">Abrir</button>',true);const b=$('btnFerConf');if(b)b.onclick=abreFerias}}
+
+/* Toda mudança no plano passa por aqui: sobe a revisão, guarda a cópia e grava o arquivo. */
+function mudaFerias(fn,importante){if(!ferias)return;fAvisoTxt='';fMemo={};
+  fn(ferias);ferias.rev=(ferias.rev||0)+1;ferias.alteradoEm=new Date().toISOString();
+  if(importante)ferias.revImportante=ferias.rev;
+  gravaCopiaNavegador(ferias);save();renderFerias()}
+const dadosCiclo=(c,criar)=>{if(!ferias)return cicloNovo();
+  if(!ferias.ciclos[c.chave]){if(!criar)return cicloNovo();ferias.ciclos[c.chave]=cicloNovo()}
+  return ferias.ciclos[c.chave]};
+const ciclosAgora=()=>ferias&&ferias.admissao?(fMemo.cs||(fMemo.cs=fCiclos(ferias.admissao,ferias.aquisitivoIni,todayISO))):null;
+const proxMes=ym=>fSoma(ym+'-15',31).slice(0,7);
+/* O que ainda pode mudar o saldo de um ciclo: fila a confirmar e meses já passados do
+   concessivo sem relatório — a não ser que a pessoa diga que conferiu (seção 7.1). */
+function pendencias(c){const k='pend:'+c.chave;return fMemo[k]||(fMemo[k]=pendencias0(c))}
+function pendencias0(c){
+  const d=dadosCiclo(c,false);
+  const fila=fFila().filter(p=>p.sugestao===c.chave||(!p.sugestao&&p.ini<=c.coFim&&p.fim>=c.coIni)).length;
+  const sem=[];
+  if(!d.historicoConfirmado){const ate=todayISO<c.coFim?todayISO:c.coFim;
+    for(let ym=c.coIni.slice(0,7);ym<=ate.slice(0,7)&&c.coIni<=ate;ym=proxMes(ym)){const m=months[ym];if(!m||!m.days.some(x=>!x.futuro))sem.push(ym)}}
+  return {fila,semRelatorio:sem}}
+function resumoPlano(f){
+  if(!f)return 'sem plano';
+  const ps=Object.values(f.ciclos||{}).flatMap(y=>y.periodos||[]);
+  return 'revisão '+(f.rev||0)+(f.alteradoEm?', de '+new Date(f.alteradoEm).toLocaleString('pt-BR'):'')
+    +' · admissão '+(f.admissao?br(f.admissao):'—')
+    +' · '+(ps.length?ps.length+(ps.length>1?' períodos: ':' período: ')+ps.slice(0,3).map(p=>br(p.ini).slice(0,5)+' a '+br(p.fim).slice(0,5)+' ('+p.estado+')').join(', '):'nenhum período')}
+/* Restaurar troca SÓ o plano: o ponto que está no arquivo fica exatamente como está. */
+function restauraFerias(op){
+  if(op.atual){ofertaFerias=null;gravaCopiaNavegador(ferias);fAvisoTxt='Ficou valendo o plano do arquivo de dados.';renderFerias();return}
+  const rev=Math.max(op.f.rev||0,(ferias&&ferias.rev)||0)+1;
+  ferias=JSON.parse(JSON.stringify(op.f));ferias.rev=rev;ferias.alteradoEm=new Date().toISOString();ferias.revImportante=rev;
+  ofertaFerias=null;try{localStorage.setItem(KF,JSON.stringify(ferias))}catch(e){}
+  save();fAvisoTxt='Plano restaurado ('+esc(op.nome.toLowerCase())+'). O ponto não foi tocado.';renderFerias()}
+
+/* ---- cópia fora do navegador (seção 11.2): só o plano, nunca o ponto ---- */
+const TIPO_COPIA={description:'Cópia do plano de férias do Cartinhas',accept:{'application/json':['.json']}};
+async function salvaCopiaExterna(){
+  if(!ferias)return;
+  const tx=JSON.stringify({app:'Cartinhas',tipo:'copia-ferias',salvoEm:new Date().toISOString(),ferias},null,1);
+  try{
+    if('showSaveFilePicker' in window){const h=await showSaveFilePicker({id:'cartinhas-ferias',suggestedName:'cartinhas-ferias-copia.json',types:[TIPO_COPIA]});
+      const w=await h.createWritable();await w.write(tx);await w.close()}
+    else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([tx],{type:'application/json'}));a.download='cartinhas-ferias-copia.json';a.click()}
+    try{localStorage.setItem(KFC,JSON.stringify({em:new Date().toISOString(),rev:ferias.rev}))}catch(e){}
+    fAvisoTxt='Cópia do plano salva. Guarde o arquivo cartinhas-ferias-copia.json junto dos seus documentos.'}
+  catch(e){if(e&&e.name==='AbortError')return;fAvisoTxt='Não consegui salvar a cópia ('+esc(e.message)+').'}
+  renderFerias()}
+async function abreCopiaExterna(){
+  try{const [h]=await showOpenFilePicker({id:'cartinhas-ferias',types:[TIPO_COPIA]});
+    let o;try{o=JSON.parse(await (await h.getFile()).text())}catch(e){throw new Error('o arquivo não é um JSON legível')}
+    if(!o||o.app!=='Cartinhas'||o.tipo!=='copia-ferias'||!o.ferias)throw new Error('não é uma cópia do plano de férias do Cartinhas');
+    const e=validaFerias(o.ferias);if(e)throw new Error(e);
+    avaliaCopia(o.ferias,'Cópia salva em '+(o.salvoEm?new Date(o.salvoEm).toLocaleString('pt-BR'):'arquivo'))}
+  catch(e){if(e&&e.name==='AbortError')return;fAvisoTxt='Não consegui usar essa cópia: '+esc(e.message)+'.';renderFerias()}}
+/* Compara uma cópia trazida pela pessoa com o plano atual e com a cópia do navegador. */
+function avaliaCopia(c,nome){
+  fAvisoTxt='';
+  if(ferias&&(c.rev||0)<(ferias.rev||0)){fAvisoTxt='Essa cópia (revisão '+(c.rev||0)+') é mais velha que o plano atual (revisão '+(ferias.rev||0)+'). Não há o que restaurar.';ofertaFerias=null;renderFerias();return}
+  if(ferias&&canonJ(c)===canonJ(ferias)){fAvisoTxt='Essa cópia é igual ao plano atual.';ofertaFerias=null;renderFerias();return}
+  const opcoes=[];if(ferias)opcoes.push({nome:'Plano atual',f:ferias,atual:true});
+  const nav=feriasDoNavegador();
+  if(nav&&nav.admissao&&canonJ(nav)!==canonJ(c)&&canonJ(nav)!==canonJ(ferias)&&(!ferias||(nav.rev||0)>=(ferias.rev||0)))opcoes.push({nome:'Cópia deste navegador',f:nav});
+  opcoes.push({nome,f:c});
+  ofertaFerias={motivo:opcoes.filter(o=>!o.atual).length>1?'Há duas cópias do plano com mudanças diferentes. Compare e escolha qual vale.':'Compare antes de restaurar.',opcoes};
+  renderFerias()}
+
+/* ---- fases 3 e 4: parâmetros da pessoa, calendário com a origem de cada dia, histórico ---- */
+/* Feriados nacionais de data fixa. O 30/11 NÃO está aqui: é lei do DF (seção 8.5). */
+const FER_NACIONAIS=new Set(['01-01','04-21','05-01','09-07','10-12','11-02','11-15','11-20','12-25']);
+const FER_UF={DF:{'11-30':'Dia do Evangélico (lei do DF)'}};
+const UFS=['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
+const NOMES_DIA=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+let fMemo={};  /* contas repetidas dentro de um mesmo desenho da área; zerada a cada mudança */
+/* Os parâmetros valendo: os da norma, com o que é da pessoa (ferias.config) por cima. */
+function fParam(){const c=(ferias&&ferias.config)||{},P={...FERIAS_PARAM};
+  if(Array.isArray(c.diasTrabalhados)&&c.diasTrabalhados.length)P.diasTrabalhados=c.diasTrabalhados;
+  if(Number.isInteger(c.dsr))P.dsr=c.dsr;if(c.leituraInicio)P.leituraInicio=c.leituraInicio;return P}
+/* Calendário de férias com a origem de cada dia. Não usa ehFeriado(): ela junta feriado com
+   dispensa, o que está certo para o ponto (nos dois não há carga) e errado aqui — dispensa não
+   sustenta a vedação legal do art. 134 §3º. */
+function fCalendario(cfg,disp){cfg=cfg||{};disp=disp||DISP;
+  const uf=FER_UF[cfg.uf]||{},locais=new Map((cfg.feriadosLocais||[]).map(x=>[x.data,x.nome||'feriado local']));
+  /* a Páscoa de cada ano, uma vez só: dela saem a Sexta-feira Santa e os facultativos móveis */
+  const anos=new Map(),ano=y=>{let a=anos.get(y);if(!a){const p=iso(pascoa(y));a={sexta:sextaSanta(y),pascoa:p};anos.set(y,a)}return a};
+  const nacional=d=>FER_NACIONAIS.has(d.slice(5))||d===ano(+d.slice(0,4)).sexta;
+  const local=d=>!!uf[d.slice(5)]||locais.has(d)||locais.has(d.slice(5));
+  /* pontos facultativos que mudam de data: Carnaval (segunda e terça) e Corpus Christi */
+  const facultativo=d=>{const e=fDias(ano(+d.slice(0,4)).pascoa,d);return e===-48||e===-47||e===60};
+  const nome=d=>nacional(d)?'feriado nacional':uf[d.slice(5)]?uf[d.slice(5)]:locais.has(d)?locais.get(d):locais.has(d.slice(5))?locais.get(d.slice(5))
+    :disp[d]?String(disp[d]):facultativo(d)?'ponto facultativo':'';
+  return {nacional,local,feriadoDaLotacao:d=>nacional(d)||local(d),dispensa:d=>!!disp[d],facultativo,nome}}
+/* Tudo o que a conta de férias precisa saber de um dia, num objeto só (seções 8.3 e 8.5). */
+function fContexto(cfgTeste,dispTeste){
+  const cfg=cfgTeste||(ferias&&ferias.config)||{},P=cfgTeste?{...FERIAS_PARAM,...cfgTeste}:fParam(),cal=fCalendario(cfg,dispTeste);
+  const naoTrabalha=d=>!P.diasTrabalhados.includes(fWd(d)),ehDSR=d=>fWd(d)===P.dsr;
+  const factLivre=d=>cal.facultativo(d)&&!!cfg.facultativosLivres;
+  const livre=d=>naoTrabalha(d)||cal.feriadoDaLotacao(d)||cal.dispensa(d)||factLivre(d);
+  /* base de cada vedação de início; dispensa não entra em nenhuma */
+  const baseLegal=d=>cal.feriadoDaLotacao(d)||ehDSR(d)||(P.facultativoVedaInicio&&cal.facultativo(d));
+  const baseEstrita=d=>baseLegal(d)||naoTrabalha(d);
+  const tipo=d=>cal.feriadoDaLotacao(d)?'feriado':cal.dispensa(d)?'dispensa':factLivre(d)?'facultativo':naoTrabalha(d)?'folga':'util';
+  /* cada resposta por dia é guardada: a busca pergunta o mesmo dia muitas vezes */
+  const guarda=f=>{const m=new Map();return d=>{let v=m.get(d);if(v===undefined){v=f(d);m.set(d,v)}return v}};
+  return {P,cal,cfg,naoTrabalha,ehDSR,livre:guarda(livre),baseLegal:guarda(baseLegal),baseEstrita:guarda(baseEstrita),tipo:guarda(tipo),ini0:new Map()}}
+
+/* ---- histórico: férias que o relatório trouxe, juntadas em períodos (seção 7.3) ---- */
+const novoIdFer=()=>Math.random().toString(36).slice(2,9);
+const sobrepoe=(a,b)=>a.ini<=b.fim&&b.ini<=a.fim;
+function todosPeriodos(){const r=[];if(!ferias)return r;
+  for(const k of Object.keys(ferias.ciclos))for(const p of ferias.ciclos[k].periodos||[])r.push({...p,chave:k});return r}
+/* Dias de férias já passados, juntados em períodos. Fim de semana ou feriado no meio de dias de
+   férias não quebra o período: férias correm em dias corridos. */
+function fHistorico(){
+  const tab=new Map();for(const k of Object.keys(months))for(const x of (months[k].days||[]))tab.set(x.d,x);
+  const fer=[...tab.values()].filter(x=>x.tipo==='ferias'&&!x.futuro&&x.d<=todayISO).sort((a,b)=>a.d<b.d?-1:1);
+  const out=[];
+  for(const x of fer){const ult=out[out.length-1];let junta=false;
+    if(ult){junta=true;for(let d=fSoma(ult.fim,1);d<x.d;d=fSoma(d,1)){const y=tab.get(d);if(!y||(y.tipo!=='folga'&&y.tipo!=='feriado')){junta=false;break}}}
+    const origem=x.srp&&!x.tipoManual?'relatorio':'digitado';
+    if(junta){ult.fim=x.d;if(origem==='digitado')ult.origem='digitado'}else out.push({ini:x.d,fim:x.d,origem})}
+  return out}
+/* A fila "a confirmar": o que o histórico achou e ainda não foi associado nem descartado. */
+function fFila(){if(!ferias)return [];return fMemo.fila||(fMemo.fila=fFila0())}
+function fFila0(){
+  const ps=todosPeriodos(),desc=ferias.descartados||[],cs=ciclosAgora();
+  return fHistorico().filter(h=>!ps.some(p=>p.ini===h.ini&&p.fim===h.fim&&p.estado==='usufruido')&&!desc.some(x=>x.ini===h.ini&&x.fim===h.fim)
+    &&!ps.some(p=>p.estado==='usufruido'&&sobrepoe(p,h)))
+    .map(h=>{const sug=cs&&cs.lista.find(c=>c.coIni<=h.ini&&h.ini<=c.coFim);
+      const mesmo=ps.find(p=>p.estado!=='usufruido'&&p.ini===h.ini&&p.fim===h.fim),parcial=!mesmo&&ps.find(p=>p.estado!=='usufruido'&&sobrepoe(p,h));
+      return {...h,sugestao:sug?sug.chave:null,mesmo:mesmo||null,parcial:parcial||null}})}
+
+/* ---- fases 5 e 6: marcar no gráfico do mês e validar (PLANO-FERIAS.md, seções 8, 9 e 13) ---- */
+let fMes=null,fIni=null,fPainel=null;  /* mês mostrado; início escolhido esperando o fim; resultado da última marcação */
+const NATUREZA={legal:'Proibição legal',interna:'Restrição interna dos Correios',aviso:'Aviso',logica:'Não dá'};
+/* Dia de início: R1a (legal), R1c e R1b (normas internas a confirmar), separadas de propósito,
+   cada uma com a sua natureza e o seu porquê (seções 8.2 e 8.3). */
+function fInicio(d,ctx){if(!ctx.ini0)return fInicio0(d,ctx);let r=ctx.ini0.get(d);if(!r){r=fInicio0(d,ctx);ctx.ini0.set(d,r)}return r}
+function fInicio0(d,ctx){const P=ctx.P,ks=[1,2].slice(0,P.diasAntesVedados),s=k=>k>1?'s':'';
+  for(const k of ks){const x=fSoma(d,k);
+    if(ctx.ehDSR(x))return {ok:false,regra:'R1a',natureza:'legal',msg:`Proibido pela CLT (art. 134 §3º): ${NOMES_DIA[fWd(d)]} fica a ${k} dia${s(k)} do repouso semanal (${NOMES_DIA[P.dsr]}).`};
+    if(ctx.cal.feriadoDaLotacao(x)||(P.facultativoVedaInicio&&ctx.cal.facultativo(x)))return {ok:false,regra:'R1a',natureza:'legal',msg:`Proibido pela CLT (art. 134 §3º): fica a ${k} dia${s(k)} do feriado de ${br(x)} (${ctx.cal.nome(x)}).`}}
+  if(P.inicioNoProprioDia&&ctx.baseLegal(d))return {ok:false,regra:'R1c',natureza:'interna',msg:`Regra dos Correios (a confirmar no MANPES): não começar férias ${ctx.ehDSR(d)?'no dia do repouso semanal':'em feriado ('+ctx.cal.nome(d)+')'}.`};
+  if(P.leituraInicio==='estrita'){
+    if(ctx.naoTrabalha(d))return {ok:false,regra:'R1b',natureza:'interna',msg:`Regra da tabela dos Correios (a confirmar no MANPES): não começar férias em dia que você não trabalha (${NOMES_DIA[fWd(d)]}).`};
+    for(const k of ks){const x=fSoma(d,k);if(ctx.baseEstrita(x))return {ok:false,regra:'R1b',natureza:'interna',
+      msg:`Restrição da tabela de férias dos Correios (a confirmar no MANPES): ${NOMES_DIA[fWd(d)]} fica a ${k} dia${s(k)} de ${NOMES_DIA[fWd(x)]}, que você não trabalha. Pela CLT, sozinha, seria permitida. Se a sua unidade aceita, mude o dia de início em "Sua jornada e o seu calendário".`}}}
+  return {ok:true}}
+/* R3, contada como no plano (8.2): entre o último dia de um período e o primeiro do seguinte
+   precisam existir N dias corridos inteiros. Fim em 10/07: o seguinte só a partir de 10/08. */
+function fIntervalo(novo,outros,P){if(!P.intervaloMinDias)return null;
+  for(const p of outros){if(sobrepoe(p,novo))continue;const antes=p.fim<novo.ini;
+    const entre=antes?fDias(p.fim,novo.ini)-1:fDias(novo.fim,p.ini)-1;if(entre>=P.intervaloMinDias)continue;
+    return {regra:'R3',natureza:'interna',msg:`Regra interna dos Correios (a confirmar no MANPES): ${P.intervaloMinDias} dias entre um período e outro. `
+      +(antes?`O anterior termina em ${br(p.fim)}; o próximo, só a partir de ${br(fSoma(p.fim,P.intervaloMinDias+1))}.`
+             :`O seguinte começa em ${br(p.ini)}; este precisa terminar até ${br(fSoma(p.ini,-P.intervaloMinDias-1))}.`)}}
+  return null}
+function motivoNaoFecha(durs,resto,P){const vagas=P.maxPeriodos-durs.length;
+  if(vagas<=0)return `já são ${P.maxPeriodos} períodos, o máximo`;
+  if(Math.max(...durs)<P.minMaior&&resto<P.minMaior)return `ainda falta um período de ${P.minMaior} dias, e só sobram ${resto}`;
+  if(resto<P.minDemais)return `${resto} dias é menos que o mínimo de ${P.minDemais} para um período`;
+  return `a divisão que sobra não respeita os mínimos de ${P.minMaior} e ${P.minDemais} dias`}
+/* R2c, camada das datas (8.4): existe pelo menos UMA colocação real do que sobra, no prazo do
+   ciclo, respeitando dia de início, sobreposição e intervalo? Não procura a melhor: basta uma. */
+function fCabeNasDatas(c,todos,durs,resto,ctx){
+  const P=ctx.P,amanha=fSoma(todayISO,1),de=amanha>c.coIni?amanha:c.coIni,ate=c.coFim,vagas=P.maxPeriodos-durs.length;
+  const splits=[];if(vagas>=1&&fCombinacao(durs.concat(resto),true).ok)splits.push([resto]);
+  if(vagas>=2)for(let a=1;a+a<=resto;a++)if(fCombinacao(durs.concat(a,resto-a),true).ok)splits.push([resto-a,a]);
+  const N=fDias(de,ate)+1;if(!splits.length||N<=0)return false;
+  /* tudo em número de dia a partir do primeiro dia possível: a busca não monta texto de data */
+  const inicios=[];for(let i=0,d=de;i<N;i++,d=fSoma(d,1))if(fInicio(d,ctx).ok)inicios.push(i);
+  const gap=P.intervaloMinDias,ocup0=todos.map(p=>({a:fDias(de,p.ini),b:fDias(de,p.fim),w:p.chave===c.chave||P.intervaloEntreCiclos}));
+  const cabe=(s,L,ocup)=>{const e=s+L-1;if(e>=N)return null;
+    for(const o of ocup){if(s<=o.b&&o.a<=e)return null;if(o.w&&gap&&(o.b<s?s-o.b-1:o.a-e-1)<gap)return null}
+    return {a:s,b:e,w:true}};
+  const coloca=(sp,i,ocup)=>{if(i===sp.length)return true;for(const x of inicios){const n=cabe(x,sp[i],ocup);if(n&&coloca(sp,i+1,ocup.concat(n)))return true}return false};
+  return splits.some(sp=>coloca(sp,0,ocup0))}
+/* O ciclo de um período: aquele em cujo prazo (concessivo) ele começa. Se dois prazos se
+   sobrepõem (aquisitivo ajustado), o mais antigo que ainda tem saldo. */
+function fCicloDaData(ini,cs){const cand=cs.lista.filter(c=>c.coIni<=ini&&ini<=c.coFim);
+  return cand.find(c=>fSaldo(c,dadosCiclo(c,false),null,todayISO).livre>0)||cand[0]||null}
+/* Validação na ordem da seção 9: para na primeira recusa, para a mensagem ser a causa real. */
+function fValida(ini,fim,ctx,ignorarId,semDatas){
+  const cs=ciclosAgora(),P=ctx.P,novo={ini,fim},dur=fDur(novo),avisos=[],c=fCicloDaData(ini,cs);
+  const recusa=(regra,natureza,msg)=>({recusa:{regra,natureza,msg},ciclo:c});
+  if(ini<=todayISO)return recusa('passado','logica','Essa data já passou. Férias já tiradas entram em "Acrescentar férias já tiradas".');
+  if(!c){const prox=cs.lista.find(x=>x.coIni>ini);return recusa('R4','legal','Essa data não cai no prazo de nenhum ciclo.'+(prox?' O próximo prazo começa em '+br(prox.coIni)+'.':''))}
+  if(fim>c.coFim)return recusa('R4','legal',`Esse período passa do prazo para tirar as férias do ${nomeCiclo(c).toLowerCase()}, que termina em ${br(c.coFim)}.`);
+  const todosC=todosPeriodos(),todos=todosC.filter(p=>p.id!==ignorarId),choca=todos.find(p=>sobrepoe(p,novo));
+  if(choca)return recusa('R10','logica',`Esses dias já estão em outro período: ${br(choca.ini)} a ${br(choca.fim)} (${ESTADO_TXT[choca.estado]}).`);
+  /* ignorarId: comparar um período marcado com o que a dica daria no lugar dele (seção 13.5) */
+  const d=dadosCiclo(c,false),s=fSaldo(c,d,pendencias(c),todayISO),ign=ignorarId&&todosC.find(p=>p.id===ignorarId),livre=s.livre+(ign&&ign.chave===c.chave?fDur(ign):0);
+  if(dur>livre)return recusa('saldo','legal',`Sobram ${Math.max(0,livre)} dias livres no ${nomeCiclo(c).toLowerCase()}; esse período pede ${dur}.`);
+  const i0=fInicio(ini,ctx);if(!i0.ok)return recusa(i0.regra,i0.natureza,i0.msg);
+  const doCiclo=(d.periodos||[]).filter(p=>p.id!==ignorarId),durs=doCiclo.map(fDur),resto=livre-dur;
+  const unico=!doCiclo.length&&resto===0;   /* o saldo inteiro de uma vez (R2): não precisa de concordância nem de mínimos */
+  if(!unico){
+    if(P.fracionarExigeConcordancia&&!d.concordaFracionar)return recusa('R11','legal',`Para dividir as férias é preciso a sua concordância (CLT, art. 134 §1º). Marque a concordância no cartão do ${nomeCiclo(c).toLowerCase()}, ou tire os ${livre} dias de uma vez.`);
+    if(doCiclo.length+1>P.maxPeriodos)return recusa('R2f','legal',`Você já tem ${P.maxPeriodos} períodos neste ciclo, o máximo.`);
+    if(dur<P.minDemais)return recusa('R2f','legal',`Período de menos de ${P.minDemais} dias só é possível se for o saldo inteiro de uma vez.`);
+    if(!fCompletavel(durs.concat(dur),resto,true))return recusa('R2c','legal',`Com esse período sobram ${resto} dias, e eles não fecham em nenhuma divisão permitida: ${motivoNaoFecha(durs.concat(dur),resto,P)}.`)}
+  const iv=fIntervalo(novo,todos.filter(p=>p.chave===c.chave||P.intervaloEntreCiclos),P);if(iv)return recusa(iv.regra,iv.natureza,iv.msg);
+  if(!semDatas&&!unico&&resto>0&&!fCabeNasDatas(c,todos.concat({...novo,chave:c.chave}),durs.concat(dur),resto,ctx))
+    return recusa('R2c','legal',`Com esse período sobram ${resto} dias, mas não há datas no prazo deste ciclo onde eles caibam — respeitando o dia de início${P.intervaloMinDias?', o intervalo de '+P.intervaloMinDias+' dias':''} e o fim do prazo, em ${br(c.coFim)}.`);
+  const falta=fDias(todayISO,ini);
+  if(falta<P.antecedenciaDias)avisos.push({regra:'R8',natureza:'aviso',msg:`Faltam ${falta} dias para essa data: menos que os ${P.antecedenciaDias} da programação ordinária. Dá para pedir, mas é tratamento excepcional.`});
+  if(s.provisorio)avisos.push({regra:'saldo',natureza:'aviso',msg:'O saldo deste ciclo é provisório ('+s.motivos.join('; ')+'): esta marcação vale como simulação.'});
+  return {ok:true,ciclo:c,avisos,dur,unico,resto}}
+/* As duas medidas (seção 4): dias úteis poupados e descanso seguido, com as bordas */
+function fBorda(d,passo,ctx){let n=0,x=fSoma(d,passo);while(n<60&&ctx.livre(x)){n++;x=fSoma(x,passo)}return n}
+function fAvalia(ini,dias,ctx){const fim=fSoma(ini,dias-1);let uteis=0;for(let d=ini;d<=fim;d=fSoma(d,1))if(!ctx.livre(d))uteis++;
+  const antes=fBorda(ini,-1,ctx),depois=fBorda(fim,1,ctx);return {ini,fim,dias,uteis,antes,depois,descanso:antes+dias+depois}}
+function fCliqueDia(d){fAvisoTxt='';fConfirma=null;
+  const p=todosPeriodos().find(x=>x.ini<=d&&d<=x.fim);
+  if(!fIni&&p){fPainel={tipo:'periodo',id:p.id};renderFerias();return}
+  if(!fIni&&d<=todayISO){fPainel={tipo:'msg',natureza:'aviso',msg:'Esse dia já passou. Férias já tiradas entram em "Acrescentar férias já tiradas".'};renderFerias();return}
+  if(!fIni){fIni=d;fPainel=null;renderFerias();return}
+  let ini=fIni,fim=d;fIni=null;if(fim<ini)[ini,fim]=[fim,ini];
+  fMarca(ini,fim)}
+/* Marcar passa sempre por aqui, venha do clique ou do botão da dica: não há caminho que pule regra. */
+function fMarca(ini,fim){
+  const r=fValida(ini,fim,fContexto());
+  if(r.recusa){fPainel={tipo:'recusa',ini,fim,...r.recusa};renderFerias();return false}
+  const id=novoIdFer();fPainel={tipo:'marcado',id,avisos:r.avisos};
+  mudaFerias(()=>{dadosCiclo(r.ciclo,true).periodos.push({id,ini,fim,estado:'planejado',origem:'digitado',confirmado:true})});return true}
+function htmlPainel(ctx){const p=fPainel;if(!p)return '';
+  if(p.tipo==='recusa')return `<div class="fnat fnat-${p.natureza}" role="alert"><b>${NATUREZA[p.natureza]}.</b> ${esc(p.msg)} <span class="msg">(${br(p.ini)} a ${br(p.fim)} não foi marcado.)</span></div>`;
+  if(p.tipo==='msg')return `<div class="fnat fnat-${p.natureza}" role="status">${esc(p.msg)}</div>`;
+  const per=todosPeriodos().find(x=>x.id===p.id);if(!per)return '';const a=fAvalia(per.ini,fDur(per),ctx);
+  return `<div class="fnat fnat-ok" role="status"><b>${p.tipo==='marcado'?'Marcado':'Férias '+ESTADO_FEM[per.estado]}:</b> ${br(per.ini)} a ${br(per.fim)}, ${durTxt(per)}.
+Descanso seguido: <b>${a.descanso} dias</b> (${a.antes} antes + ${a.dias} + ${a.depois} depois). Dias úteis poupados: <b>${a.uteis}</b>.
+${(p.avisos||[]).map(x=>`<p class="fnat fnat-${x.natureza}"><b>${NATUREZA[x.natureza]}.</b> ${esc(x.msg)}</p>`).join('')}
+${per.estado==='planejado'?`<div class="row"><button type="button" data-desmarca="${esc(per.id)}">Desmarcar este período</button></div>`:'<p class="msg">Período aprovado ou usufruído muda pela lista do ciclo.</p>'}</div>`}
+function fJanela(cs){const ms=[...cs.emConcessivo];if(cs.emAquisitivo)ms.push(cs.emAquisitivo);
+  return {de:ms.reduce((m,c)=>c.coIni<m?c.coIni:m,todayISO).slice(0,7),ate:ms.reduce((m,c)=>c.coFim>m?c.coFim:m,todayISO).slice(0,7)}}
+const mesAnt=ym=>fSoma(ym+'-15',-31).slice(0,7);
+const TIPO_DIA_TXT={util:'dia útil',folga:'dia que você não trabalha',feriado:'feriado',dispensa:'dispensa',facultativo:'ponto facultativo, folga na sua unidade'};
+function htmlMes(cs,ctx){const j=fJanela(cs);if(!fMes||fMes<j.de||fMes>j.ate)fMes=todayISO.slice(0,7);
+  fOpMes=fOpcoesMes(cs,ctx);
+  const ps=todosPeriodos(),dias=[],d0=new Date(fMes+'-01T12:00'),m=d0.getMonth(),nm=nomeMesF(fMes).split(' ')[0];
+  for(const x=new Date(d0);x.getMonth()===m;x.setDate(x.getDate()+1))dias.push(iso(x));
+  const cols=dias.map(d=>{const t=ctx.tipo(d),p=ps.find(x=>x.ini<=d&&d<=x.fim),ini=fIni===d,pass=d<=todayISO,nome=ctx.cal.nome(d);
+    const lab=`${+d.slice(8)} de ${nm}, ${NOMES_DIA[fWd(d)]}, ${TIPO_DIA_TXT[t]}${nome&&t!=='util'?' ('+nome+')':''}${p?', férias '+ESTADO_FEM[p.estado]:''}${ini?', início escolhido':''}${pass?', já passou':''}`;
+    return `<button type="button" class="col fcol ${t==='util'?'util':t==='folga'?'folga':'feriado'}${p?' p-'+p.estado:''}${ini?' fini':''}${pass?' fpass':''}${fNaSug(d)?' fsug':''}" data-d="${d}" aria-pressed="${p?'true':'false'}" aria-label="${esc(lab)}" title="${esc(lab)}"><span class="fsinal" aria-hidden="true">${p?{planejado:'●',aprovado:'▬',usufruido:'■'}[p.estado]:''}</span><span>${+d.slice(8)}</span></button>`}).join('');
+  return `<div class="fcard" id="fMesCard"><h3>Marcar no mês</h3>
+<div class="row fmesnav"><button type="button" id="fMesAnt"${fMes<=j.de?' disabled':''} aria-label="Mês anterior">‹</button><b>${esc(cap(nomeMesF(fMes)))}</b><button type="button" id="fMesProx"${fMes>=j.ate?' disabled':''} aria-label="Próximo mês">›</button></div>
+<p class="msg" aria-live="polite">${fIni?`Início em <b>${br(fIni)}</b>. Agora clique no último dia das férias — pode ser em outro mês. <button type="button" class="lnk" id="fIniCancela">cancelar</button> (ou Esc)`:'Clique no primeiro dia das férias e depois no último.'}</p>
+<div class="bars fbars" role="group" aria-label="Dias de ${esc(nomeMesF(fMes))}">${cols}</div>
+<div class="legend"><span><em style="background:var(--colbg);outline:1px solid var(--line)"></em>dia útil</span><span><em style="background:var(--fs)"></em>não trabalha</span><span><em style="background:var(--fe)"></em>feriado ou dispensa</span><span><em class="lg-pl"></em>● planejado</span><span><em class="lg-ap"></em>▬ aprovado</span><span><em class="lg-us"></em>■ usufruído</span></div>
+${htmlDicaMes(cs,ctx)}${htmlPainel(ctx)}</div>`}
+document.addEventListener('keydown',e=>{if(modoFerias&&e.key==='Escape'&&fIni){fIni=null;renderFerias()}});
+/* passar o mouse, ou o foco do teclado, numa opção da dica troca o pontilhado do gráfico para ela */
+['mouseover','focusin'].forEach(tp=>$('ferias').addEventListener(tp,e=>{const o=e.target.closest&&e.target.closest('[data-op]');if(o&&+o.dataset.op!==fSugAtiva){fSugAtiva=+o.dataset.op;pintaSug()}}));
+
+/* ---- fases 7 e 8: dicas mês a mês e a melhor combinação do ciclo (PLANO-FERIAS.md, seção 10) ---- */
+let fFocoSel=null,fDicaDur=null,fSugAtiva=0,fOpMes=null,fDicaMesRes=null,fMelhorRes=null;
+const estr=()=>(ferias&&ferias.config&&ferias.config.estrategia)||'descanso';
+/* O ciclo que se está programando: o escolhido, ou o primeiro com saldo para planejar. */
+function fCicloFoco(cs){if(!cs)return null;const cand=[...cs.emConcessivo];if(cs.emAquisitivo&&!cand.includes(cs.emAquisitivo))cand.push(cs.emAquisitivo);
+  return cand.find(c=>c.chave===fFocoSel)||cand.find(c=>fSaldo(c,dadosCiclo(c,false),null,todayISO).livre>0)||cand[0]||null}
+/* Quantos dias pode ter o próximo período: o saldo inteiro de uma vez e, com a concordância, cada
+   tamanho que ainda deixa o resto fechar (seção 8.4). Do maior para o menor. */
+function fDuracoes(c){const d=dadosCiclo(c,false),P=fParam(),livre=fSaldo(c,d,null,todayISO).livre,durs=(d.periodos||[]).map(fDur),out=new Set();
+  if(livre<=0)return [];const pode=d.concordaFracionar||!P.fracionarExigeConcordancia;
+  if(fCompletavel(durs.concat(livre),0,true)&&(!durs.length||pode))out.add(livre);
+  if(pode)for(let L=P.minDemais;L<livre;L++)if(fCompletavel(durs.concat(L),livre-L,true))out.add(L);
+  return [...out].sort((a,b)=>b-a)}
+/* As duas estratégias da seção 10.3. O último critério, a data, deixa a lista estável. */
+const ORDENA={descanso:(a,b)=>b.descanso-a.descanso||b.uteis-a.uteis||(a.ini<b.ini?-1:1),
+  aproveitamento:(a,b)=>b.uteis*a.dias-a.uteis*b.dias||b.descanso-a.descanso||(a.ini<b.ini?-1:1)};
+const PRIORIDADE_MOTIVO=['R4','saldo','R3','R2c','R11','R2f','R10','passado','R1a','R1c','R1b'];
+/* As n melhores opções de um mês para um período de L dias, cada uma começando num dia diferente.
+   Ordena tudo o que passa nas regras baratas e só roda a conta cara (as datas do resto) nos
+   primeiros da fila, até achar n. A lista de meses e o cartão do mês usam esta mesma função. */
+function fDicasDoMes(ym,c,L,ctx,n,estrategia,ignorarId){
+  const amanha=fSoma(todayISO,1),out=[],rec=[];
+  for(let d=ym+'-01';d.slice(0,7)===ym;d=fSoma(d,1)){if(d<amanha||d<c.coIni||d>c.coFim)continue;
+    const r=fValida(d,fSoma(d,L-1),ctx,ignorarId,true);if(r.recusa){rec.push(r.recusa);continue}
+    if(r.ciclo&&r.ciclo.chave!==c.chave)continue;out.push(fAvalia(d,L,ctx))}
+  out.sort(ORDENA[estrategia]||ORDENA.descanso);
+  const ok=[];for(const x of out){if(ok.length>=n)break;const r=fValida(x.ini,x.fim,ctx,ignorarId);if(r.recusa){rec.push(r.recusa);continue}ok.push({...x,avisos:r.avisos})}
+  if(ok.length)return {opcoes:ok};
+  const m=PRIORIDADE_MOTIVO.map(g=>rec.find(x=>x.regra===g)).find(Boolean);
+  return {vazio:true,motivo:m?m.msg:'Nenhum dia deste mês serve para começar.'}}
+function fMesesDoCiclo(c){const ms=[],fim=c.coFim.slice(0,7);for(let ym=(todayISO>c.coIni?todayISO:c.coIni).slice(0,7);ym<=fim;ym=proxMes(ym))ms.push(ym);return ms}
+/* Enquanto houver regra a confirmar no MANPES, ou saldo provisório, a dica diz que é condicional. */
+function condicional(ctx,s){const P=ctx.P,r=[];
+  if(P.intervaloMinDias)r.push('o intervalo de '+P.intervaloMinDias+' dias entre períodos');
+  if(P.leituraInicio==='estrita')r.push('a tabela dos Correios para o dia de início');
+  if(P.inicioNoProprioDia)r.push('não começar em feriado ou no repouso semanal');
+  let t=r.length?'<b>Dicas condicionais:</b> usam regras ainda a confirmar no MANPES — '+r.join(', ')+'.':'';
+  if(s&&s.provisorio)t+=(t?' ':'')+'<b>Saldo provisório</b> ('+esc(s.motivos.join('; '))+'): as dicas são simulação.';
+  return t}
+/* As opções do mês mostrado, calculadas antes das colunas, para o pontilhado sair junto. */
+function fOpcoesMes(cs,ctx){fDicaMesRes=null;const c=fCicloFoco(cs);if(!c)return null;
+  const Ls=fDuracoes(c);if(!Ls.length)return null;const L=Ls.includes(fDicaDur)?fDicaDur:Ls[0];
+  if(fMes<(todayISO>c.coIni?todayISO:c.coIni).slice(0,7)||fMes>c.coFim.slice(0,7))return null;
+  const r=fDicasDoMes(fMes,c,L,ctx,3,estr());fDicaMesRes={...r,L,c};
+  if(r.opcoes&&fSugAtiva>=r.opcoes.length)fSugAtiva=0;return r.opcoes||null}
+const fNaSug=d=>{const o=fOpMes&&fOpMes[fSugAtiva];return !!o&&o.ini<=d&&d<=o.fim};
+function pintaSug(){const o=fOpMes&&fOpMes[fSugAtiva];
+  for(const b of document.querySelectorAll('#fMesCard [data-d]'))b.classList.toggle('fsug',!!o&&o.ini<=b.dataset.d&&b.dataset.d<=o.fim);
+  for(const e of document.querySelectorAll('#fMesCard [data-op]'))e.classList.toggle('at',+e.dataset.op===fSugAtiva)}
+/* O cartão "Dica para o mês" (seção 13.5): a melhor e até duas alternativas, o motivo quando o mês
+   não cabe, e a comparação com o que a pessoa marcou — sem julgamento. */
+function htmlDicaMes(cs,ctx){const r=fDicaMesRes,nm=nomeMesF(fMes).split(' ')[0];
+  /* a comparação com o que a pessoa marcou neste mês, em qualquer ciclo, mesmo sem saldo para novas dicas */
+  const meus=todosPeriodos().filter(p=>p.estado==='planejado'&&p.ini.slice(0,7)===fMes);
+  const comp=meus.map(p=>{const c=cs.lista.find(x=>x.chave===p.chave);if(!c)return '';
+    const a=fAvalia(p.ini,fDur(p),ctx),alt=fDicasDoMes(fMes,c,fDur(p),ctx,1,estr(),p.id),b=alt.opcoes&&alt.opcoes[0];
+    if(!b||b.ini===p.ini)return `<p class="msg">O que você marcou (${br(p.ini)} a ${br(p.fim)}) já é a melhor opção deste mês para ${fDur(p)} dias.</p>`;
+    return `<p class="msg fcomp">Você marcou ${br(p.ini)} a ${br(p.fim)}: ${a.descanso} dias seguidos fora e ${a.uteis} úteis poupados. Com os mesmos ${fDur(p)} dias, começando em ${br(b.ini)}, seriam ${b.descanso} seguidos fora e ${b.uteis} úteis poupados. Quem decide é você.</p>`}).join('');
+  if(!r&&!comp)return '';
+  let h=`<div class="fdica"><h4>Dica para ${esc(nm)}${r&&!r.vazio?' — '+r.L+' dias do '+esc(nomeCiclo(r.c).toLowerCase()):''}</h4>`;
+  if(r&&r.vazio)h+=`<p class="fsem">${esc(r.motivo)}</p>`;
+  else if(r)h+=r.opcoes.map((o,i)=>`<div class="fop${i===fSugAtiva?' at':''}" data-op="${i}" tabindex="0"><span><b>${br(o.ini)} a ${br(o.fim)}</b> · ${o.dias} dias · <b>${o.descanso}</b> seguidos fora · <b>${o.uteis}</b> úteis poupados${i===0?' <span class="tag ok">a melhor</span>':''}${o.avisos.some(a=>a.regra==='R8')?' <span class="tag p">menos de 40 dias</span>':''}</span><button type="button" data-marcasug="${i}">Marcar</button></div>`).join('');
+  return h+comp+'</div>'}
+function htmlDicas(cs,ctx){const c=fCicloFoco(cs);if(!c)return '';
+  const cand=[...cs.emConcessivo];if(cs.emAquisitivo&&!cand.includes(cs.emAquisitivo))cand.push(cs.emAquisitivo);
+  const d=dadosCiclo(c,false),s=fSaldo(c,d,pendencias(c),todayISO),Ls=fDuracoes(c),est=estr();
+  let h=`<div class="fcard" id="fDicas"><h3>Dicas mês a mês</h3>`;
+  if(cand.length>1)h+=`<div class="row frow"><label class="fcampo">Programar o<select id="fFoco">${cand.map(x=>`<option value="${x.chave}"${x.chave===c.chave?' selected':''}>${esc(nomeCiclo(x))} — prazo até ${br(x.coFim)}</option>`).join('')}</select></label></div>`;
+  if(!Ls.length)return h+`<p class="msg">${s.livre<=0?'Não há saldo para planejar no '+esc(nomeCiclo(c).toLowerCase())+'.':'Para planejar mais um período neste ciclo é preciso dividir as férias — marque a concordância no cartão do ciclo.'}</p></div>`;
+  const L=Ls.includes(fDicaDur)?fDicaDur:Ls[0];
+  h+=`<p class="msg">Para cada mês, o período que começa nele e rende mais, dentro das regras. Pagando os mesmos dias de férias, muda quanto tempo você fica fora: as bordas — fim de semana e feriado colados no período — não se pagam.</p>
+<div class="row frow"><label class="fcampo">Dias neste período<select id="fDicaDur">${Ls.map(x=>`<option value="${x}"${x===L?' selected':''}>${x} dias${x===s.livre&&!(d.periodos||[]).length?' (de uma vez)':''}</option>`).join('')}</select></label>
+<label class="fcampo">O que pesa mais<select id="fEstrategia">${opcoesSel([['descanso','mais dias seguidos fora'],['aproveitamento','mais dias úteis poupados por dia de férias']],est)}</select></label></div>`;
+  const cond=condicional(ctx,s);if(cond)h+=`<p class="fprov">${cond}</p>`;
+  const linhas=fMesesDoCiclo(c).map(ym=>{const r=fDicasDoMes(ym,c,L,ctx,1,est),nm=cap(nomeMesF(ym));
+    if(r.vazio)return `<tr class="fsem" data-mes="${ym}"><td>${esc(nm)}</td><td colspan="3">${esc(r.motivo)}</td><td></td></tr>`;
+    const o=r.opcoes[0];return `<tr data-mes="${ym}" data-ini="${o.ini}"><td>${esc(nm)}</td><td>${br(o.ini)} a ${br(o.fim)}${o.avisos.some(a=>a.regra==='R8')?' <span class="tag p">menos de 40 dias</span>':''}</td><td class="n"><b>${o.descanso}</b></td><td class="n">${o.uteis}</td><td><button type="button" data-vai="${ym}">Ver no mês</button></td></tr>`}).join('');
+  return h+`<div class="scroll"><table class="fper fdicas"><thead><tr><th>Mês</th><th>Melhor período</th><th class="n">Dias seguidos fora</th><th class="n">Úteis poupados</th><th></th></tr></thead><tbody>${linhas}</tbody></table></div>
+<p class="msg">O limite de 20% da unidade em férias ao mesmo tempo não entra na conta: o Cartinhas não sabe quem mais marcou.</p>
+<div class="row"><button type="button" id="fMelhor">Melhor combinação do ciclo</button></div>${htmlMelhor()}</div>`}
+
+/* Seção 10.2: distribuir o saldo que falta em até três períodos, maximizando o descanso contado
+   pela UNIÃO dos intervalos [início − borda, fim + borda]: o fim de semana entre dois períodos
+   conta uma vez só. Programação dinâmica com "o último escolhido" no estado: os próximos que podem
+   dividir borda com ele (os que começam até a maior corrida de dias livres depois da borda dele)
+   são olhados um a um; os demais vêm de uma tabela de sufixos. Com o intervalo de 30 dias o
+   primeiro grupo fica vazio por construção, e a conta vira a soma simples. */
+function fMelhorCombinacao(c,ctx,op){op=op||{};if(!c)return {vazio:true,motivo:'Sem ciclo para programar.'};
+  const P=ctx.P,d=dadosCiclo(c,false),durs=(op.durs||(d.periodos||[]).map(fDur));
+  const resto=op.resto!=null?op.resto:fSaldo(c,d,null,todayISO).livre;if(resto<=0)return {vazio:true,motivo:'Não há saldo para distribuir neste ciclo.'};
+  const concorda=op.concorda!=null?op.concorda:(d.concordaFracionar||!P.fracionarExigeConcordancia);
+  const vagas=P.maxPeriodos-durs.length;if(vagas<=0)return {vazio:true,motivo:'Este ciclo já tem '+P.maxPeriodos+' períodos.'};
+  const todos=op.todos||todosPeriodos(),pesa=p=>p.chave===c.chave||P.intervaloEntreCiclos;
+  const amanha=fSoma(todayISO,1),de=amanha>c.coIni?amanha:c.coIni,ate=c.coFim;if(de>ate)return {vazio:true,motivo:'O prazo deste ciclo já acabou.'};
+  /* a janela em índices de dia, com 62 dias de folga dos dois lados para as bordas */
+  const base=fSoma(de,-62),N=fDias(base,ate)+63,dia=i=>fSoma(base,i);
+  const liv=new Uint8Array(N);for(let i=0;i<N;i++)liv[i]=ctx.livre(dia(i))?1:0;
+  const antes=new Int16Array(N),depois=new Int16Array(N),util=new Int32Array(N+1);
+  for(let i=1;i<N;i++)antes[i]=liv[i-1]?antes[i-1]+1:0;
+  for(let i=N-2;i>=0;i--)depois[i]=liv[i+1]?depois[i+1]+1:0;
+  for(let i=0;i<N;i++)util[i+1]=util[i]+(liv[i]?0:1);
+  let maxRun=0;for(let i=0;i<N;i++)if(antes[i]>maxRun)maxRun=antes[i];
+  const i0=fDias(base,de),i1=fDias(base,ate);
+  const Ls=[];if(concorda)for(let L=P.minDemais;L<=resto;L++)Ls.push(L);
+  if(!durs.length&&!Ls.includes(resto))Ls.push(resto);                 /* o saldo inteiro de uma vez */
+  const pesados=todos.filter(pesa),grupos=[],cands=[];
+  for(let si=i0;si<=i1;si++){const ds=dia(si);if(!fInicio(ds,ctx).ok)continue;const g={s:si,cands:[]};
+    for(const L of Ls){const e=si+L-1;if(e>i1)continue;const n={ini:ds,fim:dia(e)};
+      if(todos.some(p=>sobrepoe(p,n))||fIntervalo(n,pesados,P))continue;
+      const cn={L,s:si,e,lo:si-antes[si],hi:e+depois[e],desc:antes[si]+L+depois[e],uteis:util[e+1]-util[si],g:grupos.length,id:cands.length};
+      g.cands.push(cn);cands.push(cn)}
+    if(g.cands.length)grupos.push(g)}
+  if(!grupos.length)return {vazio:true,motivo:'Não há datas no prazo deste ciclo onde o saldo caiba, com as regras de início e de intervalo.'};
+  const G=grupos.length,R=resto+1,K=vagas+1,ST=R*K*2,at=(r,k,h)=>(r*K+k)*2+h,NEG=-1e9,gap=P.intervaloMinDias;
+  const prim=x=>{let lo=0,hi=G;while(lo<hi){const m=(lo+hi)>>1;if(grupos[m].s<x)lo=m+1;else hi=m}return lo};
+  const BEST=new Float64Array((G+1)*ST).fill(NEG),BARG=new Int32Array((G+1)*ST).fill(-1);
+  const T=new Float64Array((G+1)*ST).fill(NEG),TARG=new Int32Array((G+1)*ST).fill(-1);
+  const W=new Float64Array(cands.length*ST).fill(NEG),WNX=new Int32Array(cands.length*ST).fill(-1);
+  const valido=k=>durs.length+(vagas-k)<=1;   /* um período só: bloco único, sem exigir o de 14 */
+  for(let gi=G-1;gi>=0;gi--){
+    for(const cn of grupos[gi].cands){
+      const nx=prim(cn.e+gap+1),far=Math.max(nx,prim(cn.hi+maxRun+1));
+      for(let r=0;r<R;r++)for(let k=0;k<K;k++)for(let h=0;h<2;h++){const w=cn.id*ST+at(r,k,h);
+        if(r===0){if(valido(k)||h){W[w]=cn.desc;WNX[w]=-1}continue}
+        if(k===0)continue;let best=NEG,arg=-1;
+        for(let g2=nx;g2<far;g2++){const b=g2*ST+at(r,k,h),v=BEST[b];if(v<=NEG/2)continue;
+          const ov=Math.max(0,cn.hi-cands[BARG[b]].lo+1);if(v-ov>best){best=v-ov;arg=BARG[b]}}
+        const tf=far*ST+at(r,k,h);if(T[tf]>best){best=T[tf];arg=TARG[tf]}
+        if(arg>=0&&best>NEG/2){W[w]=cn.desc+best;WNX[w]=arg}}}
+    for(let r=1;r<R;r++)for(let k=1;k<K;k++)for(let h=0;h<2;h++){const b=gi*ST+at(r,k,h);
+      for(const cn of grupos[gi].cands){if(cn.L>r)continue;const v=W[cn.id*ST+at(r-cn.L,k-1,h||cn.L>=P.minMaior?1:0)];if(v>BEST[b]){BEST[b]=v;BARG[b]=cn.id}}
+      const nt=(gi+1)*ST+at(r,k,h);T[b]=BEST[b];TARG[b]=BARG[b];if(T[nt]>T[b]){T[b]=T[nt];TARG[b]=TARG[nt]}}}
+  const h0=durs.some(x=>x>=P.minMaior)?1:0,raiz=at(resto,vagas,h0),total=T[raiz];
+  if(total<=NEG/2)return {vazio:true,motivo:'Não há combinação que feche o saldo neste ciclo, com as regras de início, de intervalo e de fracionamento.'};
+  const ps=[];let i=TARG[raiz],r=resto,k=vagas,h=h0;
+  while(i>=0){const cn=cands[i];ps.push({ini:dia(cn.s),fim:dia(cn.e),descanso:cn.desc,uteis:cn.uteis});r-=cn.L;k--;h=h||cn.L>=P.minMaior?1:0;i=WNX[cn.id*ST+at(r,k,h)]}
+  return {periodos:ps,descanso:total,uteis:ps.reduce((a,p)=>a+p.uteis,0),dias:resto}}
+function htmlMelhor(){const r=fMelhorRes;if(!r)return '';
+  if(r.vazio)return `<p class="fsem">${esc(r.motivo)}</p>`;
+  return `<div class="fdica" id="fMelhorRes"><h4>Melhor combinação para os ${r.dias} dias que faltam</h4>
+${r.periodos.map(p=>`<p><b>${br(p.ini)} a ${br(p.fim)}</b> · ${fDur(p)} dias · ${p.descanso} seguidos fora · ${p.uteis} úteis poupados</p>`).join('')}
+<p>No total: <b>${r.descanso} dias fora</b> e <b>${r.uteis} dias úteis poupados</b>${r.periodos.length>1?' — o mesmo fim de semana entre dois períodos conta uma vez só':''}.</p>
+<p class="msg">É a que mais rende pelo critério "dias seguidos fora", não necessariamente a melhor para você.</p>
+<div class="row"><button type="button" class="pri" id="fMarcaMelhor">Marcar estas</button></div></div>`}
+function marcaMelhor(){const r=fMelhorRes;if(!r||!r.periodos)return;fMelhorRes=null;for(const p of r.periodos)if(!fMarca(p.ini,p.fim))return}
+
+/* ---- fase 9: avisos com data calculada (PLANO-FERIAS.md, seção 14) ---- */
+function fAvisosCiclo(c,s){const P=fParam(),h=todayISO,out=[];
+  if(c.aqIni<=h&&h<=c.aqFim){const lim=fSoma(c.aqFim,-P.abonoPrazoDias);
+    out.push(h<=lim?`<b>Abono:</b> este período aquisitivo termina em ${br(c.aqFim)}. Para vender dias, registre a intenção no e-Benefício até <b>${br(lim)}</b> (${P.abonoPrazoDias} dias antes) e antes de programar as férias.`
+      :`<b>Abono:</b> o prazo para registrar a intenção de vender dias deste ciclo terminou em ${br(lim)}.`)}
+  if(c.coIni<=h&&h<=c.coFim&&s.livre>0){const n=fDias(h,c.coFim);
+    if(n<90)out.push(`<b>Prazo correndo:</b> faltam ${s.livre} dias sem data, e o prazo termina em ${br(c.coFim)}, daqui a ${n} dias. Fora do prazo, a remuneração das férias é paga em dobro.`)}
+  return out}
+/* o prazo administrativo de cada período: programar com 40 dias, avisar com 30 */
+function prazoPeriodo(p){const P=fParam(),h=todayISO;
+  if(p.estado==='planejado'){const lim=fSoma(p.ini,-P.antecedenciaDias);return lim>=h?`programar até ${br(lim)}`:`a menos de ${P.antecedenciaDias} dias: pedido excepcional`}
+  if(p.estado==='aprovado'&&p.ini>h){const lim=fSoma(p.ini,-P.avisoDias);return `aviso de férias até ${br(lim)}`}
+  return ''}
+
+/* ---- fase 10: lançar na tabela do ponto (seção 13.6) ----
+   É o único caminho pelo qual o plano mexe no ponto. Regras: só período aprovado; pré-visualização
+   dia a dia; dia com batidas ou corrigido à mão não vai sem decisão explícita; sem tipoManual, para
+   o relatório do SRP continuar valendo quando trouxer o dia; desfazer confere antes de devolver. */
+let fLanca=null,fDesfaz=null;
+const retratoDia=x=>({tipo:x.tipo,marcas:x.marcas||'',abono:x.abono==null?'':String(x.abono),obs:x.obs||''});
+const diaDoPonto=d=>{const m=months[d.slice(0,7)];return m?(m.days||[]).find(x=>x.d===d)||null:null};
+/* o mês precisa existir na tabela para receber os dias (mesmo jeito de garanteMeses: não troca o mês mostrado) */
+function garanteMesPonto(ym){if(months[ym]&&months[ym].days&&months[ym].days.length)return;
+  const sv={cur,days,meta};useMonth(ym);({cur,days,meta}=sv);if(cur)months[cur]={days,meta}}
+const contribDia=x=>{const r=calcDay(x);return r.fora?0:(($('optExc').checked?r.cred:0)-r.deb)};
+/* Pré-visualizar não grava nada, nem cria mês: mês que ainda não está na tabela é lido pela mesma
+   regra com que a tabela o criaria (fillMonth), e só é criado ao lançar de fato. */
+const diaPrevisto=d=>diaDoPonto(d)||(months[d.slice(0,7)]?null:{d,tipo:[0,6].includes(fWd(d))?'folga':ehFeriado(d)?'feriado':'util',marcas:'',srpMarcas:'',futuro:true,novo:true});
+function fPreparaLanca(pid){const p=todosPeriodos().find(x=>x.id===pid);if(!p)return;const dias=[];
+  for(let d=p.ini;d<=p.fim;d=fSoma(d,1)){const x=diaPrevisto(d);
+    if(!x||x.tipo!=='util')continue;  /* fim de semana, feriado e férias já não têm carga */
+    const bat=parseList(x.marcas).length>0,edit=!!x.tipoManual||normM(x.marcas)!==normM(x.srpMarcas);
+    dias.push({d,bat,edit,ab:x.abono!=null&&x.abono!=='',marcas:x.marcas||'',efeito:contribDia(x),pular:bat||edit})}
+  fLanca={pid,ini:p.ini,fim:p.fim,dias};fAvisoTxt='';renderFerias()}
+/* o saldo de cada mês tocado, antes e depois, do jeito que está marcado na pré-visualização */
+function efeitoLanca(L){const por={};for(const it of L.dias)(por[it.d.slice(0,7)]=por[it.d.slice(0,7)]||[]).push(it);
+  const useExc=$('optExc').checked;
+  return Object.keys(por).sort().map(ym=>{if(!months[ym])return {ym,antes:0,depois:0,novo:true};
+    const ds=months[ym].days,vai=new Set(por[ym].filter(i=>!i.pular).map(i=>i.d));
+    const antes=totals(useExc,false,ds).saldo,depois=totals(useExc,false,ds.map(x=>vai.has(x.d)?{...x,tipo:'ferias'}:x)).saldo;
+    return {ym,antes,depois}})}
+function htmlLanca(){const L=fLanca,ef=efeitoLanca(L);
+  const linha=(it,i)=>`<tr><td>${br(it.d)} ${['dom','seg','ter','qua','qui','sex','sáb'][fWd(it.d)]}</td><td>${it.bat?`<b>tem batidas</b> (${esc(it.marcas)}): lançar ${it.efeito?'muda o saldo em '+esc(fmt(-it.efeito,true))+' — as horas desse dia viram hora extra, fora do banco':'não muda o saldo, mas as horas desse dia viram hora extra'}`:it.edit?'<b>corrigido à mão</b> na tabela':'sem batidas'}${it.ab?' · tem abono':''}</td>
+<td><label class="fchk"><input type="checkbox" data-lpula="${i}"${it.pular?'':' checked'}> lançar</label></td></tr>`;
+  return `<div class="faviso" role="alert" id="fLancaPainel"><b>Lançar na tabela do ponto: ${br(L.ini)} a ${br(L.fim)}</b>
+<p>Os dias úteis do período passam a "Férias" na tabela do banco de horas. Fins de semana e feriados ficam como estão, porque já não têm carga. Quando o relatório do SRP trouxer esses dias, vale o que ele disser.</p>
+${L.dias.length?`<div class="scroll"><table class="fper"><thead><tr><th>Dia</th><th>Situação</th><th></th></tr></thead><tbody>${L.dias.map(linha).join('')}</tbody></table></div>`:'<p>Nenhum dia útil a lançar: o período inteiro já está como férias, fim de semana ou feriado.</p>'}
+<p><b>Efeito no saldo:</b> ${ef.map(e=>`${esc(cap(nomeMesF(e.ym)))}: ${e.novo?'ainda não está na tabela; o mês entra nela, com esses dias como férias':e.antes===e.depois?'fica igual ('+esc(fmt(e.antes,true))+')':'vai de '+esc(fmt(e.antes,true))+' para '+esc(fmt(e.depois,true))}`).join(' · ')||'nenhum'}. Dias que ainda não chegaram não entram no saldo; deixam de contar como dia útil na previsão do mês.</p>
+<div class="row"><button type="button" class="pri" id="fLancaOk">Lançar</button><button type="button" id="fLancaCancela">Cancelar</button></div></div>`}
+function fAplicaLanca(){const L=fLanca;if(!L)return;fLanca=null;const em=new Date().toISOString(),feitos=[];
+  for(const it of L.dias){if(it.pular)continue;garanteMesPonto(it.d.slice(0,7));const x=diaDoPonto(it.d);if(!x||x.tipo!=='util')continue;
+    const antes={tipo:x.tipo,tipoManual:!!x.tipoManual};x.tipo='ferias';
+    x.lancFerias={periodo:L.pid,em,antes,conferencia:retratoDia(x)};feitos.push(it.d)}
+  if(cur&&months[cur]){days=months[cur].days;meta=months[cur].meta||null}
+  mudaFerias(f=>{for(const k of Object.keys(f.ciclos)){const p=(f.ciclos[k].periodos||[]).find(y=>y.id===L.pid);if(p){p.lancado=true;p.lancados=feitos}}},true);
+  fAvisoTxt=feitos.length?`Lançados ${feitos.length} dias úteis na tabela do ponto, como férias.`:'Nenhum dia foi lançado.';render();renderFerias()}
+/* Desfazer: devolve só o dia que está exatamente como o lançamento deixou. Dia editado depois, ou
+   que o relatório do SRP substituiu, não é restaurado calado. */
+function fDesfazLanca(pid){const conflito=[],ok=[];
+  for(const k of Object.keys(months))for(const x of months[k].days||[]){const m=x.lancFerias;if(!m||m.periodo!==pid)continue;
+    if(canonJ(retratoDia(x))===canonJ(m.conferencia)){x.tipo=m.antes.tipo;if(m.antes.tipoManual)x.tipoManual=true;else delete x.tipoManual;delete x.lancFerias;ok.push(x.d)}
+    else conflito.push({d:x.d,antes:m.antes,lanc:m.conferencia,agora:retratoDia(x)})}
+  const p=todosPeriodos().find(y=>y.id===pid),doSrp=((p&&p.lancados)||[]).filter(d=>{const x=diaDoPonto(d);return x&&!x.lancFerias});
+  if(cur&&months[cur]){days=months[cur].days;meta=months[cur].meta||null}
+  if(conflito.length){fDesfaz={pid,conflito,ok,doSrp};save();render();renderFerias();return}
+  fDesfaz=null;fimDesfaz(pid,ok,doSrp)}
+function fimDesfaz(pid,ok,doSrp){
+  mudaFerias(f=>{for(const k of Object.keys(f.ciclos)){const p=(f.ciclos[k].periodos||[]).find(y=>y.id===pid);if(p){p.lancado=false;delete p.lancados}}},true);
+  fAvisoTxt=`Lançamento desfeito: ${ok.length} dias voltaram ao que eram.`+(doSrp.length?` ${doSrp.length} já tinham vindo do relatório do SRP e ficaram como ele diz.`:'');render();renderFerias()}
+function htmlDesfaz(){const D=fDesfaz,v=r=>`${r.tipo}${r.marcas?' · '+esc(r.marcas):''}${r.abono?' · abono '+esc(r.abono):''}${r.obs?' · “'+esc(r.obs)+'”':''}`;
+  return `<div class="faviso" role="alert" id="fDesfazPainel"><b>Desfazer o lançamento: estes dias mudaram depois.</b> Os outros ${D.ok.length} dias já voltaram ao que eram. Estes não voltam sozinhos:
+<div class="scroll"><table class="fper"><thead><tr><th>Dia</th><th>Antes de lançar</th><th>Ao lançar</th><th>Agora</th></tr></thead><tbody>${D.conflito.map(c=>`<tr><td>${br(c.d)}</td><td>${esc(c.antes.tipo)}</td><td>${v(c.lanc)}</td><td>${v(c.agora)}</td></tr>`).join('')}</tbody></table></div>
+<p class="msg">Nos dois casos, o que você editou depois fica. A diferença é só o tipo do dia.</p>
+<div class="row"><button type="button" class="pri" id="fDesfazManter">Manter estes dias como estão agora</button><button type="button" id="fDesfazVoltar">Voltar o tipo ao de antes, mantendo as edições</button></div></div>`}
+function resolveDesfaz(voltar){const D=fDesfaz;if(!D)return;fDesfaz=null;
+  for(const c of D.conflito){const x=diaDoPonto(c.d);if(!x||!x.lancFerias)continue;
+    if(voltar){x.tipo=x.lancFerias.antes.tipo;if(x.lancFerias.antes.tipoManual)x.tipoManual=true;else delete x.tipoManual}
+    delete x.lancFerias}
+  if(cur&&months[cur]){days=months[cur].days;meta=months[cur].meta||null}
+  fimDesfaz(D.pid,D.ok.concat(D.conflito.map(c=>c.d)),D.doSrp)}
+/* depois de lançar, o relatório do SRP pode trazer o dia de outro jeito: o conflito fica à vista */
+function conflitosLanc(p){if(!p.lancado)return '';
+  const tr=(p.lancados||[]).map(d=>({d,x:diaDoPonto(d)})).filter(o=>o.x&&!o.x.lancFerias&&o.x.tipo!=='ferias');
+  return tr.map(o=>`<p class="fnat fnat-aviso">O relatório trouxe ${br(o.d)} como ${o.x.tipo==='util'?'dia trabalhado':esc(o.x.tipo)}${parseList(o.x.marcas).length?' (batidas '+esc(o.x.marcas)+')':''}; o período lançado previa férias. Nada foi corrigido sozinho.</p>`).join('')}
+
+/* ---- plano mestre: prazo na faixa, lembretes, opções e direitos, e-mail para o chefe ----
+   (PLANO-MESTRE-CARTINHAS.md, "Prazos e lembretes" e "Opções e direitos"). Nada aqui muda o ponto:
+   ver um aviso, mudar uma opção ou preparar o e-mail mantém o banco de horas igual. */
+const KFL=KEYM+'.ferias.lembretes';  /* marcos de lembrete já mostrados, por ciclo: estado local deste computador */
+let fLembrete=null,fLembreteFeito=false,fOpAberto=null,fEmail=null;
+/* Dias que ainda pedem programação: o direito menos o usufruído, o vendido e o APROVADO.
+   Planejado é rascunho: continua no saldo do planejamento, mas não encerra os avisos. */
+const pendenteCiclo=(c,d)=>{const s=fSaldo(c,d,null,todayISO);return s.direito-s.usufruido-s.abono-s.aprovado};
+/* O início mais tarde possível para um bloco único com os dias pendentes: conta as datas inclusivas
+   até o fim do concessivo e, se o dia for vedado ou bater em período confirmado, volta até achar um. */
+function fUltimoInicio(c,pend,ctx){const P=ctx.P,conf=todosPeriodos().filter(p=>p.estado!=='planejado'),amanha=fSoma(todayISO,1);
+  const pesa=conf.filter(p=>p.chave===c.chave||P.intervaloEntreCiclos);
+  for(let d=fSoma(c.coFim,-(pend-1));d>=amanha&&d>=c.coIni;d=fSoma(d,-1)){const n={ini:d,fim:fSoma(d,pend-1)};
+    if(!fInicio(d,ctx).ok||conf.some(p=>sobrepoe(p,n))||fIntervalo(n,pesa,P))continue;return d}
+  return null}
+/* A conta da faixa para um ciclo: quantos dias para marcar, a partir da data de escolha informada
+   ou, sem ela, do último início viável menos a antecedência de 40 dias (cenário, a confirmar). */
+function fFaixa(c,ctx){const d=dadosCiclo(c,false),P=ctx.P,h=todayISO,s=fSaldo(c,d,pendencias(c),h),pend=pendenteCiclo(c,d);
+  const base={c,pend,provisorio:s.provisorio,motivos:s.motivos,esc:d.dataEscolha||null,aut:d.dataAutomatica||null,fonte:d.fonteDatas||''};
+  if(pend<=0)return {...base,tipo:'ok'};
+  if(h>c.coFim)return {...base,tipo:'vencido'};
+  let ult=fUltimoInicio(c,pend,ctx),div=false;
+  if(!ult&&(d.concordaFracionar||!P.fracionarExigeConcordancia)&&fPodeFracionar(pend)){
+    const conf=todosPeriodos().filter(p=>p.estado!=='planejado'),r=fMelhorCombinacao(c,ctx,{resto:pend,todos:conf,durs:(d.periodos||[]).filter(p=>p.estado!=='planejado').map(fDur)});
+    if(r.periodos){ult=r.periodos.map(p=>p.ini).sort()[0];div=true}}
+  const prazo=ult?fSoma(ult,-P.antecedenciaDias):null,ref=base.esc||prazo;
+  if(!ref)return {...base,tipo:'risco'};
+  const n=fDias(h,ref);return {...base,tipo:n<0?'passou':'conta',n,ref,prazo,ult,div,estimado:!base.esc}}
+const nDias=n=>n===1?'1 dia':n+' dias';
+function textoFaixa(fx){
+  if(fx.tipo==='ok')return 'Suas férias deste ciclo estão programadas.';
+  if(fx.tipo==='vencido')return 'Seu período concessivo terminou com férias pendentes.';
+  if(fx.tipo==='risco')return 'Os dias pendentes já não cabem antes do fim do prazo deste ciclo.';
+  if(fx.tipo==='passou')return 'O prazo ordinário passou. Ainda há férias a regularizar.';
+  if(fx.n===0)return 'Hoje é o último dia para solicitar a programação no prazo ordinário.';
+  return (fx.estimado?'Pelo cenário estimado, você tem ':'Você tem ')+nDias(fx.n)+' para marcar suas férias.'}
+/* Marco de lembrete: um por mês antes da janela final; nos últimos 30 dias até o prazo, os marcos
+   30, 25, 20, 15, 10, 5 e 0. Quem ficou dias sem abrir vê só o marco de agora, não os perdidos. */
+function fMarco(fx){if(!fx||(fx.tipo!=='conta'&&fx.tipo!=='passou'))return null;
+  if(fx.tipo==='passou')return 'passou';if(fx.n>30)return 'mes:'+todayISO.slice(0,7);
+  return 'dias:'+[0,5,10,15,20,25,30].find(m=>fx.n<=m)}
+function confereLembrete(fx){if(fLembreteFeito)return;fLembreteFeito=true;const m=fMarco(fx);if(!m)return;
+  let reg={};try{reg=JSON.parse(localStorage.getItem(KFL))||{}}catch(e){}
+  const k=fx.c.chave+':ordinario';if(reg[k]===m)return;reg[k]=m;try{localStorage.setItem(KFL,JSON.stringify(reg))}catch(e){}
+  fLembrete={chave:fx.c.chave,marco:m,n:fx.n,ref:fx.ref}}
+function cardsFaixa(fx,outro){const out=[],P=fParam(),h=todayISO;
+  const card=(nivel,titulo,texto,acao,rotulo)=>out.push({nivel,titulo,texto,acao,rotulo});
+  if(fLembrete&&fLembrete.chave===fx.c.chave&&fx.tipo==='conta')card('info','Lembrete',`Faltam ${nDias(fx.n)} para o prazo de solicitar a programação, em ${br(fx.ref)}. Veja as datas disponíveis e prepare o pedido.`,'lembrete-ok','Ok, vi');
+  if(fx.tipo==='passou')card('urgente','Prazo para solicitar passou',`O prazo ordinário era ${br(fx.ref)}. Ainda há ${nDias(fx.pend)} sem programação confirmada, e o prazo para tirar vai até ${br(fx.c.coFim)}: as datas que aparecem continuam valendo, sujeitas à regularização.`,'ver-datas','Ver datas e falar com o gestor');
+  if(fx.tipo==='risco')card('urgente','Risco de vencer com saldo',`${nDias(fx.pend)} estão sem programação confirmada e já não cabem antes de ${br(fx.c.coFim)}, com as regras de início e de intervalo. Fora do prazo, a remuneração das férias é paga em dobro.`,'email','Conferir com o gestor ou a Gestão de Pessoas');
+  if(fx.tipo==='vencido')card('urgente','Férias pendentes de regularização',`O prazo deste ciclo terminou em ${br(fx.c.coFim)} com ${nDias(fx.pend)} sem programação confirmada.`,'email','Falar com o gestor');
+  if(fx.aut){const na=fDias(h,fx.aut);
+    if(na<0)card('atencao','Confira se o Populis programou suas férias',`A programação automática estava prevista para ${br(fx.aut)}${fx.fonte?' ('+esc(fx.fonte)+')':''}. Se o Populis já programou, marque o período como aprovado na lista do ciclo.`);
+    else if(fx.esc&&fx.tipo==='conta'&&fx.n<=10)card('urgente','Programação automática chegando',`Você tem ${nDias(fx.n)} para marcar suas férias antes da programação automática prevista no Populis, em ${br(fx.aut)}${fx.fonte?' ('+esc(fx.fonte)+')':''}.`,'email','Preparar o pedido');
+    else if(!fx.esc&&na<=10)card('urgente','Programação automática chegando',`Faltam ${nDias(na)} para a programação automática prevista, em ${br(fx.aut)}${fx.fonte?' ('+esc(fx.fonte)+')':''}.`,'email','Preparar o pedido')}
+  if(outro)card('atencao','Outro ciclo tem prazo mais perto',`No ${esc(nomeCiclo(outro.c).toLowerCase())}: ${esc(textoFaixa(outro))}${outro.ref?' Prazo: '+br(outro.ref)+'.':''}`);
+  return out}
+const ICONE={urgente:'⚠️',atencao:'⏰',info:'🔔'};
+function htmlFaixa(cs,ctx){
+  const cand=[...cs.emConcessivo];if(cs.emAquisitivo&&!cand.includes(cs.emAquisitivo))cand.push(cs.emAquisitivo);
+  /* ciclos que já terminaram, mas em que a pessoa registrou algo e ainda há dias pendentes */
+  for(const c of cs.lista)if(c.coFim<todayISO&&ferias.ciclos[c.chave]&&pendenteCiclo(c,ferias.ciclos[c.chave])>0&&!cand.includes(c))cand.unshift(c);
+  const fxs=cand.map(c=>fFaixa(c,ctx));if(!fxs.length)return '';
+  const urg=x=>x.tipo==='vencido'?0:x.tipo==='risco'?1:x.tipo==='passou'?2:x.tipo==='conta'?3:9;
+  const ordem=fxs.slice().sort((a,b)=>urg(a)-urg(b)||((a.ref||'9')<(b.ref||'9')?-1:1));
+  const correndo=ordem.filter(x=>x.c.coIni<=todayISO);
+  const fx=(fFocoSel&&fxs.find(x=>x.c.chave===fFocoSel))||correndo[0]||ordem[0];
+  const outro=ordem.find(x=>x!==fx&&urg(x)<9&&(urg(x)<urg(fx)||(x.ref&&fx.ref&&x.ref<fx.ref)));
+  confereLembrete(fx);
+  const det=fx.tipo==='conta'||fx.tipo==='passou'
+    ?(fx.estimado?`Prazo recomendado para solicitar a programação: até ${br(fx.ref)} — o último início possível${fx.div?', com as férias divididas,':''} é ${br(fx.ult)}, menos os ${ctx.P.antecedenciaDias} dias de antecedência da regra interna, ainda a confirmar no MANPES. Se o Populis tiver um prazo para escolher ou uma programação automática prevista, informe no cartão do ciclo.`
+      :`Prazo para escolher informado por você${fx.fonte?' ('+esc(fx.fonte)+')':''}: ${br(fx.esc)}.`):fx.tipo==='ok'?'Os dias deste ciclo estão cobertos por férias aprovadas, usufruídas ou vendidas.':'';
+  const lim=fx.provisorio&&fx.tipo!=='ok'?`<p class="msg">O saldo ainda é provisório (${esc(fx.motivos.join('; '))}): confirme o saldo e as datas do ciclo para o prazo valer.</p>`:'';
+  const nivel=fx.tipo==='ok'?'fx-ok':fx.tipo==='conta'&&fx.n>10?'':'fx-urg';
+  /* fixo no topo só o essencial; o resto rola, para a faixa não cobrir a tela de quem usa celular ou janela estreita */
+  return `<div class="ffaixa ${nivel}" id="fFaixa" role="status" aria-live="polite"><span class="fcic">${esc(nomeCiclo(fx.c))}</span> <b class="fn">${esc(textoFaixa(fx))}</b></div>
+<div class="ffaixa-det" id="fFaixaDet"><p>${det}${fx.tipo==='conta'||fx.tipo==='passou'?' <button type="button" data-fx="ver-datas" class="lnk">Ver as datas disponíveis</button>':''}</p>${lim}
+<div class="row"><button type="button" data-fx="email">✉️ Preparar e-mail para o chefe</button></div></div>
+${cardsFaixa(fx,outro).map(k=>`<div class="fcardx fx-${k.nivel}" role="${k.nivel==='urgente'?'alert':'status'}"><b>${ICONE[k.nivel]} ${k.nivel==='urgente'?'Urgente: ':''}${esc(k.titulo)}</b><p>${k.texto}</p>${k.acao?`<button type="button" data-fx="${k.acao}">${esc(k.rotulo)}</button>`:''}</div>`).join('')}`}
+
+/* ---- datas do Populis: só quando a pessoa sabe e informa, com a origem ---- */
+function htmlDatasPopulis(c,d){return `<details class="fopcoes"${d.dataEscolha||d.dataAutomatica?' open':''}><summary>Datas do Populis, se você souber</summary>
+<div class="row frow"><label class="fcampo">Prazo para escolher as férias<input type="date" data-fd="dataEscolha" value="${esc(d.dataEscolha||'')}"></label>
+<label class="fcampo">Programação automática prevista<input type="date" data-fd="dataAutomatica" value="${esc(d.dataAutomatica||'')}"></label>
+<label class="fcampo">De onde veio a informação<input data-fd="fonteDatas" value="${esc(d.fonteDatas||'')}" placeholder="ex.: e-mail do gestor"></label></div>
+<p class="msg">Com o prazo para escolher, a faixa conta por ele. Sem ele, o Cartinhas estima pelo cenário de 40 dias de antecedência. "Programação automática" quer dizer que o Populis pode pôr as datas sozinho; confira no Populis se isso vale para você.</p></details>`}
+
+/* ---- opções e direitos (plano mestre): o que é, o que dá para escolher, qual o próximo passo ---- */
+const EST_OP=[['decidir','a decidir'],['pretendo','pretendo solicitar'],['solicitado','solicitação informada'],['confirmado','confirmação informada']];
+const ESCOLHA_DECIMO=['decidir','ferias','fora'],ESCOLHA_ADIANT=['decidir','sim','nao'];
+const EXPL={
+  datas:'Escolha os dias em que você quer se afastar do trabalho. O gestor ainda precisa confirmar as datas. As férias contam dias corridos, incluindo fins de semana e feriados dentro do período.',
+  dividir:'Você pode tirar tudo de uma vez ou dividir o descanso em blocos, se as datas e o saldo permitirem. Com 30 dias, um exemplo é 15 dias agora e 15 depois. Cada bloco precisa respeitar as regras de duração e programação.',
+  abono:dir=>{const v=Math.floor(dir*FERIAS_PARAM.abonoFracao+1e-9);return dir?`Você troca parte dos dias de descanso por dinheiro. Com direito a ${dir} dias, vender um terço significa descansar ${dir-v} dias e receber pelos outros ${v}. Esse dinheiro não é devolvido. Para saber até quando pode pedir, conte a partir da data em que termina o período em que você ganhou esse direito.`:'Sem dias de direito neste ciclo, não há o que vender.'},
+  decimo:'Você pede para receber nas férias parte do décimo terceiro que já receberia. A opção relatada para os Correios é de 50%. A regra aplicável ao seu caso precisa ser confirmada. O que vier antes será considerado no acerto do 13º.',
+  adiant:'É um valor que você pode pedir agora e devolver por descontos nos pagamentos seguintes. A remuneração normal das férias e o adicional de um terço seguem suas próprias regras.',
+  parcelas:'Se você pedir o adiantamento, a devolução pode ser dividida nos meses seguintes conforme a regra aplicável. Mais parcelas espalham os descontos pelo tempo. A regra relatada permite até cinco parcelas, ainda a confirmar.',
+  nao:'Você escolhe não receber a primeira parcela do 13º junto das férias e não pedir o adiantamento devolvido em folha. Seu abono pecuniário, se escolhido, continua separado. A remuneração de férias e o adicional de um terço continuam aplicáveis.',
+  terco:'É o valor adicional previsto pela Constituição sobre a remuneração de férias. É pago conforme as regras da folha. Você não precisa marcar uma opção para pedir.'};
+function validaOpcoes(o){if(typeof o!=='object'||Array.isArray(o)||!o)return 'opções fora do formato';
+  const est=x=>x==null||EST_OP.some(e=>e[0]===x);
+  if(o.abono&&(!est(o.abono.estado)||(o.abono.dias!=null&&!Number.isInteger(o.abono.dias))))return 'opção de abono fora do formato';
+  if(o.decimo&&(!ESCOLHA_DECIMO.includes(o.decimo.escolha||'decidir')||!est(o.decimo.estado)||(o.decimo.ano!=null&&!Number.isInteger(o.decimo.ano))||(o.decimo.periodo!=null&&typeof o.decimo.periodo!=='string')))return 'opção do 13º fora do formato';
+  const ad=o.adiantamento;
+  if(ad&&(!ESCOLHA_ADIANT.includes(ad.escolha||'decidir')||!est(ad.estado)||(ad.parcelas!=null&&!(Number.isInteger(ad.parcelas)&&ad.parcelas>=1&&ad.parcelas<=5))||(ad.periodo!=null&&typeof ad.periodo!=='string')))return 'opção de adiantamento fora do formato';
+  return null}
+/* Período ligado a uma opção que mudou de data ou sumiu pede revisão (não muda nada sozinho). */
+function revisoesOpcoes(d){const o=d.opcoes||{},out=[],ps=d.periodos||[];
+  for(const [k,nome] of [['decimo','ao 13º nas férias'],['adiantamento','ao adiantamento']]){const x=o[k];if(!x||!x.periodo)continue;
+    const p=ps.find(y=>y.id===x.periodo);
+    if(!p)out.push(`O período ligado ${nome} foi apagado: revise essa escolha.`);
+    else if(x.snap&&(x.snap.ini!==p.ini||x.snap.fim!==p.fim))out.push(`O período ligado ${nome} mudou de datas (era ${br(x.snap.ini)} a ${br(x.snap.fim)}): revise essa escolha.`)}
+  return out}
+function htmlOpcoes(c,d,s){const o=d.opcoes||{},ab=o.abono||{},dc=o.decimo||{},ad=o.adiantamento||{};
+  const futuros=(d.periodos||[]).filter(p=>p.estado!=='usufruido').sort((a,b)=>a.ini<b.ini?-1:1),selP=(campo,atual)=>`<label class="fcampo">Em qual período<select data-fo="${campo}">${opcoesSel([['','escolher…'],...futuros.map(p=>[p.id,br(p.ini)+' a '+br(p.fim)])],atual||'')}</select></label>`;
+  return `<details class="fopcoes"${fOpAberto===c.chave?' open':''} data-opc="${c.chave}"><summary>Opções e direitos: vender dias, 13º, adiantamento e o adicional de 1/3</summary>
+<p class="msg">Aqui você registra o que pretende pedir e o que já informou. Quem processa é o Populis, o e-Benefício e a folha: o Cartinhas só calcula prazos e dias e guarda o que você declarar. Nada disso muda o seu banco de horas.</p>
+${revisoesOpcoes(d).map(t=>`<p class="fnat fnat-aviso">${esc(t)}</p>`).join('')}
+<div class="fitem-op"><h4>💰 Vender dias de férias (abono pecuniário)</h4><p class="fexpl">${EXPL.abono(s.direito)}</p>
+<p class="msg">Até quando registrar a intenção: ${br(fSoma(c.aqFim,-FERIAS_PARAM.abonoPrazoDias))}, no e-Benefício. Quantos dias, você escolhe em "Dias vendidos (abono)" acima, quando estiver confirmado.</p>
+<div class="row frow"><label class="fcampo">Situação<select data-fo="abono.estado">${opcoesSel(EST_OP,ab.estado||'decidir')}</select></label></div></div>
+<div class="fitem-op"><h4>💵 Receber parte do 13º nas férias</h4><p class="fexpl">${EXPL.decimo}</p>
+<div class="row frow"><label class="fcampo">Sua preferência<select data-fo="decimo.escolha">${opcoesSel([['decidir','a decidir'],['ferias','prefiro nas férias'],['fora','prefiro fora das férias']],dc.escolha||'decidir')}</select></label>
+${dc.escolha==='ferias'?selP('decimo.periodo',dc.periodo):''}<label class="fcampo">Situação<select data-fo="decimo.estado">${opcoesSel(EST_OP,dc.estado||'decidir')}</select></label></div></div>
+<div class="fitem-op"><h4>🏦 Receber um adiantamento de férias</h4><p class="fexpl">${EXPL.adiant}</p>
+<div class="row frow"><label class="fcampo">Sua preferência<select data-fo="adiantamento.escolha">${opcoesSel([['decidir','a decidir'],['sim','pretendo solicitar'],['nao','não vou solicitar']],ad.escolha||'decidir')}</select></label>
+<label class="fcampo">🔄 Parcelas para devolver<select data-fo="adiantamento.parcelas"${ad.escolha==='sim'?'':' disabled'}>${opcoesSel([['','—'],...[1,2,3,4,5].map(n=>[n,n+(n>1?' parcelas':' parcela')])],ad.parcelas||'')}</select></label>
+${ad.escolha==='sim'?selP('adiantamento.periodo',ad.periodo):''}<label class="fcampo">Situação<select data-fo="adiantamento.estado">${opcoesSel(EST_OP,ad.estado||'decidir')}</select></label></div>
+<p class="fexpl">${EXPL.parcelas}</p></div>
+<div class="fitem-op"><button type="button" data-fx="nao-antecipa">✅ Não solicitar antecipações</button><p class="fexpl">${EXPL.nao}</p></div>
+<div class="fitem-op"><h4>ℹ️ Adicional de um terço</h4><p class="fexpl">${EXPL.terco}</p></div></details>`}
+/* Muda uma opção do ciclo. O 13º nas férias vale para um período só em cada ano do 13º. */
+function mudaOpcao(c,campo,valor){const [grupo,chave]=campo.split('.');fOpAberto=c.chave;
+  if(grupo==='decimo'&&(chave==='periodo'||chave==='escolha')){
+    const d=dadosCiclo(c,false),o=(d.opcoes||{}).decimo||{},per=(d.periodos||[]).find(p=>p.id===(chave==='periodo'?valor:o.periodo));
+    const vaiFerias=(chave==='escolha'?valor:o.escolha)==='ferias';
+    if(vaiFerias&&per){const ano=+per.ini.slice(0,4);
+      const outro=Object.entries(ferias.ciclos).find(([k,y])=>k!==c.chave&&y.opcoes&&y.opcoes.decimo&&y.opcoes.decimo.escolha==='ferias'&&y.opcoes.decimo.ano===ano);
+      if(outro){fAvisoTxt=`Você já escolheu receber o 13º de ${ano} nas férias de outro ciclo. Só dá para pedir em um período por ano do 13º: desfaça a outra escolha antes.`;renderFerias();return}}}
+  mudaFerias(()=>{const d=dadosCiclo(c,true);d.opcoes=d.opcoes||{};const g=d.opcoes[grupo]=d.opcoes[grupo]||{};
+    if(chave==='parcelas')g.parcelas=valor===''?null:+valor;
+    else if(chave==='periodo'){g.periodo=valor||null;const p=(d.periodos||[]).find(x=>x.id===valor);g.snap=p?{ini:p.ini,fim:p.fim}:null;if(grupo==='decimo')g.ano=p?+p.ini.slice(0,4):null}
+    else g[chave]=valor;
+    if(grupo==='adiantamento'&&chave==='escolha'&&valor!=='sim'){g.parcelas=null;g.periodo=null;g.snap=null}
+    if(grupo==='decimo'&&chave==='escolha'&&valor!=='ferias'){g.periodo=null;g.snap=null;g.ano=null}})}
+/* Não solicitar antecipações: o 13º nas férias e o adiantamento passam a "não"; o abono fica como está. */
+function naoAntecipa(c){fOpAberto=c.chave;mudaFerias(()=>{const d=dadosCiclo(c,true);d.opcoes=d.opcoes||{};
+  d.opcoes.decimo={...(d.opcoes.decimo||{}),escolha:'fora',periodo:null,snap:null,ano:null};
+  d.opcoes.adiantamento={...(d.opcoes.adiantamento||{}),escolha:'nao',parcelas:null,periodo:null,snap:null}})}
+
+/* ---- preparar e-mail para o chefe: rascunho local, editável, copiado pela pessoa ---- */
+function fCicloEmail(cs){const cand=[...cs.emConcessivo];if(cs.emAquisitivo&&!cand.includes(cs.emAquisitivo))cand.push(cs.emAquisitivo);
+  const sel=fFocoSel&&cand.find(c=>c.chave===fFocoSel);if(sel)return sel;
+  return cand.find(c=>(dadosCiclo(c,false).periodos||[]).some(p=>p.estado!=='usufruido'&&p.fim>=todayISO))||cand[0]||null}
+function abreEmail(){const cs=ciclosAgora(),c=fCicloEmail(cs);if(!c)return;const d=dadosCiclo(c,false),o=d.opcoes||{},s=fSaldo(c,d,null,todayISO);
+  const ps=(d.periodos||[]).filter(p=>p.estado!=='usufruido'&&p.fim>=todayISO);
+  fEmail={chave:c.chave,sel:new Set(ps.map(p=>p.id)),
+    abono:d.abonoInformado&&d.abono>0?'sim':(o.abono&&o.abono.estado==='pretendo'?'sim':'decidir'),abonoDias:d.abono||Math.floor(s.direito*FERIAS_PARAM.abonoFracao+1e-9),
+    decimo:o.decimo&&o.decimo.escolha==='ferias'?'sim':o.decimo&&o.decimo.escolha==='fora'?'nao':'decidir',decimoPer:(o.decimo&&o.decimo.periodo)||null,
+    adiant:(o.adiantamento&&o.adiantamento.escolha)||'decidir',parcelas:(o.adiantamento&&o.adiantamento.parcelas)||'',orientar:true,rascunho:null};
+  renderFerias();const e=$('fEmail');if(e)try{e.scrollIntoView({block:'start'})}catch(x){}}
+const juntaE=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' e '+a[a.length-1];
+function textoEmail(c,E,s,fx){const d=dadosCiclo(c,false),ps=(d.periodos||[]).filter(p=>E.sel.has(p.id)).sort((a,b)=>a.ini<b.ini?-1:1);
+  const par=[],tot=ps.reduce((a,p)=>a+fDur(p),0);let lista='';
+  if(!ps.length)par.push(`Gostaria de orientação para programar minhas férias do ${nomeCiclo(c).toLowerCase()}: há ${nDias(Math.max(0,fx.pend))} a programar${fx.ref?', e pelo que calculei o prazo para solicitar a programação vai até '+br(fx.ref):''}. Poderia me orientar sobre as datas disponíveis?`);
+  else if(ps.length===1)par.push(`Gostaria de solicitar a programação de férias para ${br(ps[0].ini)} a ${br(ps[0].fim)}, com ${fDur(ps[0])} dias corridos de descanso.`);
+  else{par.push('Gostaria de solicitar a programação de férias nos seguintes períodos:');lista=ps.map(p=>`- ${br(p.ini)} a ${br(p.fim)} (${fDur(p)} dias corridos)`).join('\n')+`\nNo total, ${tot} dias corridos de descanso.`}
+  const resto=[];
+  if(E.abono==='sim')resto.push(`Também gostaria de solicitar a conversão de ${E.abonoDias} dias em abono pecuniário, caso esteja dentro do prazo.`);
+  const pd=ps.find(p=>p.id===E.decimoPer);
+  if(E.decimo==='sim')resto.push(`Gostaria de receber a primeira parcela do 13º salário junto das férias${pd?' de '+br(pd.ini)+' a '+br(pd.fim):''}, conforme a regra aplicável.`);
+  if(E.adiant==='sim')resto.push(`Gostaria de solicitar o adiantamento de férias${E.parcelas?`, com devolução em ${E.parcelas} ${+E.parcelas>1?'parcelas':'parcela'}`:''}, conforme a regra aplicável.`);
+  if(E.decimo==='nao'&&E.adiant==='nao')resto.push('Para este pedido, não solicito a antecipação da primeira parcela do 13º nas férias nem o adiantamento de férias.');
+  else{if(E.decimo==='nao')resto.push('Não solicito a antecipação da primeira parcela do 13º nas férias.');if(E.adiant==='nao')resto.push('Não solicito o adiantamento de férias.')}
+  if(E.decimo==='sim'||E.adiant==='sim')resto.push('Como as condições do 13º nas férias e do adiantamento dependem da regra aplicável, peço que me confirme se o pedido pode ser feito assim.');
+  const dec=[E.abono==='decidir'&&'a venda de dias (abono)',E.decimo==='decidir'&&'a antecipação do 13º nas férias',E.adiant==='decidir'&&'o adiantamento de férias'].filter(Boolean);
+  if(E.orientar&&dec.length)resto.push(`Gostaria também de orientação sobre ${juntaE(dec)} antes de decidir.`);
+  if(s.provisorio)resto.push('Peço também a conferência do meu saldo de férias deste ciclo.');
+  if(fx.tipo==='passou')resto.push('Sei que o prazo ordinário para solicitar a programação já passou; peço orientação para regularizar.');
+  const corpo='Olá,\n\n'+par.join(' ')+(lista?'\n'+lista:'')+(resto.length?'\n\n'+resto.join(' '):'')
+    +(ps.length?'\n\nPoderia confirmar a disponibilidade das datas e me orientar sobre o registro e os prazos?':'')+'\n\nAtenciosamente,\n[Nome]';
+  return {assunto:ps.length?'Solicitação de programação de férias':'Orientação para programação de férias',corpo}}
+function htmlEmail(cs,ctx){const E=fEmail;if(!E)return '';const c=cs.lista.find(x=>x.chave===E.chave);if(!c)return '';
+  const d=dadosCiclo(c,false),s=fSaldo(c,d,pendencias(c),todayISO),fx=fFaixa(c,ctx),maxAb=Math.floor(s.direito*FERIAS_PARAM.abonoFracao+1e-9);
+  const ps=(d.periodos||[]).filter(p=>p.estado!=='usufruido'&&p.fim>=todayISO).sort((a,b)=>a.ini<b.ini?-1:1),sel=ps.filter(p=>E.sel.has(p.id));
+  const tri=(k,rot,expl,extra)=>`<div class="fitem-op"><h4>${rot}</h4><p class="fexpl">${expl}</p><div class="fescolha" role="radiogroup" aria-label="${esc(rot.replace(/^\S+\s/,''))}">${[['sim','Quero'],['nao','Não quero'],['decidir','A decidir']].map(([v,t])=>`<label><input type="radio" name="fe-${k}" data-fe="${k}" value="${v}"${E[k]===v?' checked':''}> ${t}</label>`).join('')}</div>${extra||''}</div>`;
+  const resumo=[sel.length?`${sel.length} ${sel.length>1?'períodos':'período'}, ${sel.reduce((a,p)=>a+fDur(p),0)} dias corridos`:'nenhum período escolhido: o rascunho vira um pedido de orientação',
+    'abono: '+({sim:'quero vender '+E.abonoDias+' dias',nao:'não quero',decidir:'a decidir'})[E.abono],'13º nas férias: '+({sim:'quero',nao:'não quero',decidir:'a decidir'})[E.decimo],
+    'adiantamento: '+({sim:'quero'+(E.parcelas?', em '+E.parcelas+' parcelas':''),nao:'não quero',decidir:'a decidir'})[E.adiant]];
+  const avisos=[s.provisorio&&'O saldo deste ciclo ainda é provisório: o rascunho pede ao gestor a conferência do saldo.',fx.tipo==='passou'&&'O prazo ordinário já passou: o rascunho pede orientação para regularizar.',!sel.length&&'Sem período escolhido, o rascunho pede orientação em vez de datas.'].filter(Boolean);
+  return `<div class="fcard femail" id="fEmail"><h3>Como você quer marcar suas férias?</h3>
+<p class="msg">Tique o que você quer pedir, com a explicação ao lado de cada item. No fim, o Cartinhas monta um rascunho que você revisa, edita e copia para o seu e-mail. Preparar ou copiar não muda a situação dos períodos: pedir e aprovar continuam sendo passos que você informa.</p>
+<div class="fitem-op"><h4>1. 📅 Períodos — ${esc(nomeCiclo(c))}</h4><p class="fexpl">${EXPL.datas}</p>
+${ps.length?ps.map(p=>`<label class="fchk"><input type="checkbox" data-fe="sel" value="${esc(p.id)}"${E.sel.has(p.id)?' checked':''}> ${br(p.ini)} a ${br(p.fim)} — ${fDur(p)} dias corridos (${ESTADO_TXT[p.estado]})</label>`).join('')+`<p class="msg">Total escolhido: ${sel.reduce((a,p)=>a+fDur(p),0)} dias corridos.</p>`
+  :'<p>Nenhum período marcado ainda.</p>'}<p class="fexpl">${EXPL.dividir}</p><button type="button" data-fx="ir-calendario">Escolher no calendário</button></div>
+<h4>2. O que você quer pedir</h4>
+${tri('abono','💰 Vender dias de férias (abono pecuniário)',EXPL.abono(s.direito),E.abono==='sim'?`<label class="fcampo">Quantos dias vender<select data-fe="abonoDias">${opcoesSel(Array.from({length:maxAb},(_,i)=>[i+1,(i+1)+' dias']),E.abonoDias)}</select></label>`:'')}
+${tri('decimo','💵 Receber parte do 13º nas férias',EXPL.decimo,E.decimo==='sim'&&sel.length?`<label class="fcampo">Em qual período<select data-fe="decimoPer">${opcoesSel([['','escolher…'],...sel.map(p=>[p.id,br(p.ini)+' a '+br(p.fim)])],E.decimoPer||'')}</select></label>`:'')}
+${tri('adiant','🏦 Receber um adiantamento de férias',EXPL.adiant,`<label class="fcampo">🔄 Parcelas para devolver<select data-fe="parcelas"${E.adiant==='sim'?'':' disabled'}>${opcoesSel([['','—'],...[1,2,3,4,5].map(n=>[n,n+(n>1?' parcelas':' parcela')])],E.parcelas)}</select></label><p class="fexpl">${EXPL.parcelas}</p>`)}
+<div class="fitem-op"><button type="button" data-fx="nao-antecipa-email">✅ Não solicitar antecipações</button><p class="fexpl">${EXPL.nao}</p></div>
+<div class="fitem-op"><h4>ℹ️ Adicional de um terço</h4><p class="fexpl">${EXPL.terco}</p></div>
+<label class="fchk"><input type="checkbox" data-fe="orientar"${E.orientar?' checked':''}> Pedir orientação sobre o que está "a decidir"</label>
+<div class="fitem-op"><h4>Resumo</h4><ul class="floc">${resumo.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>${avisos.map(t=>`<p class="fnat fnat-aviso">${esc(t)}</p>`).join('')}</div>
+<h4>3. Rascunho</h4><div class="row"><button type="button" class="pri" data-fx="gerar">${E.rascunho?'Gerar de novo':'Gerar rascunho'}</button><button type="button" data-fx="email-fecha">Fechar</button></div>
+${E.rascunho?`<label class="fcampo">Assunto<input id="fEmAssunto" value="${esc(E.rascunho.assunto)}"></label>
+<label class="fcampo">Texto<textarea id="fEmCorpo" rows="16">${esc(E.rascunho.corpo)}</textarea></label>
+<p class="msg">Confira o texto, troque [Nome] pela sua assinatura e ponha o endereço do seu gestor no seu e-mail.</p>
+<div class="row"><button type="button" class="pri" data-fx="copiar">Copiar e-mail</button><span class="msg" id="fEmCopiado" role="status"></span></div>`:''}</div>`}
+/* gerar o rascunho guarda as escolhas como preferências do ciclo (não o texto do e-mail) */
+function geraEmail(){const E=fEmail;if(!E)return;const cs=ciclosAgora(),c=cs.lista.find(x=>x.chave===E.chave);if(!c)return;
+  const d=dadosCiclo(c,false),s=fSaldo(c,d,pendencias(c),todayISO),fx=fFaixa(c,fContexto());E.rascunho=textoEmail(c,E,s,fx);
+  const est=(x,v)=>x&&x.estado&&x.estado!=='decidir'?x.estado:v;
+  mudaFerias(()=>{const y=dadosCiclo(c,true);y.opcoes=y.opcoes||{};const o=y.opcoes,pd=(y.periodos||[]).find(p=>p.id===E.decimoPer);
+    o.abono={...(o.abono||{}),estado:E.abono==='sim'?est(o.abono,'pretendo'):(o.abono&&o.abono.estado)||'decidir',dias:E.abono==='sim'?+E.abonoDias:(o.abono&&o.abono.dias)||null};
+    o.decimo={...(o.decimo||{}),escolha:E.decimo==='sim'?'ferias':E.decimo==='nao'?'fora':'decidir',periodo:E.decimo==='sim'&&pd?pd.id:null,snap:E.decimo==='sim'&&pd?{ini:pd.ini,fim:pd.fim}:null,ano:E.decimo==='sim'&&pd?+pd.ini.slice(0,4):null,estado:E.decimo==='sim'?est(o.decimo,'pretendo'):(o.decimo&&o.decimo.estado)||'decidir'};
+    o.adiantamento={...(o.adiantamento||{}),escolha:E.adiant,parcelas:E.adiant==='sim'&&E.parcelas?+E.parcelas:null,estado:E.adiant==='sim'?est(o.adiantamento,'pretendo'):(o.adiantamento&&o.adiantamento.estado)||'decidir'}})}
+async function copiaEmail(){const a=$('fEmAssunto'),b=$('fEmCorpo');if(!a||!b)return;const t='Assunto: '+a.value+'\n\n'+b.value;let ok=false;
+  try{if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(t);ok=true}}catch(e){}
+  if(!ok)try{const x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();ok=document.execCommand('copy');x.remove()}catch(e){}
+  const m=$('fEmCopiado');if(m)m.textContent=ok?'Copiado. Cole no seu e-mail, confira e envie.':'Não consegui copiar sozinho: selecione o texto, copie com Ctrl+C e cole no seu e-mail.'}
+function acaoFx(t){const a=t.dataset.fx,cs=ciclosAgora();
+  if(a==='lembrete-ok'){fLembrete=null;renderFerias();return}
+  if(a==='ver-datas'){const e=$('fDicas');if(e)try{e.scrollIntoView({block:'start'})}catch(x){}return}
+  if(a==='email'){abreEmail();return}
+  if(a==='email-fecha'){fEmail=null;renderFerias();return}
+  if(a==='ir-calendario'){const e=$('fMesCard');if(e)try{e.scrollIntoView({block:'start'})}catch(x){}return}
+  if(a==='nao-antecipa'){const c=cicloDoCartao(t);if(c)naoAntecipa(c);return}
+  if(a==='nao-antecipa-email'&&fEmail){fEmail.decimo='nao';fEmail.adiant='nao';fEmail.parcelas='';fEmail.decimoPer=null;renderFerias();return}
+  if(a==='gerar'){geraEmail();return}
+  if(a==='copiar'){copiaEmail();return}}
+function campoFx(t){
+  if(t.dataset.fd){const c=cicloDoCartao(t);if(!c)return;const v=t.value.trim();
+    if(t.dataset.fd!=='fonteDatas'&&v&&!dataOk(v))return;
+    mudaFerias(()=>{const d=dadosCiclo(c,true);d[t.dataset.fd]=v||null});return}
+  if(t.dataset.fo){const c=cicloDoCartao(t);if(c)mudaOpcao(c,t.dataset.fo,t.value);return}
+  if(t.dataset.fe&&fEmail){const k=t.dataset.fe,E=fEmail;
+    if(k==='sel'){if(t.checked)E.sel.add(t.value);else E.sel.delete(t.value)}
+    else if(k==='orientar')E.orientar=t.checked;
+    else if(k==='abonoDias')E.abonoDias=+t.value;
+    else if(k==='decimoPer')E.decimoPer=t.value||null;
+    else if(k==='parcelas')E.parcelas=t.value;
+    else{E[k]=t.value;if(k==='adiant'&&t.value!=='sim')E.parcelas=''}
+    renderFerias()}}
+/* o texto do rascunho editado pela pessoa sobrevive a um novo desenho da área */
+$('ferias').addEventListener('input',e=>{if(!fEmail||!fEmail.rascunho)return;if(e.target.id==='fEmAssunto')fEmail.rascunho.assunto=e.target.value;if(e.target.id==='fEmCorpo')fEmail.rascunho.corpo=e.target.value});
+$('ferias').addEventListener('toggle',e=>{const k=e.target.dataset&&e.target.dataset.opc;if(k)fOpAberto=e.target.open?k:(fOpAberto===k?null:fOpAberto)},true);
+
+/* ---- a área: aparece e some; o banco de horas fica intocado (D2, D3) ---- */
+let fRebase=null,fConfirma=null;  /* mudança de data esperando confirmação (6.3); apagar esperando o segundo clique */
+function abreFerias(){modoFerias=true;document.body.classList.add('modo-ferias');$('secFerias').hidden=false;
+  $('btnFerias').textContent='← Voltar ao banco de horas';
+  try{if(location.hash!=='#ferias')history.replaceState(null,'','#ferias')}catch(e){}
+  renderFerias();try{window.scrollTo(0,0)}catch(e){}}
+function fechaFerias(){modoFerias=false;document.body.classList.remove('modo-ferias');$('secFerias').hidden=true;
+  $('btnFerias').textContent='Programação de Férias';render()}
+const opcoesSel=(vals,atual,vazio)=>(vazio?`<option value="" selected>${esc(vazio)}</option>`:'')
+  +vals.map(([v,t])=>`<option value="${v}"${!vazio&&String(v)===String(atual)?' selected':''}>${esc(t)}</option>`).join('');
+const nomeCiclo=c=>'Ciclo '+c.aqIni.slice(0,4)+'/'+(+c.aqIni.slice(0,4)+1);
+const durTxt=p=>{const n=fDur(p);return n+(n>1?' dias':' dia')};
+const ESTADO_TXT={planejado:'planejado',aprovado:'aprovado no Populis',usufruido:'usufruído'};
+const ESTADO_FEM={planejado:'planejadas',aprovado:'aprovadas no Populis',usufruido:'usufruídas'};
+const ciclosPassados=cs=>cs.lista.filter(c=>c.aqIni<=todayISO);
+const selCiclos=(cs,atual)=>ciclosPassados(cs).map(c=>`<option value="${c.chave}"${c.chave===atual?' selected':''}>${esc(nomeCiclo(c))} (concessivo ${br(c.coIni)} a ${br(c.coFim)})</option>`).join('');
+
+function acoesPeriodo(p){
+  const apagar=fConfirma===p.id?'<button type="button" class="fperigo" data-pa="apagar">Confirmar: apagar</button>':'<button type="button" data-pa="apagar">Apagar</button>';
+  if(p.estado==='planejado')return '<button type="button" data-pa="aprovar">Aprovado no Populis</button>'+apagar;
+  if(p.estado==='aprovado')return p.lancado?'<button type="button" data-pa="desfazlanc">Desfazer o lançamento</button>'
+    :'<button type="button" class="pri" data-pa="lancar">Lançar na tabela</button><button type="button" data-pa="desaprovar">Voltar a planejado</button>'+apagar;
+  return p.origem==='relatorio'?'<button type="button" data-pa="devolver">Desfazer a confirmação</button>':apagar}
+function htmlPeriodos(d){
+  const ps=(d.periodos||[]).slice().sort((a,b)=>a.ini<b.ini?-1:1);
+  if(!ps.length)return '<p class="msg">Nenhum período registrado neste ciclo.</p>';
+  return `<div class="scroll"><table class="fper"><thead><tr><th>Período</th><th class="n">Dias</th><th>Situação</th><th>Origem</th><th>Prazo</th><th></th></tr></thead><tbody>${ps.map(p=>
+    `<tr data-pid="${esc(p.id||'')}"><td>${br(p.ini)} a ${br(p.fim)}${conflitosLanc(p)}</td><td class="n">${fDur(p)}</td><td><span class="tag ${p.estado==='usufruido'?'ok':'p'}">${ESTADO_TXT[p.estado]}</span>${p.lancado?' <span class="tag">lançado na tabela</span>':''}</td><td class="msg">${p.origem==='relatorio'?'relatório do SRP':'informado por você'}</td><td class="msg">${prazoPeriodo(p)}</td><td class="fac">${acoesPeriodo(p)}</td></tr>`).join('')}</tbody></table></div>`}
+function htmlCiclo(c){
+  const d=dadosCiclo(c,false),hoje=todayISO,pend=pendencias(c),s=fSaldo(c,d,pend,hoje);
+  const emCo=c.coIni<=hoje&&hoje<=c.coFim;
+  const prazo=emCo?`Você tem até <b>${br(c.coFim)}</b> para tirar estas férias — faltam ${fDias(hoje,c.coFim)} dias.`
+    :`Estas férias estão sendo ganhas até ${br(c.aqFim)}; poderão ser tiradas de ${br(c.coIni)} a ${br(c.coFim)}.`;
+  const maxAb=Math.floor(s.direito*FERIAS_PARAM.abonoFracao+1e-9),resto=s.direito-s.abono;
+  const usu=(d.periodos||[]).filter(p=>p.estado==='usufruido').map(fDur),somaUsu=usu.reduce((a,b)=>a+b,0);
+  const irregular=usu.length>=2&&!fCompletavel(usu,Math.max(0,resto-somaUsu),true);
+  const n=(r,v,x)=>`<div><small>${r}</small><b>${v}</b>${x?`<small>${x}</small>`:''}</div>`;
+  return `<div class="fcard" data-ciclo="${c.chave}"><h3>${esc(nomeCiclo(c))}${c.ajustado?' <span class="tag p">aquisitivo ajustado</span>':''}</h3>
+<p class="msg">Aquisitivo de ${br(c.aqIni)} a ${br(c.aqFim)} · concessivo de ${br(c.coIni)} a ${br(c.coFim)}</p><p>${prazo}</p>
+<div class="fnums">${n('Direito',s.direito,d.direitoInformado?'informado':'presumido')}${n('Usufruído',s.usufruido)}${n('Vendido (abono)',s.abono)}${n('Aprovado',s.aprovado)}${n('Planejado',s.planejado)}${n('Livre para planejar',s.livre,s.provisorio?'provisório':'firme')}</div>
+${s.provisorio?`<p class="fprov"><b>Saldo provisório:</b> ${esc(s.motivos.join('; '))}. Dá para simular, mas nenhuma data aparece como viável enquanto isso não fechar.</p>`:''}
+${fAvisosCiclo(c,s).map(t=>`<p class="fnat fnat-aviso">${t}</p>`).join('')}
+${irregular?`<p class="fprov">O que já foi usufruído (${usu.join(' + ')} dias) não fecha com as regras de fracionamento: falta um período de 14, ou há um abaixo de 5. Confira com a Gestão de Pessoas; o Cartinhas segue a conta com o saldo que sobra.</p>`:''}
+${s.livre<0?`<p class="fprov">Há mais dias registrados do que o direito do ciclo (${-s.livre} a mais). Confira os períodos e o direito.</p>`:''}
+${htmlDatasPopulis(c,d)}${htmlOpcoes(c,d,s)}
+${htmlPeriodos(d)}
+<div class="row frow">
+<label class="fcampo">Direito neste ciclo<select data-fc="direito">${opcoesSel(FERIAS_DIREITOS.map(v=>[v,v+' dias']),s.direito,d.direitoInformado?null:s.direito+' dias (presumido)')}</select></label>
+<label class="fcampo">Dias vendidos (abono)<select data-fc="abono">${opcoesSel(Array.from({length:maxAb+1},(_,v)=>[v,v?v+' dias':'nenhum']),s.abono,d.abonoInformado?null:'não informado')}</select></label>
+<label class="fchk"><input type="checkbox" data-fc="concorda"${d.concordaFracionar?' checked':''}> Concordo em dividir as férias deste ciclo</label>
+${pend.semRelatorio.length||d.historicoConfirmado?`<label class="fchk"><input type="checkbox" data-fc="historico"${d.historicoConfirmado?' checked':''}> Conferi: neste ciclo não tirei férias além das que aparecem aqui</label>`:''}
+</div>
+<p class="msg">${fPodeFracionar(resto)?'Dividir é possível, com a sua concordância: até 3 períodos, um de pelo menos 14 dias e os outros de pelo menos 5 (CLT, art. 134 §1º).'
+  :`Com ${resto} dias, as férias só podem ser tiradas de uma vez: dividir exige pelo menos 19 (14 + 5).`}</p></div>`}
+function htmlFila(cs){const fila=fFila();if(!fila.length)return '';
+  return `<div class="fcard"><h3>Férias achadas no histórico</h3><p>Estes períodos vieram dos meses importados. Diga de qual ciclo eles são: até você confirmar, <b>não entram no saldo</b>, e o saldo fica provisório.</p>
+${fila.map((h,i)=>{const sug=cs.lista.find(c=>c.chave===h.sugestao);
+  return `<div class="fitem" data-fila="${i}"><p><b>De ${br(h.ini)} a ${br(h.fim)}</b> (${durTxt(h)}), ${h.origem==='relatorio'?'do relatório do SRP':'marcado na tabela do ponto'}.</p>
+${h.mesmo?`<p>É o mesmo período que estava ${ESTADO_TXT[h.mesmo.estado]} no plano. <button type="button" class="pri" data-ff="promove">Marcar esse período como usufruído</button></p>`
+:h.parcial?`<p class="fprov">Coincide em parte com o período ${ESTADO_TXT[h.parcial.estado]} de ${br(h.parcial.ini)} a ${br(h.parcial.fim)}. Qual vale? Nada muda sozinho.</p>
+<div class="row"><button type="button" data-ff="vale-relatorio">Vale o do relatório (${br(h.ini).slice(0,5)} a ${br(h.fim).slice(0,5)})</button><button type="button" data-ff="descarta">Manter o do plano e ignorar este</button></div>`
+:`<p class="msg">${sug?'Pela data, parece ser do '+esc(nomeCiclo(sug))+' — mas férias concedidas com atraso podem ser do ciclo anterior.':'A data não cai em nenhum concessivo calculado: escolha o ciclo.'}</p>
+<div class="row frow"><label class="fcampo">De qual ciclo são?<select data-ff-ciclo>${selCiclos(cs,h.sugestao)}</select></label>
+<button class="pri" type="button" data-ff="confirma">Confirmar</button><button type="button" data-ff="descarta">Não são férias</button></div>`}</div>`}).join('')}</div>`}
+function htmlAcrescentar(cs){return `<div class="fcard"><h3>Acrescentar férias já tiradas</h3>
+<p class="msg">Para meses que não estão no Cartinhas: informe o período e de qual ciclo ele é. Fica marcado como informado por você.</p>
+<div class="row frow"><label class="fcampo">De<input type="date" id="fUsIni" max="${todayISO}"></label><label class="fcampo">Até<input type="date" id="fUsFim" max="${todayISO}"></label>
+<label class="fcampo">Ciclo<select id="fUsCiclo">${selCiclos(cs,(cs.emConcessivo[0]||{}).chave)}</select></label><button type="button" id="fUsAdd">Acrescentar</button></div></div>`}
+function htmlConfig(){const c=ferias.config||{},P=fParam(),locais=c.feriadosLocais||[];
+  return `<div class="fcard"><h3>Sua jornada e o seu calendário</h3>
+<p class="msg">Isto vale só aqui, para as férias. A tabela do banco de horas continua tratando sábado e domingo como folga.</p>
+<div class="row frow">
+<label class="fcampo">Dias de trabalho<select id="fJornada">${opcoesSel([['1,2,3,4,5','segunda a sexta'],['1,2,3,4,5,6','segunda a sábado']],P.diasTrabalhados.join(','))}</select></label>
+<label class="fcampo">Repouso semanal (DSR)<select id="fDsr">${opcoesSel(NOMES_DIA.map((t,i)=>[i,t]),P.dsr)}</select></label>
+<label class="fcampo">UF da lotação<select id="fUf">${opcoesSel([['','não informada'],...UFS.map(u=>[u,u])],c.uf||'')}</select></label>
+<label class="fcampo">Dia de início das férias<select id="fLeitura">${opcoesSel([['estrita','tabela dos Correios: segunda a quarta'],['clt','só a CLT: inclui a quinta']],P.leituraInicio)}</select></label></div>
+<label class="fchk"><input type="checkbox" id="fFacult"${c.facultativosLivres?' checked':''}> Na minha unidade, Carnaval e Corpus Christi costumam ser folga</label>
+<p class="msg">A tabela dos Correios não aceita começar na quinta-feira, porque conta o sábado; pela CLT sozinha, a quinta seria permitida. Isso ainda precisa ser conferido no MANPES, e por isso dá para escolher.</p>
+<h4>Feriados da lotação</h4>
+<p class="msg">Os nacionais o Cartinhas já conhece. Do DF, também o 30/11. Outros feriados estaduais e municipais da sua lotação: acrescente aqui.</p>
+${locais.length?`<ul class="floc">${locais.map((x,i)=>`<li>${esc(/^\d{2}-\d{2}$/.test(x.data)?x.data.slice(3)+'/'+x.data.slice(0,2)+', todo ano':br(x.data))} — ${esc(x.nome||'feriado local')} <button type="button" class="lnk" data-locdel="${i}">tirar</button></li>`).join('')}</ul>`:''}
+<div class="row frow"><label class="fcampo">Data<input type="date" id="fLocData"></label><label class="fcampo">Nome<input id="fLocNome" placeholder="ex.: aniversário da cidade"></label>
+<label class="fchk"><input type="checkbox" id="fLocAnual" checked> repete todo ano</label><button type="button" id="fLocAdd">Acrescentar</button></div></div>`}
+function htmlAjuste(cs){
+  const a=ferias.aquisitivoIni,em=cs.emenda;
+  return `<div class="fcard"><h3>Confira com o Populis</h3>
+<p>A conta parte da sua admissão, em ${br(ferias.admissao)}. Afastamentos longos podem mudar o início do aquisitivo no Populis. Confira no <b>RH 24 Horas</b>: se o seu aquisitivo atual começa em outra data, informe aqui — o que você informar prevalece sobre a conta.</p>
+${a?`<p><span class="tag p">Em uso: aquisitivo a partir de ${br(a)}, informado por você</span></p>`:''}
+${em?`<p class="fprov">${em.tipo==='vao'?`Com o ajuste, fica um vão sem concessivo de ${br(em.de)} a ${br(em.ate)}: é o tempo que não contou para férias.`:`Com o ajuste, dois concessivos se sobrepõem de ${br(em.de)} a ${br(em.ate)}.`}</p>`:''}
+<div class="row frow"><label class="fcampo">Início do aquisitivo no Populis<input type="date" id="fAjuste" value="${a||''}"></label>
+<button type="button" id="fAjusteOk">Usar esta data</button>${a?'<button type="button" id="fAjusteTira">Voltar à conta pela admissão</button>':''}<button type="button" id="fAdmMuda">Corrigir a admissão</button></div></div>`}
+function htmlCopia(){
+  const ce=copiaExterna();let av='';
+  if(FH&&pronto&&!ce)av='<p class="faviso">O plano de férias agora também vai para o seu arquivo de dados. <b>Salve uma cópia dele fora do navegador</b>: se uma versão antiga do Cartinhas gravar o arquivo, é por ela que o plano volta.</p>';
+  else if(ce&&(ferias.revImportante||0)>(ce.rev||0))av=`<p class="faviso">A sua cópia do plano é de ${new Date(ce.em).toLocaleDateString('pt-BR')}, e o plano mudou depois. Vale salvar de novo.</p>`;
+  return `<div class="fcard"><h3>Cópia do plano</h3>${av}<p class="msg">${ce?'Última cópia salva em '+new Date(ce.em).toLocaleString('pt-BR')+'.':'Nenhuma cópia salva ainda.'} A cópia leva só o plano de férias, nunca o ponto.</p>
+<div class="row"><button type="button" id="fCopia">Salvar cópia do plano</button><button type="button" id="fAbreCopia">Restaurar de uma cópia</button></div></div>`}
+function htmlOferta(){const o=ofertaFerias;
+  return `<div class="faviso" role="alert"><b>Plano de férias para conferir.</b> ${esc(o.motivo)}
+<div class="fopc">${o.opcoes.map((p,i)=>`<div><b>${esc(p.nome)}</b><p class="msg">${esc(resumoPlano(p.f))}</p><button type="button" data-fres="${i}">${p.atual?'Manter este':'Usar este'}</button></div>`).join('')}</div>
+<p class="msg">Escolher um plano troca só as férias. O ponto que está no arquivo fica exatamente como está.</p></div>`}
+/* 6.3: mudar a admissão ou o aquisitivo com períodos registrados não move nada sozinho */
+function htmlRebase(){const r=fRebase,novos=fCiclos(r.campo==='admissao'?r.v:ferias.admissao,r.campo==='aquisitivoIni'?r.v:ferias.aquisitivoIni,todayISO);
+  return `<div class="faviso" role="alert"><b>Conferir antes de mudar a data.</b> ${r.campo==='admissao'?'A admissão passa a ser '+br(r.v):r.v?'O aquisitivo passa a começar em '+br(r.v):'O aquisitivo volta à conta pela admissão'}. Os ciclos mudam, e cada período registrado precisa de um ciclo — o Cartinhas propõe, você confirma.
+<div class="scroll"><table class="fper"><thead><tr><th>Período</th><th>Situação</th><th>Ciclo hoje</th><th>Ciclo depois</th></tr></thead><tbody>${r.assoc.map((a,i)=>
+  `<tr><td>${br(a.ini)} a ${br(a.fim)}</td><td>${ESTADO_TXT[a.estado]}</td><td>${a.chave.slice(0,4)}/${+a.chave.slice(0,4)+1}</td><td><select data-rb="${i}">${selCiclos(novos,a.nova)}</select></td></tr>`).join('')}</tbody></table></div>
+<p class="msg">Direito, abono e concordância ficam com os ciclos que continuarem com a mesma data; os que mudarem de data voltam ao padrão, para você conferir.</p>
+<div class="row"><button type="button" class="pri" id="fRbOk">Confirmar a mudança</button><button type="button" id="fRbCancela">Cancelar</button></div></div>`}
+function renderFerias(){
+  const el=$('ferias');if(!el)return;const hoje=todayISO;fMemo={};
+  let h=`<h2 class="ftit">Programação de Férias</h2><p class="msg">Proposta para a escala: quem programa é o gestor, no Populis, e a época é da conveniência do serviço. Nada nesta área muda o seu banco de horas.</p>`;
+  if(fAvisoTxt)h+=`<p class="faviso" role="status">${fAvisoTxt}</p>`;
+  if(ofertaFerias)h+=htmlOferta();
+  if(!ferias||!ferias.admissao||fEditaAdm){
+    h+=`<div class="fcard"><h3>${fEditaAdm?'Corrigir a data de admissão':'Para começar, a data de admissão'}</h3>
+<p>As férias contam da sua admissão nos Correios: a cada 12 meses você ganha um período, e tem os 12 meses seguintes para tirar. Com essa data o Cartinhas calcula os ciclos sozinho. Ela fica só no seu arquivo de dados.</p>
+<div class="row frow"><label class="fcampo">Data de admissão<input type="date" id="fAdm" max="${hoje}" value="${ferias&&ferias.admissao||''}"></label><button class="pri" id="fAdmOk" type="button">Calcular os ciclos</button>${fEditaAdm?'<button type="button" id="fAdmCancela">Cancelar</button>':''}</div>
+${fEditaAdm?'':'<p class="msg">Já tinha um plano em outro computador, ou uma versão antiga do Cartinhas apagou o seu? <button type="button" id="fAbreCopia">Restaurar de uma cópia</button></p>'}</div>`;
+    el.innerHTML=h;return}
+  const cs=ciclosAgora(),ctx=fContexto();
+  h+=htmlFaixa(cs,ctx)+htmlEmail(cs,ctx);
+  if(fRebase)h+=htmlRebase();
+  if(fLanca)h+=htmlLanca();
+  if(fDesfaz)h+=htmlDesfaz();
+  /* a ordem da seção 13.1: o saldo dos ciclos primeiro, porque é nele que se dá a concordância e se
+     confere o direito — o que muda as dicas; depois a fila, as dicas e o mês */
+  const mostrar=[...cs.emConcessivo];if(cs.emAquisitivo&&!mostrar.includes(cs.emAquisitivo))mostrar.push(cs.emAquisitivo);
+  h+=mostrar.map(htmlCiclo).join('');
+  h+=htmlFila(cs);
+  h+=htmlDicas(cs,ctx)+htmlMes(cs,ctx);
+  h+=htmlAcrescentar(cs)+htmlConfig()+htmlAjuste(cs)+htmlCopia();
+  el.innerHTML=h}
+function cicloDoCartao(el){const k=el.closest('[data-ciclo]');const cs=ciclosAgora();return k&&cs?cs.lista.find(c=>c.chave===k.dataset.ciclo):null}
+function trocaBase(campo,v){
+  const ps=[];for(const k of Object.keys(ferias.ciclos))for(const p of ferias.ciclos[k].periodos||[]){if(!p.id)p.id=novoIdFer();ps.push({...p,chave:k})}
+  if(!ps.length){fRebase=null;mudaFerias(f=>{f[campo]=v},true);return}
+  const novos=fCiclos(campo==='admissao'?v:ferias.admissao,campo==='aquisitivoIni'?v:ferias.aquisitivoIni,todayISO);
+  fRebase={campo,v,assoc:ps.map(p=>{const sug=novos.lista.find(c=>c.coIni<=p.ini&&p.ini<=c.coFim)||novos.lista.find(c=>c.chave===p.chave)||ciclosPassados(novos)[0];
+    return {id:p.id,ini:p.ini,fim:p.fim,estado:p.estado,chave:p.chave,nova:sug?sug.chave:p.chave}})};
+  fAvisoTxt='';renderFerias()}
+function aplicaRebase(){const r=fRebase;if(!r)return;fRebase=null;
+  mudaFerias(f=>{const lista=fCiclos(r.campo==='admissao'?r.v:f.admissao,r.campo==='aquisitivoIni'?r.v:f.aquisitivoIni,todayISO).lista;
+    const velhos=f.ciclos,novos={},todos=Object.values(velhos).flatMap(y=>y.periodos||[]);
+    for(const k of Object.keys(velhos))if(lista.some(c=>c.chave===k))novos[k]={...velhos[k],periodos:[]};
+    for(const a of r.assoc){const p=todos.find(x=>x.id===a.id);if(!p)continue;if(!novos[a.nova])novos[a.nova]=cicloNovo();novos[a.nova].periodos.push(p)}
+    f[r.campo]=r.v;f.ciclos=novos},true)}
+const cicloPorChave=k=>{const cs=ciclosAgora();return cs&&cs.lista.find(c=>c.chave===k)};
+function acaoFila(t){const i=+t.closest('[data-fila]').dataset.fila,h=fFila()[i];if(!h)return;const acao=t.dataset.ff;
+  if(acao==='confirma'){const c=cicloPorChave(t.closest('[data-fila]').querySelector('[data-ff-ciclo]').value);if(!c)return;
+    mudaFerias(()=>{dadosCiclo(c,true).periodos.push({id:novoIdFer(),ini:h.ini,fim:h.fim,estado:'usufruido',origem:h.origem,confirmado:true})},true);return}
+  if(acao==='descarta'){mudaFerias(f=>{(f.descartados=f.descartados||[]).push({ini:h.ini,fim:h.fim})});return}
+  const alvo=h.mesmo||h.parcial;if(!alvo)return;
+  mudaFerias(f=>{const p=(f.ciclos[alvo.chave].periodos||[]).find(x=>x.id===alvo.id);if(!p)return;
+    p.ini=h.ini;p.fim=h.fim;p.estado='usufruido';p.origem=h.origem;p.confirmado=true},true)}
+function acaoPeriodo(t){const pid=t.closest('[data-pid]').dataset.pid,c=cicloDoCartao(t),pa=t.dataset.pa;if(!c)return;
+  const d=dadosCiclo(c,false),p=(d.periodos||[]).find(x=>x.id===pid);if(!p)return;
+  if(pa==='lancar'){fPreparaLanca(pid);return}
+  if(pa==='desfazlanc'){fDesfazLanca(pid);return}
+  if(p.lancado&&(pa==='desaprovar'||pa==='apagar')){fAvisoTxt='Este período está lançado na tabela do ponto. Desfaça o lançamento antes.';renderFerias();return}
+  if(pa==='apagar'&&p.estado!=='planejado'&&fConfirma!==pid){fConfirma=pid;renderFerias();return}
+  fConfirma=null;
+  mudaFerias(()=>{const ps=dadosCiclo(c,true).periodos,i=ps.findIndex(x=>x.id===pid);if(i<0)return;
+    if(pa==='aprovar')ps[i].estado='aprovado';else if(pa==='desaprovar')ps[i].estado='planejado';
+    else if(pa==='apagar'||pa==='devolver')ps.splice(i,1)},pa!=='desaprovar')}
+function acrescentaUsufruido(){const ini=$('fUsIni').value,fim=$('fUsFim').value,c=cicloPorChave($('fUsCiclo').value);
+  if(!dataOk(ini)||!dataOk(fim)||ini>fim){fAvisoTxt='Informe as duas datas do período, a primeira antes da segunda.';renderFerias();return}
+  if(fim>todayISO){fAvisoTxt='Aqui entram só férias já tiradas. Para as próximas, marque no mês.';renderFerias();return}
+  const choca=todosPeriodos().find(p=>sobrepoe(p,{ini,fim}));
+  if(choca){fAvisoTxt=`Esses dias já estão em outro período: ${br(choca.ini)} a ${br(choca.fim)} (${ESTADO_TXT[choca.estado]}).`;renderFerias();return}
+  if(!c)return;
+  mudaFerias(()=>{dadosCiclo(c,true).periodos.push({id:novoIdFer(),ini,fim,estado:'usufruido',origem:'digitado',confirmado:true})},true)}
+function acrescentaLocal(){const d=$('fLocData').value,nome=$('fLocNome').value.trim();
+  if(!dataOk(d)){fAvisoTxt='Informe a data do feriado.';renderFerias();return}
+  mudaFerias(f=>{f.config=f.config||{};(f.config.feriadosLocais=f.config.feriadosLocais||[]).push({data:$('fLocAnual').checked?d.slice(5):d,nome:nome||'feriado local'})})}
+$('ferias').addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
+  if(t.dataset.fx){acaoFx(t);return}
+  if(t.dataset.d){const d=t.dataset.d;fCliqueDia(d);const b=document.querySelector('#fMesCard [data-d="'+d+'"]');if(b)try{b.focus({preventScroll:true})}catch(x){}return}
+  if(t.dataset.desmarca){const id=t.dataset.desmarca;fPainel=null;
+    mudaFerias(f=>{for(const k of Object.keys(f.ciclos)){const ps=f.ciclos[k].periodos||[],i=ps.findIndex(x=>x.id===id&&x.estado==='planejado');if(i>=0)ps.splice(i,1)}});return}
+  if(t.dataset.vai){fMes=t.dataset.vai;fSugAtiva=0;fMelhorRes=null;renderFerias();const m=$('fMesCard');if(m)try{m.scrollIntoView({block:'start'})}catch(x){}return}
+  if(t.dataset.marcasug!=null){const o=(fOpMes||[])[+t.dataset.marcasug];if(o)fMarca(o.ini,o.fim);return}
+  if(t.dataset.pa){acaoPeriodo(t);return}
+  if(t.dataset.ff){acaoFila(t);return}
+  if(t.dataset.locdel!=null){const i=+t.dataset.locdel;mudaFerias(f=>{f.config.feriadosLocais.splice(i,1)});return}
+  if(t.dataset.fres!=null&&ofertaFerias){restauraFerias(ofertaFerias.opcoes[+t.dataset.fres]);return}
+  switch(t.id){
+    case 'fAdmOk':{const v=$('fAdm').value;
+      if(!dataOk(v)||v>todayISO){fAvisoTxt='Informe uma data de admissão válida, que não esteja no futuro.';renderFerias();return}
+      if(!ferias){ferias=feriasNovo(v);fEditaAdm=false;mudaFerias(()=>{},true);return}
+      fEditaAdm=false;if(v!==ferias.admissao)trocaBase('admissao',v);else renderFerias();return}
+    case 'fAdmCancela':fEditaAdm=false;renderFerias();return;
+    case 'fAdmMuda':fEditaAdm=true;renderFerias();return;
+    case 'fAjusteOk':{const v=$('fAjuste').value;
+      if(!dataOk(v)||v<=ferias.admissao||v>todayISO){fAvisoTxt='O início do aquisitivo precisa ser uma data depois da admissão e que não esteja no futuro.';renderFerias();return}
+      trocaBase('aquisitivoIni',v);return}
+    case 'fAjusteTira':trocaBase('aquisitivoIni',null);return;
+    case 'fRbOk':aplicaRebase();return;
+    case 'fRbCancela':fRebase=null;renderFerias();return;
+    case 'fMesAnt':fMes=mesAnt(fMes);fSugAtiva=0;renderFerias();return;
+    case 'fMesProx':fMes=proxMes(fMes);fSugAtiva=0;renderFerias();return;
+    case 'fIniCancela':fIni=null;renderFerias();return;
+    case 'fMelhor':fMelhorRes=fMelhorCombinacao(fCicloFoco(ciclosAgora()),fContexto());renderFerias();return;
+    case 'fMarcaMelhor':marcaMelhor();return;
+    case 'fLancaOk':fAplicaLanca();return;
+    case 'fLancaCancela':fLanca=null;renderFerias();return;
+    case 'fDesfazManter':resolveDesfaz(false);return;
+    case 'fDesfazVoltar':resolveDesfaz(true);return;
+    case 'fUsAdd':acrescentaUsufruido();return;
+    case 'fLocAdd':acrescentaLocal();return;
+    case 'fCopia':salvaCopiaExterna();return;
+    case 'fAbreCopia':abreCopiaExterna();return}});
+$('ferias').addEventListener('change',e=>{const t=e.target;
+  if(t.dataset.fd||t.dataset.fo||t.dataset.fe){campoFx(t);return}
+  if(t.dataset.lpula!=null&&fLanca){fLanca.dias[+t.dataset.lpula].pular=!t.checked;renderFerias();return}
+  if(t.dataset.rb!=null&&fRebase){fRebase.assoc[+t.dataset.rb].nova=t.value;return}
+  if(t.id==='fFoco'){fFocoSel=t.value;fDicaDur=null;fMelhorRes=null;renderFerias();return}
+  if(t.id==='fDicaDur'){fDicaDur=+t.value;fMelhorRes=null;renderFerias();return}
+  if(t.id==='fEstrategia'){mudaFerias(f=>{f.config=f.config||{};f.config.estrategia=t.value});return}
+  const cfg={fJornada:f=>{f.config.diasTrabalhados=t.value.split(',').map(Number)},fDsr:f=>{f.config.dsr=+t.value},fUf:f=>{f.config.uf=t.value},
+    fLeitura:f=>{f.config.leituraInicio=t.value},fFacult:f=>{f.config.facultativosLivres=t.checked}}[t.id];
+  if(cfg){mudaFerias(f=>{f.config=f.config||{};cfg(f)});return}
+  const campo=t.dataset.fc;if(!campo)return;const c=cicloDoCartao(t);if(!c)return;
+  mudaFerias(()=>{const d=dadosCiclo(c,true);
+    if(campo==='direito'&&t.value!==''){d.direito=+t.value;d.direitoInformado=true;d.abono=Math.min(d.abono||0,Math.floor(d.direito*FERIAS_PARAM.abonoFracao+1e-9))}
+    if(campo==='abono'&&t.value!==''){d.abono=+t.value;d.abonoInformado=true}
+    if(campo==='concorda')d.concordaFracionar=t.checked;
+    if(campo==='historico')d.historicoConfirmado=t.checked})});
+ferias=feriasDoNavegador();
+$('btnFerias').addEventListener('click',()=>modoFerias?fechaFerias():abreFerias());
+window.addEventListener('hashchange',()=>{if(location.hash==='#ferias'){if(!modoFerias)abreFerias()}else if(modoFerias)fechaFerias()});
+if(location.hash==='#ferias')abreFerias();
+
 /* ponte usada só pela auditoria automática (publico/testes/auditoria.test.js) */
 window.cartinhasTeste={calcDay,uneDias,validaArq,aplicaArq,conferiaDia,relerMeses,hoje:()=>todayISO,estado:()=>({cur,days,months}),
-  conecta:(h,g)=>conecta(h,g),gravaArq:()=>gravaArq(),confereArq:()=>confereArq(),pacote:()=>pacote()};
+  conecta:(h,g)=>conecta(h,g),gravaArq:()=>gravaArq(),confereArq:()=>confereArq(),pacote:()=>pacote(),ferias:FERIAS_REGRAS,
+  fer:{estado:()=>ferias,oferta:()=>ofertaFerias,abre:()=>abreFerias(),fecha:()=>fechaFerias(),avaliaCopia:(c,n)=>avaliaCopia(c,n),confere:()=>confereFeriasDoArquivo(),modo:()=>modoFerias,contexto:(c,d)=>fContexto(c,d),fila:()=>{fMemo={};return fFila()},render:()=>renderFerias(),
+    valida:(i,f)=>{fMemo={};return fValida(i,f,fContexto())},inicioCtx:(d,ctx)=>fInicio(d,ctx),
+    foco:()=>fCicloFoco(ciclosAgora()),duracoes:()=>{fMemo={};return fDuracoes(fCicloFoco(ciclosAgora()))},
+    dicas:(ym,L,est)=>{fMemo={};const c=fCicloFoco(ciclosAgora());return fDicasDoMes(ym,c,L||fDuracoes(c)[0],fContexto(),3,est||estr())},
+    melhor:(cfg,op)=>{fMemo={};return fMelhorCombinacao(fCicloFoco(ciclosAgora()),cfg?fContexto(cfg):fContexto(),op)},inicio:d=>fInicio(d,fContexto()),avalia:(i,n)=>fAvalia(i,n,fContexto())}};
 
 /* ---- arquivo de dados único na pasta (Chrome/Edge): todos os navegadores leem e gravam o mesmo arquivo ---- */
 const NOME_ARQ='cartinhas-dados.json';
 function status(t,html){const e=$('nuvem');if(html)e.innerHTML=t;else e.textContent=t}
 const idb=(modo,fn)=>new Promise((ok,er)=>{const q=indexedDB.open('cartinhas',1);q.onupgradeneeded=()=>q.result.createObjectStore('h');q.onerror=()=>er(q.error);q.onsuccess=()=>{const t=q.result.transaction('h',modo);const st=t.objectStore('h');const rq=fn(st);t.oncomplete=()=>ok(rq&&rq.result);t.onerror=()=>er(t.error)}});
-const pacote=()=>({app:'Cartinhas',versao:1,salvoEm:new Date().toISOString(),cur,months,calc:['cE1','cS1','cE2','cS2','cJ','cAlvo'].map(i=>$(i).value),tema:document.documentElement.dataset.mode||''});
+/* Campos de topo que esta versão não conhece voltam como vieram (PLANO-FERIAS.md, 11.2): assim um
+   recurso futuro não some quando esta versão grava. O plano de férias sobe o arquivo para a versão 2. */
+const pacote=()=>({...extrasArq,app:'Cartinhas',versao:ferias?VERSAO_ARQ:1,salvoEm:new Date().toISOString(),cur,months,calc:['cE1','cS1','cE2','cS2','cJ','cAlvo'].map(i=>$(i).value),tema:document.documentElement.dataset.mode||'',...(ferias?{ferias}:{})});
 function nuvemAgenda(){if(!pronto||!FH)return;clearTimeout(fila);status('Salvando no arquivo…');fila=setTimeout(gravaArq,600)}
 async function gravaArq(){if(gravando){fila=setTimeout(gravaArq,300);return}gravando=true;
   let aviso='';
@@ -709,16 +1929,20 @@ async function gravaArq(){if(gravando){fila=setTimeout(gravaArq,300);return}grav
       if(!aplicaArq(o)){gravando=false;return}
       guardaConflito(meu);
       const {n,conflitos}=reaplicaMinhas(base,meu);
+      const rf=reaplicaFerias(base,meu),fx=textoFeriasJunta(rf);/* o plano de férias é um item só */
       if(months[cur]){days=months[cur].days;meta=months[cur].meta||null}
       renderMeses();render();
-      if(!n){ultJS=JSON.stringify({...pacote(),salvoEm:''});
-        status(conflitos?'O mesmo dia foi alterado nos dois navegadores ('+conflitos+'). Ficou valendo o do arquivo; o que estava aqui está guardado: <button id="btnMeu" type="button">usar só os meus</button>'
-                        :'Os dados foram alterados em outro navegador; recarreguei. Não havia nada pendente aqui.',!!conflitos);
-        if(conflitos)ligaMeu();
+      if(!n&&!rf.n){ultJS=JSON.stringify({...pacote(),salvoEm:''});
+        status(conflitos?'O mesmo dia foi alterado nos dois navegadores ('+conflitos+'). Ficou valendo o do arquivo; o que estava aqui está guardado: <button id="btnMeu" type="button">usar só os meus</button>'+fx
+                        :rf.conflitos?fx.trim()+' <button id="btnMeu" type="button">usar só os meus</button>'
+                        :'Os dados foram alterados em outro navegador; recarreguei. Não havia nada pendente aqui.',!!(conflitos||rf.conflitos));
+        if(conflitos||rf.conflitos)ligaMeu();
+        confereFeriasDoArquivo();if(modoFerias)renderFerias();
         gravando=false;return}
-      aviso='Outro navegador gravou enquanto eu salvava. Juntei: '+n+(n>1?' dias alterados aqui continuam':' dia alterado aqui continua')+' valendo, e o resto veio do arquivo.'
+      aviso=(n?'Outro navegador gravou enquanto eu salvava. Juntei: '+n+(n>1?' dias alterados aqui continuam':' dia alterado aqui continua')+' valendo, e o resto veio do arquivo.':'Outro navegador gravou enquanto eu salvava; o resto veio do arquivo.')
         +(conflitos?' Em '+conflitos+(conflitos>1?' dias alterados nos dois':' dia alterado nos dois')+' ficou valendo o do arquivo.':'')
-        +' <button id="btnMeu" type="button">usar só os meus</button>';
+        +fx+' <button id="btnMeu" type="button">usar só os meus</button>';
+      confereFeriasDoArquivo();if(modoFerias)renderFerias();
     }
     const p=pacote();const js=JSON.stringify({...p,salvoEm:''});
     if(js!==ultJS||aviso){const txNovo=JSON.stringify(p,null,1);const w=await FH.createWritable();await w.write(txNovo);await w.close();ultJS=js;ultTxt=txNovo;ultMod=(await FH.getFile()).lastModified}
@@ -749,6 +1973,7 @@ function validaArq(o){
     }
   }
   if(o.calc!=null&&!Array.isArray(o.calc))return 'a calculadora está fora do formato';
+  if(o.ferias!=null){const e=validaFerias(o.ferias);if(e)return e}
   return null;
 }
 /* completa o que faltar, para um arquivo antigo não chegar na tela com campo faltando */
@@ -759,9 +1984,13 @@ function limpaArq(o){
   return o;
 }
 function aplicaArq(o){
+  /* arquivo gravado por versão mais nova: não sabemos o que ela guarda, então não gravamos por cima */
+  if(o&&typeof o.versao==='number'&&o.versao>VERSAO_ARQ){status('Este arquivo de dados foi gravado por uma versão mais nova do Cartinhas; não gravei nada nele. Atualize o Cartinhas (atualizar.bat) e abra de novo.');return false}
   const erro=validaArq(o);
   if(erro){status('O arquivo de dados está fora do formato ('+erro+'); nada foi alterado aqui nem nele.');return false}
   o=limpaArq(o);
+  extrasArq={};for(const k of Object.keys(o))if(!CAMPOS_ARQ.has(k))extrasArq[k]=o[k];
+  ferias=o.ferias||null;
   months=o.months;cur=o.cur&&months[o.cur]?o.cur:Object.keys(months).sort().pop();days=months[cur].days;meta=months[cur].meta||null;
   if(Array.isArray(o.calc))['cE1','cS1','cE2','cS2','cJ','cAlvo'].forEach((k,i)=>{if(o.calc[i]!=null&&document.activeElement!==$(k))$(k).value=o.calc[i]});
   if(o.tema==='light'||o.tema==='dark'){document.documentElement.dataset.mode=o.tema;pintaTema()}
@@ -814,7 +2043,7 @@ async function conecta(h,gesto){FH=h;let perm=await FH.queryPermission({mode:'re
   if(o===null){pronto=true;await gravaArq()}        /* arquivo vazio: pode ser usado */
   else if(o.months&&Object.keys(o.months).length){try{localStorage.setItem(KEYM+'.backup',JSON.stringify({cur,months}))}catch(e){}
     if(!aplicaArq(o))return;/* fora do formato: não conecta, para não gravar em cima */
-    ultJS=JSON.stringify({...pacote(),salvoEm:''});pronto=true;status('Salvo em '+NOME_ARQ)}
+    ultJS=JSON.stringify({...pacote(),salvoEm:''});pronto=true;status('Salvo em '+NOME_ARQ);confereFeriasDoArquivo();if(modoFerias)renderFerias()}
   else{/* JSON legível, com conteúdo, mas sem os meses: é de outro programa. Não gravar em cima. */
     FH=null;pronto=false;
     status('Esse arquivo tem conteúdo que não é do Cartinhas; não gravei nada nele. Escolha outro arquivo, ou um arquivo novo e vazio. <button id="btnArq" type="button">Escolher outro</button>',true);ligaBotao();return}
@@ -833,14 +2062,16 @@ async function confereArq(){if(!FH||!pronto||gravando)return;try{
   if(!o||o==='invalido')return;
   if(!aplicaArq(o))return;
   const {n,conflitos}=reaplicaMinhas(base,meu);
+  const rf=reaplicaFerias(base,meu),fx=textoFeriasJunta(rf);/* o plano de férias é um item só */
   if(months[cur]){days=months[cur].days;meta=months[cur].meta||null}
-  if(n||conflitos){guardaConflito(meu);renderMeses();render()}
-  if(n){status('Atualizado do arquivo e juntado com '+n+(n>1?' dias alterados aqui':' dia alterado aqui')
-      +(conflitos?'. Em '+conflitos+(conflitos>1?' dias alterados nos dois':' dia alterado nos dois')+' ficou valendo o do arquivo':'')
-      +'. <button id="btnMeu" type="button">usar só os meus</button>',true);ligaMeu();nuvemAgenda()}
-  else if(conflitos){ultJS=JSON.stringify({...pacote(),salvoEm:''});
-    status('O mesmo dia foi alterado nos dois navegadores ('+conflitos+'). Ficou valendo o do arquivo; o que estava aqui está guardado: <button id="btnMeu" type="button">usar só os meus</button>',true);ligaMeu()}
+  if(n||conflitos||rf.n||rf.conflitos){guardaConflito(meu);renderMeses();render()}
+  if(n||rf.n){status((n?'Atualizado do arquivo e juntado com '+n+(n>1?' dias alterados aqui':' dia alterado aqui')
+      +(conflitos?'. Em '+conflitos+(conflitos>1?' dias alterados nos dois':' dia alterado nos dois')+' ficou valendo o do arquivo':''):'Atualizado do arquivo')
+      +'.'+fx+' <button id="btnMeu" type="button">usar só os meus</button>',true);ligaMeu();nuvemAgenda()}
+  else if(conflitos||rf.conflitos){ultJS=JSON.stringify({...pacote(),salvoEm:''});
+    status((conflitos?'O mesmo dia foi alterado nos dois navegadores ('+conflitos+'). Ficou valendo o do arquivo; o que estava aqui está guardado:'+fx:fx.trim())+' <button id="btnMeu" type="button">usar só os meus</button>',true);ligaMeu()}
   else{ultJS=JSON.stringify({...pacote(),salvoEm:''});status('Atualizado do arquivo')}
+  if(!n&&!rf.n)confereFeriasDoArquivo();if(modoFerias)renderFerias();
 }catch(e){}}
 window.addEventListener('focus',confereArq);document.addEventListener('visibilitychange',()=>{if(!document.hidden)confereArq()});
 (async()=>{
