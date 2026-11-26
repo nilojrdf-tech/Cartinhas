@@ -163,6 +163,17 @@ button.fcol:hover{border-color:var(--b)}button.fcol[disabled]{cursor:default}
 .fop.at{border-color:#c2417f;background:light-dark(#fdf2f8,#2c1d27)}.fop button{min-height:36px;padding:0 12px}
 .fcol.fsug{outline:2px dashed #c2417f;outline-offset:-3px}
 .fsem{color:var(--mut)}tr.fsem td{color:var(--mut);font-style:italic}
+.ffaixa{position:sticky;top:0;z-index:3;background:var(--bb);color:#fff;border-radius:12px;padding:12px 16px;margin:12px 0;box-shadow:0 4px 14px #0003}
+.ffaixa .fn{font:800 clamp(17px,2.4vw,22px)/1.25 "Inter Tight",system-ui,sans-serif}.ffaixa .fcic{display:block;font-size:13px;opacity:.85}
+.ffaixa-det{background:light-dark(#e7f0f8,#1d2c3a);border-radius:12px;padding:10px 14px;margin:-4px 0 12px;font-size:14px}.ffaixa-det p{margin:4px 0}
+.ffaixa.fx-ok{background:light-dark(#0a7a3d,#1f5c3b)}.ffaixa.fx-urg{background:light-dark(#b3141a,#7a2c2f)}
+.fcardx{border-radius:12px;padding:12px 14px;margin:10px 0;border-left:5px solid}.fcardx p{margin:6px 0}.fcardx button{min-height:38px}
+.fx-urgente{background:light-dark(#fde2e2,#3d2426);border-color:var(--neg)}.fx-atencao{background:light-dark(#fff1bf,#3a3200);border-color:#c99700}.fx-info{background:light-dark(#e7f0f8,#1d2c3a);border-color:var(--b)}
+.fopcoes{margin:12px 0;background:var(--bg);border-radius:10px;padding:6px 12px}.fopcoes summary{cursor:pointer;font-weight:600;min-height:40px;display:flex;align-items:center}
+.fitem-op{border-top:1px solid var(--line);padding-top:8px;margin-top:8px}.fitem-op h4{margin:4px 0}
+.fexpl{font-size:14px;background:light-dark(#f2f6f9,#14222f);border-radius:8px;padding:8px 10px;margin:6px 0}
+.fescolha{display:flex;flex-wrap:wrap;gap:4px 16px;margin:4px 0}.fescolha label{display:flex;align-items:center;gap:6px;min-height:40px}.fescolha input{width:20px;height:20px}
+.femail textarea{min-height:280px;font:15px/1.55 Inter,system-ui,sans-serif}.femail #fEmAssunto{width:100%}
 @media(prefers-reduced-motion:no-preference){.col i{transition:height .35s ease}}
 </style>
 <script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
@@ -830,7 +841,10 @@ function validaFerias(f){
     if(!FERIAS_DIREITOS.includes(dir))return 'direito fora do esperado no ciclo '+k+': '+String(y.direito);
     const ab=y.abono||0;if(!Number.isInteger(ab)||ab<0||ab>Math.floor(dir*FERIAS_PARAM.abonoFracao+1e-9))return 'abono fora do esperado no ciclo '+k;
     if(y.periodos!=null&&!Array.isArray(y.periodos))return 'períodos fora do formato no ciclo '+k;
-    for(const p of y.periodos||[]){const e=validaPeriodoFer(p);if(e)return e+' no ciclo '+k}}
+    for(const p of y.periodos||[]){const e=validaPeriodoFer(p);if(e)return e+' no ciclo '+k}
+    for(const x of ['dataEscolha','dataAutomatica'])if(y[x]!=null&&y[x]!==''&&!dataOk(y[x]))return 'data do Populis inválida no ciclo '+k;
+    if(y.fonteDatas!=null&&typeof y.fonteDatas!=='string')return 'origem das datas fora do formato no ciclo '+k;
+    if(y.opcoes!=null){const e=validaOpcoes(y.opcoes);if(e)return e+' no ciclo '+k}}
   if(f.aConfirmar!=null&&!Array.isArray(f.aConfirmar))return 'fila de férias a confirmar fora do formato';
   for(const p of f.aConfirmar||[])if(!p||!dataOk(p.ini)||!dataOk(p.fim)||p.ini>p.fim)return 'período a confirmar fora do formato';
   if(f.descartados!=null&&(!Array.isArray(f.descartados)||f.descartados.some(p=>!p||!dataOk(p.ini)||!dataOk(p.fim))))return 'lista de períodos descartados fora do formato';
@@ -1349,6 +1363,253 @@ function conflitosLanc(p){if(!p.lancado)return '';
   const tr=(p.lancados||[]).map(d=>({d,x:diaDoPonto(d)})).filter(o=>o.x&&!o.x.lancFerias&&o.x.tipo!=='ferias');
   return tr.map(o=>`<p class="fnat fnat-aviso">O relatório trouxe ${br(o.d)} como ${o.x.tipo==='util'?'dia trabalhado':esc(o.x.tipo)}${parseList(o.x.marcas).length?' (batidas '+esc(o.x.marcas)+')':''}; o período lançado previa férias. Nada foi corrigido sozinho.</p>`).join('')}
 
+/* ---- plano mestre: prazo na faixa, lembretes, opções e direitos, e-mail para o chefe ----
+   (PLANO-MESTRE-CARTINHAS.md, "Prazos e lembretes" e "Opções e direitos"). Nada aqui muda o ponto:
+   ver um aviso, mudar uma opção ou preparar o e-mail mantém o banco de horas igual. */
+const KFL=KEYM+'.ferias.lembretes';  /* marcos de lembrete já mostrados, por ciclo: estado local deste computador */
+let fLembrete=null,fLembreteFeito=false,fOpAberto=null,fEmail=null;
+/* Dias que ainda pedem programação: o direito menos o usufruído, o vendido e o APROVADO.
+   Planejado é rascunho: continua no saldo do planejamento, mas não encerra os avisos. */
+const pendenteCiclo=(c,d)=>{const s=fSaldo(c,d,null,todayISO);return s.direito-s.usufruido-s.abono-s.aprovado};
+/* O início mais tarde possível para um bloco único com os dias pendentes: conta as datas inclusivas
+   até o fim do concessivo e, se o dia for vedado ou bater em período confirmado, volta até achar um. */
+function fUltimoInicio(c,pend,ctx){const P=ctx.P,conf=todosPeriodos().filter(p=>p.estado!=='planejado'),amanha=fSoma(todayISO,1);
+  const pesa=conf.filter(p=>p.chave===c.chave||P.intervaloEntreCiclos);
+  for(let d=fSoma(c.coFim,-(pend-1));d>=amanha&&d>=c.coIni;d=fSoma(d,-1)){const n={ini:d,fim:fSoma(d,pend-1)};
+    if(!fInicio(d,ctx).ok||conf.some(p=>sobrepoe(p,n))||fIntervalo(n,pesa,P))continue;return d}
+  return null}
+/* A conta da faixa para um ciclo: quantos dias para marcar, a partir da data de escolha informada
+   ou, sem ela, do último início viável menos a antecedência de 40 dias (cenário, a confirmar). */
+function fFaixa(c,ctx){const d=dadosCiclo(c,false),P=ctx.P,h=todayISO,s=fSaldo(c,d,pendencias(c),h),pend=pendenteCiclo(c,d);
+  const base={c,pend,provisorio:s.provisorio,motivos:s.motivos,esc:d.dataEscolha||null,aut:d.dataAutomatica||null,fonte:d.fonteDatas||''};
+  if(pend<=0)return {...base,tipo:'ok'};
+  if(h>c.coFim)return {...base,tipo:'vencido'};
+  let ult=fUltimoInicio(c,pend,ctx),div=false;
+  if(!ult&&(d.concordaFracionar||!P.fracionarExigeConcordancia)&&fPodeFracionar(pend)){
+    const conf=todosPeriodos().filter(p=>p.estado!=='planejado'),r=fMelhorCombinacao(c,ctx,{resto:pend,todos:conf,durs:(d.periodos||[]).filter(p=>p.estado!=='planejado').map(fDur)});
+    if(r.periodos){ult=r.periodos.map(p=>p.ini).sort()[0];div=true}}
+  const prazo=ult?fSoma(ult,-P.antecedenciaDias):null,ref=base.esc||prazo;
+  if(!ref)return {...base,tipo:'risco'};
+  const n=fDias(h,ref);return {...base,tipo:n<0?'passou':'conta',n,ref,prazo,ult,div,estimado:!base.esc}}
+const nDias=n=>n===1?'1 dia':n+' dias';
+function textoFaixa(fx){
+  if(fx.tipo==='ok')return 'Suas férias deste ciclo estão programadas.';
+  if(fx.tipo==='vencido')return 'Seu período concessivo terminou com férias pendentes.';
+  if(fx.tipo==='risco')return 'Os dias pendentes já não cabem antes do fim do prazo deste ciclo.';
+  if(fx.tipo==='passou')return 'O prazo ordinário passou. Ainda há férias a regularizar.';
+  if(fx.n===0)return 'Hoje é o último dia para solicitar a programação no prazo ordinário.';
+  return (fx.estimado?'Pelo cenário estimado, você tem ':'Você tem ')+nDias(fx.n)+' para marcar suas férias.'}
+/* Marco de lembrete: um por mês antes da janela final; nos últimos 30 dias até o prazo, os marcos
+   30, 25, 20, 15, 10, 5 e 0. Quem ficou dias sem abrir vê só o marco de agora, não os perdidos. */
+function fMarco(fx){if(!fx||(fx.tipo!=='conta'&&fx.tipo!=='passou'))return null;
+  if(fx.tipo==='passou')return 'passou';if(fx.n>30)return 'mes:'+todayISO.slice(0,7);
+  return 'dias:'+[0,5,10,15,20,25,30].find(m=>fx.n<=m)}
+function confereLembrete(fx){if(fLembreteFeito)return;fLembreteFeito=true;const m=fMarco(fx);if(!m)return;
+  let reg={};try{reg=JSON.parse(localStorage.getItem(KFL))||{}}catch(e){}
+  const k=fx.c.chave+':ordinario';if(reg[k]===m)return;reg[k]=m;try{localStorage.setItem(KFL,JSON.stringify(reg))}catch(e){}
+  fLembrete={chave:fx.c.chave,marco:m,n:fx.n,ref:fx.ref}}
+function cardsFaixa(fx,outro){const out=[],P=fParam(),h=todayISO;
+  const card=(nivel,titulo,texto,acao,rotulo)=>out.push({nivel,titulo,texto,acao,rotulo});
+  if(fLembrete&&fLembrete.chave===fx.c.chave&&fx.tipo==='conta')card('info','Lembrete',`Faltam ${nDias(fx.n)} para o prazo de solicitar a programação, em ${br(fx.ref)}. Veja as datas disponíveis e prepare o pedido.`,'lembrete-ok','Ok, vi');
+  if(fx.tipo==='passou')card('urgente','Prazo para solicitar passou',`O prazo ordinário era ${br(fx.ref)}. Ainda há ${nDias(fx.pend)} sem programação confirmada, e o prazo para tirar vai até ${br(fx.c.coFim)}: as datas que aparecem continuam valendo, sujeitas à regularização.`,'ver-datas','Ver datas e falar com o gestor');
+  if(fx.tipo==='risco')card('urgente','Risco de vencer com saldo',`${nDias(fx.pend)} estão sem programação confirmada e já não cabem antes de ${br(fx.c.coFim)}, com as regras de início e de intervalo. Fora do prazo, a remuneração das férias é paga em dobro.`,'email','Conferir com o gestor ou a Gestão de Pessoas');
+  if(fx.tipo==='vencido')card('urgente','Férias pendentes de regularização',`O prazo deste ciclo terminou em ${br(fx.c.coFim)} com ${nDias(fx.pend)} sem programação confirmada.`,'email','Falar com o gestor');
+  if(fx.aut){const na=fDias(h,fx.aut);
+    if(na<0)card('atencao','Confira se o Populis programou suas férias',`A programação automática estava prevista para ${br(fx.aut)}${fx.fonte?' ('+esc(fx.fonte)+')':''}. Se o Populis já programou, marque o período como aprovado na lista do ciclo.`);
+    else if(fx.esc&&fx.tipo==='conta'&&fx.n<=10)card('urgente','Programação automática chegando',`Você tem ${nDias(fx.n)} para marcar suas férias antes da programação automática prevista no Populis, em ${br(fx.aut)}${fx.fonte?' ('+esc(fx.fonte)+')':''}.`,'email','Preparar o pedido');
+    else if(!fx.esc&&na<=10)card('urgente','Programação automática chegando',`Faltam ${nDias(na)} para a programação automática prevista, em ${br(fx.aut)}${fx.fonte?' ('+esc(fx.fonte)+')':''}.`,'email','Preparar o pedido')}
+  if(outro)card('atencao','Outro ciclo tem prazo mais perto',`No ${esc(nomeCiclo(outro.c).toLowerCase())}: ${esc(textoFaixa(outro))}${outro.ref?' Prazo: '+br(outro.ref)+'.':''}`);
+  return out}
+const ICONE={urgente:'⚠️',atencao:'⏰',info:'🔔'};
+function htmlFaixa(cs,ctx){
+  const cand=[...cs.emConcessivo];if(cs.emAquisitivo&&!cand.includes(cs.emAquisitivo))cand.push(cs.emAquisitivo);
+  /* ciclos que já terminaram, mas em que a pessoa registrou algo e ainda há dias pendentes */
+  for(const c of cs.lista)if(c.coFim<todayISO&&ferias.ciclos[c.chave]&&pendenteCiclo(c,ferias.ciclos[c.chave])>0&&!cand.includes(c))cand.unshift(c);
+  const fxs=cand.map(c=>fFaixa(c,ctx));if(!fxs.length)return '';
+  const urg=x=>x.tipo==='vencido'?0:x.tipo==='risco'?1:x.tipo==='passou'?2:x.tipo==='conta'?3:9;
+  const ordem=fxs.slice().sort((a,b)=>urg(a)-urg(b)||((a.ref||'9')<(b.ref||'9')?-1:1));
+  const correndo=ordem.filter(x=>x.c.coIni<=todayISO);
+  const fx=(fFocoSel&&fxs.find(x=>x.c.chave===fFocoSel))||correndo[0]||ordem[0];
+  const outro=ordem.find(x=>x!==fx&&urg(x)<9&&(urg(x)<urg(fx)||(x.ref&&fx.ref&&x.ref<fx.ref)));
+  confereLembrete(fx);
+  const det=fx.tipo==='conta'||fx.tipo==='passou'
+    ?(fx.estimado?`Prazo recomendado para solicitar a programação: até ${br(fx.ref)} — o último início possível${fx.div?', com as férias divididas,':''} é ${br(fx.ult)}, menos os ${ctx.P.antecedenciaDias} dias de antecedência da regra interna, ainda a confirmar no MANPES. Se o Populis tiver um prazo para escolher ou uma programação automática prevista, informe no cartão do ciclo.`
+      :`Prazo para escolher informado por você${fx.fonte?' ('+esc(fx.fonte)+')':''}: ${br(fx.esc)}.`):fx.tipo==='ok'?'Os dias deste ciclo estão cobertos por férias aprovadas, usufruídas ou vendidas.':'';
+  const lim=fx.provisorio&&fx.tipo!=='ok'?`<p class="msg">O saldo ainda é provisório (${esc(fx.motivos.join('; '))}): confirme o saldo e as datas do ciclo para o prazo valer.</p>`:'';
+  const nivel=fx.tipo==='ok'?'fx-ok':fx.tipo==='conta'&&fx.n>10?'':'fx-urg';
+  /* fixo no topo só o essencial; o resto rola, para a faixa não cobrir a tela de quem usa celular ou janela estreita */
+  return `<div class="ffaixa ${nivel}" id="fFaixa" role="status" aria-live="polite"><span class="fcic">${esc(nomeCiclo(fx.c))}</span> <b class="fn">${esc(textoFaixa(fx))}</b></div>
+<div class="ffaixa-det" id="fFaixaDet"><p>${det}${fx.tipo==='conta'||fx.tipo==='passou'?' <button type="button" data-fx="ver-datas" class="lnk">Ver as datas disponíveis</button>':''}</p>${lim}
+<div class="row"><button type="button" data-fx="email">✉️ Preparar e-mail para o chefe</button></div></div>
+${cardsFaixa(fx,outro).map(k=>`<div class="fcardx fx-${k.nivel}" role="${k.nivel==='urgente'?'alert':'status'}"><b>${ICONE[k.nivel]} ${k.nivel==='urgente'?'Urgente: ':''}${esc(k.titulo)}</b><p>${k.texto}</p>${k.acao?`<button type="button" data-fx="${k.acao}">${esc(k.rotulo)}</button>`:''}</div>`).join('')}`}
+
+/* ---- datas do Populis: só quando a pessoa sabe e informa, com a origem ---- */
+function htmlDatasPopulis(c,d){return `<details class="fopcoes"${d.dataEscolha||d.dataAutomatica?' open':''}><summary>Datas do Populis, se você souber</summary>
+<div class="row frow"><label class="fcampo">Prazo para escolher as férias<input type="date" data-fd="dataEscolha" value="${esc(d.dataEscolha||'')}"></label>
+<label class="fcampo">Programação automática prevista<input type="date" data-fd="dataAutomatica" value="${esc(d.dataAutomatica||'')}"></label>
+<label class="fcampo">De onde veio a informação<input data-fd="fonteDatas" value="${esc(d.fonteDatas||'')}" placeholder="ex.: e-mail do gestor"></label></div>
+<p class="msg">Com o prazo para escolher, a faixa conta por ele. Sem ele, o Cartinhas estima pelo cenário de 40 dias de antecedência. "Programação automática" quer dizer que o Populis pode pôr as datas sozinho; confira no Populis se isso vale para você.</p></details>`}
+
+/* ---- opções e direitos (plano mestre): o que é, o que dá para escolher, qual o próximo passo ---- */
+const EST_OP=[['decidir','a decidir'],['pretendo','pretendo solicitar'],['solicitado','solicitação informada'],['confirmado','confirmação informada']];
+const ESCOLHA_DECIMO=['decidir','ferias','fora'],ESCOLHA_ADIANT=['decidir','sim','nao'];
+const EXPL={
+  datas:'Escolha os dias em que você quer se afastar do trabalho. O gestor ainda precisa confirmar as datas. As férias contam dias corridos, incluindo fins de semana e feriados dentro do período.',
+  dividir:'Você pode tirar tudo de uma vez ou dividir o descanso em blocos, se as datas e o saldo permitirem. Com 30 dias, um exemplo é 15 dias agora e 15 depois. Cada bloco precisa respeitar as regras de duração e programação.',
+  abono:dir=>{const v=Math.floor(dir*FERIAS_PARAM.abonoFracao+1e-9);return dir?`Você troca parte dos dias de descanso por dinheiro. Com direito a ${dir} dias, vender um terço significa descansar ${dir-v} dias e receber pelos outros ${v}. Esse dinheiro não é devolvido. Para saber até quando pode pedir, conte a partir da data em que termina o período em que você ganhou esse direito.`:'Sem dias de direito neste ciclo, não há o que vender.'},
+  decimo:'Você pede para receber nas férias parte do décimo terceiro que já receberia. A opção relatada para os Correios é de 50%. A regra aplicável ao seu caso precisa ser confirmada. O que vier antes será considerado no acerto do 13º.',
+  adiant:'É um valor que você pode pedir agora e devolver por descontos nos pagamentos seguintes. A remuneração normal das férias e o adicional de um terço seguem suas próprias regras.',
+  parcelas:'Se você pedir o adiantamento, a devolução pode ser dividida nos meses seguintes conforme a regra aplicável. Mais parcelas espalham os descontos pelo tempo. A regra relatada permite até cinco parcelas, ainda a confirmar.',
+  nao:'Você escolhe não receber a primeira parcela do 13º junto das férias e não pedir o adiantamento devolvido em folha. Seu abono pecuniário, se escolhido, continua separado. A remuneração de férias e o adicional de um terço continuam aplicáveis.',
+  terco:'É o valor adicional previsto pela Constituição sobre a remuneração de férias. É pago conforme as regras da folha. Você não precisa marcar uma opção para pedir.'};
+function validaOpcoes(o){if(typeof o!=='object'||Array.isArray(o)||!o)return 'opções fora do formato';
+  const est=x=>x==null||EST_OP.some(e=>e[0]===x);
+  if(o.abono&&(!est(o.abono.estado)||(o.abono.dias!=null&&!Number.isInteger(o.abono.dias))))return 'opção de abono fora do formato';
+  if(o.decimo&&(!ESCOLHA_DECIMO.includes(o.decimo.escolha||'decidir')||!est(o.decimo.estado)||(o.decimo.ano!=null&&!Number.isInteger(o.decimo.ano))||(o.decimo.periodo!=null&&typeof o.decimo.periodo!=='string')))return 'opção do 13º fora do formato';
+  const ad=o.adiantamento;
+  if(ad&&(!ESCOLHA_ADIANT.includes(ad.escolha||'decidir')||!est(ad.estado)||(ad.parcelas!=null&&!(Number.isInteger(ad.parcelas)&&ad.parcelas>=1&&ad.parcelas<=5))||(ad.periodo!=null&&typeof ad.periodo!=='string')))return 'opção de adiantamento fora do formato';
+  return null}
+/* Período ligado a uma opção que mudou de data ou sumiu pede revisão (não muda nada sozinho). */
+function revisoesOpcoes(d){const o=d.opcoes||{},out=[],ps=d.periodos||[];
+  for(const [k,nome] of [['decimo','ao 13º nas férias'],['adiantamento','ao adiantamento']]){const x=o[k];if(!x||!x.periodo)continue;
+    const p=ps.find(y=>y.id===x.periodo);
+    if(!p)out.push(`O período ligado ${nome} foi apagado: revise essa escolha.`);
+    else if(x.snap&&(x.snap.ini!==p.ini||x.snap.fim!==p.fim))out.push(`O período ligado ${nome} mudou de datas (era ${br(x.snap.ini)} a ${br(x.snap.fim)}): revise essa escolha.`)}
+  return out}
+function htmlOpcoes(c,d,s){const o=d.opcoes||{},ab=o.abono||{},dc=o.decimo||{},ad=o.adiantamento||{};
+  const futuros=(d.periodos||[]).filter(p=>p.estado!=='usufruido').sort((a,b)=>a.ini<b.ini?-1:1),selP=(campo,atual)=>`<label class="fcampo">Em qual período<select data-fo="${campo}">${opcoesSel([['','escolher…'],...futuros.map(p=>[p.id,br(p.ini)+' a '+br(p.fim)])],atual||'')}</select></label>`;
+  return `<details class="fopcoes"${fOpAberto===c.chave?' open':''} data-opc="${c.chave}"><summary>Opções e direitos: vender dias, 13º, adiantamento e o adicional de 1/3</summary>
+<p class="msg">Aqui você registra o que pretende pedir e o que já informou. Quem processa é o Populis, o e-Benefício e a folha: o Cartinhas só calcula prazos e dias e guarda o que você declarar. Nada disso muda o seu banco de horas.</p>
+${revisoesOpcoes(d).map(t=>`<p class="fnat fnat-aviso">${esc(t)}</p>`).join('')}
+<div class="fitem-op"><h4>💰 Vender dias de férias (abono pecuniário)</h4><p class="fexpl">${EXPL.abono(s.direito)}</p>
+<p class="msg">Até quando registrar a intenção: ${br(fSoma(c.aqFim,-FERIAS_PARAM.abonoPrazoDias))}, no e-Benefício. Quantos dias, você escolhe em "Dias vendidos (abono)" acima, quando estiver confirmado.</p>
+<div class="row frow"><label class="fcampo">Situação<select data-fo="abono.estado">${opcoesSel(EST_OP,ab.estado||'decidir')}</select></label></div></div>
+<div class="fitem-op"><h4>💵 Receber parte do 13º nas férias</h4><p class="fexpl">${EXPL.decimo}</p>
+<div class="row frow"><label class="fcampo">Sua preferência<select data-fo="decimo.escolha">${opcoesSel([['decidir','a decidir'],['ferias','prefiro nas férias'],['fora','prefiro fora das férias']],dc.escolha||'decidir')}</select></label>
+${dc.escolha==='ferias'?selP('decimo.periodo',dc.periodo):''}<label class="fcampo">Situação<select data-fo="decimo.estado">${opcoesSel(EST_OP,dc.estado||'decidir')}</select></label></div></div>
+<div class="fitem-op"><h4>🏦 Receber um adiantamento de férias</h4><p class="fexpl">${EXPL.adiant}</p>
+<div class="row frow"><label class="fcampo">Sua preferência<select data-fo="adiantamento.escolha">${opcoesSel([['decidir','a decidir'],['sim','pretendo solicitar'],['nao','não vou solicitar']],ad.escolha||'decidir')}</select></label>
+<label class="fcampo">🔄 Parcelas para devolver<select data-fo="adiantamento.parcelas"${ad.escolha==='sim'?'':' disabled'}>${opcoesSel([['','—'],...[1,2,3,4,5].map(n=>[n,n+(n>1?' parcelas':' parcela')])],ad.parcelas||'')}</select></label>
+${ad.escolha==='sim'?selP('adiantamento.periodo',ad.periodo):''}<label class="fcampo">Situação<select data-fo="adiantamento.estado">${opcoesSel(EST_OP,ad.estado||'decidir')}</select></label></div>
+<p class="fexpl">${EXPL.parcelas}</p></div>
+<div class="fitem-op"><button type="button" data-fx="nao-antecipa">✅ Não solicitar antecipações</button><p class="fexpl">${EXPL.nao}</p></div>
+<div class="fitem-op"><h4>ℹ️ Adicional de um terço</h4><p class="fexpl">${EXPL.terco}</p></div></details>`}
+/* Muda uma opção do ciclo. O 13º nas férias vale para um período só em cada ano do 13º. */
+function mudaOpcao(c,campo,valor){const [grupo,chave]=campo.split('.');fOpAberto=c.chave;
+  if(grupo==='decimo'&&(chave==='periodo'||chave==='escolha')){
+    const d=dadosCiclo(c,false),o=(d.opcoes||{}).decimo||{},per=(d.periodos||[]).find(p=>p.id===(chave==='periodo'?valor:o.periodo));
+    const vaiFerias=(chave==='escolha'?valor:o.escolha)==='ferias';
+    if(vaiFerias&&per){const ano=+per.ini.slice(0,4);
+      const outro=Object.entries(ferias.ciclos).find(([k,y])=>k!==c.chave&&y.opcoes&&y.opcoes.decimo&&y.opcoes.decimo.escolha==='ferias'&&y.opcoes.decimo.ano===ano);
+      if(outro){fAvisoTxt=`Você já escolheu receber o 13º de ${ano} nas férias de outro ciclo. Só dá para pedir em um período por ano do 13º: desfaça a outra escolha antes.`;renderFerias();return}}}
+  mudaFerias(()=>{const d=dadosCiclo(c,true);d.opcoes=d.opcoes||{};const g=d.opcoes[grupo]=d.opcoes[grupo]||{};
+    if(chave==='parcelas')g.parcelas=valor===''?null:+valor;
+    else if(chave==='periodo'){g.periodo=valor||null;const p=(d.periodos||[]).find(x=>x.id===valor);g.snap=p?{ini:p.ini,fim:p.fim}:null;if(grupo==='decimo')g.ano=p?+p.ini.slice(0,4):null}
+    else g[chave]=valor;
+    if(grupo==='adiantamento'&&chave==='escolha'&&valor!=='sim'){g.parcelas=null;g.periodo=null;g.snap=null}
+    if(grupo==='decimo'&&chave==='escolha'&&valor!=='ferias'){g.periodo=null;g.snap=null;g.ano=null}})}
+/* Não solicitar antecipações: o 13º nas férias e o adiantamento passam a "não"; o abono fica como está. */
+function naoAntecipa(c){fOpAberto=c.chave;mudaFerias(()=>{const d=dadosCiclo(c,true);d.opcoes=d.opcoes||{};
+  d.opcoes.decimo={...(d.opcoes.decimo||{}),escolha:'fora',periodo:null,snap:null,ano:null};
+  d.opcoes.adiantamento={...(d.opcoes.adiantamento||{}),escolha:'nao',parcelas:null,periodo:null,snap:null}})}
+
+/* ---- preparar e-mail para o chefe: rascunho local, editável, copiado pela pessoa ---- */
+function fCicloEmail(cs){const cand=[...cs.emConcessivo];if(cs.emAquisitivo&&!cand.includes(cs.emAquisitivo))cand.push(cs.emAquisitivo);
+  const sel=fFocoSel&&cand.find(c=>c.chave===fFocoSel);if(sel)return sel;
+  return cand.find(c=>(dadosCiclo(c,false).periodos||[]).some(p=>p.estado!=='usufruido'&&p.fim>=todayISO))||cand[0]||null}
+function abreEmail(){const cs=ciclosAgora(),c=fCicloEmail(cs);if(!c)return;const d=dadosCiclo(c,false),o=d.opcoes||{},s=fSaldo(c,d,null,todayISO);
+  const ps=(d.periodos||[]).filter(p=>p.estado!=='usufruido'&&p.fim>=todayISO);
+  fEmail={chave:c.chave,sel:new Set(ps.map(p=>p.id)),
+    abono:d.abonoInformado&&d.abono>0?'sim':(o.abono&&o.abono.estado==='pretendo'?'sim':'decidir'),abonoDias:d.abono||Math.floor(s.direito*FERIAS_PARAM.abonoFracao+1e-9),
+    decimo:o.decimo&&o.decimo.escolha==='ferias'?'sim':o.decimo&&o.decimo.escolha==='fora'?'nao':'decidir',decimoPer:(o.decimo&&o.decimo.periodo)||null,
+    adiant:(o.adiantamento&&o.adiantamento.escolha)||'decidir',parcelas:(o.adiantamento&&o.adiantamento.parcelas)||'',orientar:true,rascunho:null};
+  renderFerias();const e=$('fEmail');if(e)try{e.scrollIntoView({block:'start'})}catch(x){}}
+const juntaE=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' e '+a[a.length-1];
+function textoEmail(c,E,s,fx){const d=dadosCiclo(c,false),ps=(d.periodos||[]).filter(p=>E.sel.has(p.id)).sort((a,b)=>a.ini<b.ini?-1:1);
+  const par=[],tot=ps.reduce((a,p)=>a+fDur(p),0);let lista='';
+  if(!ps.length)par.push(`Gostaria de orientação para programar minhas férias do ${nomeCiclo(c).toLowerCase()}: há ${nDias(Math.max(0,fx.pend))} a programar${fx.ref?', e pelo que calculei o prazo para solicitar a programação vai até '+br(fx.ref):''}. Poderia me orientar sobre as datas disponíveis?`);
+  else if(ps.length===1)par.push(`Gostaria de solicitar a programação de férias para ${br(ps[0].ini)} a ${br(ps[0].fim)}, com ${fDur(ps[0])} dias corridos de descanso.`);
+  else{par.push('Gostaria de solicitar a programação de férias nos seguintes períodos:');lista=ps.map(p=>`- ${br(p.ini)} a ${br(p.fim)} (${fDur(p)} dias corridos)`).join('\n')+`\nNo total, ${tot} dias corridos de descanso.`}
+  const resto=[];
+  if(E.abono==='sim')resto.push(`Também gostaria de solicitar a conversão de ${E.abonoDias} dias em abono pecuniário, caso esteja dentro do prazo.`);
+  const pd=ps.find(p=>p.id===E.decimoPer);
+  if(E.decimo==='sim')resto.push(`Gostaria de receber a primeira parcela do 13º salário junto das férias${pd?' de '+br(pd.ini)+' a '+br(pd.fim):''}, conforme a regra aplicável.`);
+  if(E.adiant==='sim')resto.push(`Gostaria de solicitar o adiantamento de férias${E.parcelas?`, com devolução em ${E.parcelas} ${+E.parcelas>1?'parcelas':'parcela'}`:''}, conforme a regra aplicável.`);
+  if(E.decimo==='nao'&&E.adiant==='nao')resto.push('Para este pedido, não solicito a antecipação da primeira parcela do 13º nas férias nem o adiantamento de férias.');
+  else{if(E.decimo==='nao')resto.push('Não solicito a antecipação da primeira parcela do 13º nas férias.');if(E.adiant==='nao')resto.push('Não solicito o adiantamento de férias.')}
+  if(E.decimo==='sim'||E.adiant==='sim')resto.push('Como as condições do 13º nas férias e do adiantamento dependem da regra aplicável, peço que me confirme se o pedido pode ser feito assim.');
+  const dec=[E.abono==='decidir'&&'a venda de dias (abono)',E.decimo==='decidir'&&'a antecipação do 13º nas férias',E.adiant==='decidir'&&'o adiantamento de férias'].filter(Boolean);
+  if(E.orientar&&dec.length)resto.push(`Gostaria também de orientação sobre ${juntaE(dec)} antes de decidir.`);
+  if(s.provisorio)resto.push('Peço também a conferência do meu saldo de férias deste ciclo.');
+  if(fx.tipo==='passou')resto.push('Sei que o prazo ordinário para solicitar a programação já passou; peço orientação para regularizar.');
+  const corpo='Olá,\n\n'+par.join(' ')+(lista?'\n'+lista:'')+(resto.length?'\n\n'+resto.join(' '):'')
+    +(ps.length?'\n\nPoderia confirmar a disponibilidade das datas e me orientar sobre o registro e os prazos?':'')+'\n\nAtenciosamente,\n[Nome]';
+  return {assunto:ps.length?'Solicitação de programação de férias':'Orientação para programação de férias',corpo}}
+function htmlEmail(cs,ctx){const E=fEmail;if(!E)return '';const c=cs.lista.find(x=>x.chave===E.chave);if(!c)return '';
+  const d=dadosCiclo(c,false),s=fSaldo(c,d,pendencias(c),todayISO),fx=fFaixa(c,ctx),maxAb=Math.floor(s.direito*FERIAS_PARAM.abonoFracao+1e-9);
+  const ps=(d.periodos||[]).filter(p=>p.estado!=='usufruido'&&p.fim>=todayISO).sort((a,b)=>a.ini<b.ini?-1:1),sel=ps.filter(p=>E.sel.has(p.id));
+  const tri=(k,rot,expl,extra)=>`<div class="fitem-op"><h4>${rot}</h4><p class="fexpl">${expl}</p><div class="fescolha" role="radiogroup" aria-label="${esc(rot.replace(/^\S+\s/,''))}">${[['sim','Quero'],['nao','Não quero'],['decidir','A decidir']].map(([v,t])=>`<label><input type="radio" name="fe-${k}" data-fe="${k}" value="${v}"${E[k]===v?' checked':''}> ${t}</label>`).join('')}</div>${extra||''}</div>`;
+  const resumo=[sel.length?`${sel.length} ${sel.length>1?'períodos':'período'}, ${sel.reduce((a,p)=>a+fDur(p),0)} dias corridos`:'nenhum período escolhido: o rascunho vira um pedido de orientação',
+    'abono: '+({sim:'quero vender '+E.abonoDias+' dias',nao:'não quero',decidir:'a decidir'})[E.abono],'13º nas férias: '+({sim:'quero',nao:'não quero',decidir:'a decidir'})[E.decimo],
+    'adiantamento: '+({sim:'quero'+(E.parcelas?', em '+E.parcelas+' parcelas':''),nao:'não quero',decidir:'a decidir'})[E.adiant]];
+  const avisos=[s.provisorio&&'O saldo deste ciclo ainda é provisório: o rascunho pede ao gestor a conferência do saldo.',fx.tipo==='passou'&&'O prazo ordinário já passou: o rascunho pede orientação para regularizar.',!sel.length&&'Sem período escolhido, o rascunho pede orientação em vez de datas.'].filter(Boolean);
+  return `<div class="fcard femail" id="fEmail"><h3>Como você quer marcar suas férias?</h3>
+<p class="msg">Tique o que você quer pedir, com a explicação ao lado de cada item. No fim, o Cartinhas monta um rascunho que você revisa, edita e copia para o seu e-mail. Preparar ou copiar não muda a situação dos períodos: pedir e aprovar continuam sendo passos que você informa.</p>
+<div class="fitem-op"><h4>1. 📅 Períodos — ${esc(nomeCiclo(c))}</h4><p class="fexpl">${EXPL.datas}</p>
+${ps.length?ps.map(p=>`<label class="fchk"><input type="checkbox" data-fe="sel" value="${esc(p.id)}"${E.sel.has(p.id)?' checked':''}> ${br(p.ini)} a ${br(p.fim)} — ${fDur(p)} dias corridos (${ESTADO_TXT[p.estado]})</label>`).join('')+`<p class="msg">Total escolhido: ${sel.reduce((a,p)=>a+fDur(p),0)} dias corridos.</p>`
+  :'<p>Nenhum período marcado ainda.</p>'}<p class="fexpl">${EXPL.dividir}</p><button type="button" data-fx="ir-calendario">Escolher no calendário</button></div>
+<h4>2. O que você quer pedir</h4>
+${tri('abono','💰 Vender dias de férias (abono pecuniário)',EXPL.abono(s.direito),E.abono==='sim'?`<label class="fcampo">Quantos dias vender<select data-fe="abonoDias">${opcoesSel(Array.from({length:maxAb},(_,i)=>[i+1,(i+1)+' dias']),E.abonoDias)}</select></label>`:'')}
+${tri('decimo','💵 Receber parte do 13º nas férias',EXPL.decimo,E.decimo==='sim'&&sel.length?`<label class="fcampo">Em qual período<select data-fe="decimoPer">${opcoesSel([['','escolher…'],...sel.map(p=>[p.id,br(p.ini)+' a '+br(p.fim)])],E.decimoPer||'')}</select></label>`:'')}
+${tri('adiant','🏦 Receber um adiantamento de férias',EXPL.adiant,`<label class="fcampo">🔄 Parcelas para devolver<select data-fe="parcelas"${E.adiant==='sim'?'':' disabled'}>${opcoesSel([['','—'],...[1,2,3,4,5].map(n=>[n,n+(n>1?' parcelas':' parcela')])],E.parcelas)}</select></label><p class="fexpl">${EXPL.parcelas}</p>`)}
+<div class="fitem-op"><button type="button" data-fx="nao-antecipa-email">✅ Não solicitar antecipações</button><p class="fexpl">${EXPL.nao}</p></div>
+<div class="fitem-op"><h4>ℹ️ Adicional de um terço</h4><p class="fexpl">${EXPL.terco}</p></div>
+<label class="fchk"><input type="checkbox" data-fe="orientar"${E.orientar?' checked':''}> Pedir orientação sobre o que está "a decidir"</label>
+<div class="fitem-op"><h4>Resumo</h4><ul class="floc">${resumo.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>${avisos.map(t=>`<p class="fnat fnat-aviso">${esc(t)}</p>`).join('')}</div>
+<h4>3. Rascunho</h4><div class="row"><button type="button" class="pri" data-fx="gerar">${E.rascunho?'Gerar de novo':'Gerar rascunho'}</button><button type="button" data-fx="email-fecha">Fechar</button></div>
+${E.rascunho?`<label class="fcampo">Assunto<input id="fEmAssunto" value="${esc(E.rascunho.assunto)}"></label>
+<label class="fcampo">Texto<textarea id="fEmCorpo" rows="16">${esc(E.rascunho.corpo)}</textarea></label>
+<p class="msg">Confira o texto, troque [Nome] pela sua assinatura e ponha o endereço do seu gestor no seu e-mail.</p>
+<div class="row"><button type="button" class="pri" data-fx="copiar">Copiar e-mail</button><span class="msg" id="fEmCopiado" role="status"></span></div>`:''}</div>`}
+/* gerar o rascunho guarda as escolhas como preferências do ciclo (não o texto do e-mail) */
+function geraEmail(){const E=fEmail;if(!E)return;const cs=ciclosAgora(),c=cs.lista.find(x=>x.chave===E.chave);if(!c)return;
+  const d=dadosCiclo(c,false),s=fSaldo(c,d,pendencias(c),todayISO),fx=fFaixa(c,fContexto());E.rascunho=textoEmail(c,E,s,fx);
+  const est=(x,v)=>x&&x.estado&&x.estado!=='decidir'?x.estado:v;
+  mudaFerias(()=>{const y=dadosCiclo(c,true);y.opcoes=y.opcoes||{};const o=y.opcoes,pd=(y.periodos||[]).find(p=>p.id===E.decimoPer);
+    o.abono={...(o.abono||{}),estado:E.abono==='sim'?est(o.abono,'pretendo'):(o.abono&&o.abono.estado)||'decidir',dias:E.abono==='sim'?+E.abonoDias:(o.abono&&o.abono.dias)||null};
+    o.decimo={...(o.decimo||{}),escolha:E.decimo==='sim'?'ferias':E.decimo==='nao'?'fora':'decidir',periodo:E.decimo==='sim'&&pd?pd.id:null,snap:E.decimo==='sim'&&pd?{ini:pd.ini,fim:pd.fim}:null,ano:E.decimo==='sim'&&pd?+pd.ini.slice(0,4):null,estado:E.decimo==='sim'?est(o.decimo,'pretendo'):(o.decimo&&o.decimo.estado)||'decidir'};
+    o.adiantamento={...(o.adiantamento||{}),escolha:E.adiant,parcelas:E.adiant==='sim'&&E.parcelas?+E.parcelas:null,estado:E.adiant==='sim'?est(o.adiantamento,'pretendo'):(o.adiantamento&&o.adiantamento.estado)||'decidir'}})}
+async function copiaEmail(){const a=$('fEmAssunto'),b=$('fEmCorpo');if(!a||!b)return;const t='Assunto: '+a.value+'\n\n'+b.value;let ok=false;
+  try{if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(t);ok=true}}catch(e){}
+  if(!ok)try{const x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();ok=document.execCommand('copy');x.remove()}catch(e){}
+  const m=$('fEmCopiado');if(m)m.textContent=ok?'Copiado. Cole no seu e-mail, confira e envie.':'Não consegui copiar sozinho: selecione o texto, copie com Ctrl+C e cole no seu e-mail.'}
+function acaoFx(t){const a=t.dataset.fx,cs=ciclosAgora();
+  if(a==='lembrete-ok'){fLembrete=null;renderFerias();return}
+  if(a==='ver-datas'){const e=$('fDicas');if(e)try{e.scrollIntoView({block:'start'})}catch(x){}return}
+  if(a==='email'){abreEmail();return}
+  if(a==='email-fecha'){fEmail=null;renderFerias();return}
+  if(a==='ir-calendario'){const e=$('fMesCard');if(e)try{e.scrollIntoView({block:'start'})}catch(x){}return}
+  if(a==='nao-antecipa'){const c=cicloDoCartao(t);if(c)naoAntecipa(c);return}
+  if(a==='nao-antecipa-email'&&fEmail){fEmail.decimo='nao';fEmail.adiant='nao';fEmail.parcelas='';fEmail.decimoPer=null;renderFerias();return}
+  if(a==='gerar'){geraEmail();return}
+  if(a==='copiar'){copiaEmail();return}}
+function campoFx(t){
+  if(t.dataset.fd){const c=cicloDoCartao(t);if(!c)return;const v=t.value.trim();
+    if(t.dataset.fd!=='fonteDatas'&&v&&!dataOk(v))return;
+    mudaFerias(()=>{const d=dadosCiclo(c,true);d[t.dataset.fd]=v||null});return}
+  if(t.dataset.fo){const c=cicloDoCartao(t);if(c)mudaOpcao(c,t.dataset.fo,t.value);return}
+  if(t.dataset.fe&&fEmail){const k=t.dataset.fe,E=fEmail;
+    if(k==='sel'){if(t.checked)E.sel.add(t.value);else E.sel.delete(t.value)}
+    else if(k==='orientar')E.orientar=t.checked;
+    else if(k==='abonoDias')E.abonoDias=+t.value;
+    else if(k==='decimoPer')E.decimoPer=t.value||null;
+    else if(k==='parcelas')E.parcelas=t.value;
+    else{E[k]=t.value;if(k==='adiant'&&t.value!=='sim')E.parcelas=''}
+    renderFerias()}}
+/* o texto do rascunho editado pela pessoa sobrevive a um novo desenho da área */
+$('ferias').addEventListener('input',e=>{if(!fEmail||!fEmail.rascunho)return;if(e.target.id==='fEmAssunto')fEmail.rascunho.assunto=e.target.value;if(e.target.id==='fEmCorpo')fEmail.rascunho.corpo=e.target.value});
+$('ferias').addEventListener('toggle',e=>{const k=e.target.dataset&&e.target.dataset.opc;if(k)fOpAberto=e.target.open?k:(fOpAberto===k?null:fOpAberto)},true);
+
 /* ---- a área: aparece e some; o banco de horas fica intocado (D2, D3) ---- */
 let fRebase=null,fConfirma=null;  /* mudança de data esperando confirmação (6.3); apagar esperando o segundo clique */
 function abreFerias(){modoFerias=true;document.body.classList.add('modo-ferias');$('secFerias').hidden=false;
@@ -1359,7 +1620,7 @@ function fechaFerias(){modoFerias=false;document.body.classList.remove('modo-fer
   $('btnFerias').textContent='Programação de Férias';render()}
 const opcoesSel=(vals,atual,vazio)=>(vazio?`<option value="" selected>${esc(vazio)}</option>`:'')
   +vals.map(([v,t])=>`<option value="${v}"${!vazio&&String(v)===String(atual)?' selected':''}>${esc(t)}</option>`).join('');
-const nomeCiclo=c=>'Ciclo '+c.aqIni.slice(0,4)+'/'+c.aqFim.slice(0,4);
+const nomeCiclo=c=>'Ciclo '+c.aqIni.slice(0,4)+'/'+(+c.aqIni.slice(0,4)+1);
 const durTxt=p=>{const n=fDur(p);return n+(n>1?' dias':' dia')};
 const ESTADO_TXT={planejado:'planejado',aprovado:'aprovado no Populis',usufruido:'usufruído'};
 const ESTADO_FEM={planejado:'planejadas',aprovado:'aprovadas no Populis',usufruido:'usufruídas'};
@@ -1393,6 +1654,7 @@ ${s.provisorio?`<p class="fprov"><b>Saldo provisório:</b> ${esc(s.motivos.join(
 ${fAvisosCiclo(c,s).map(t=>`<p class="fnat fnat-aviso">${t}</p>`).join('')}
 ${irregular?`<p class="fprov">O que já foi usufruído (${usu.join(' + ')} dias) não fecha com as regras de fracionamento: falta um período de 14, ou há um abaixo de 5. Confira com a Gestão de Pessoas; o Cartinhas segue a conta com o saldo que sobra.</p>`:''}
 ${s.livre<0?`<p class="fprov">Há mais dias registrados do que o direito do ciclo (${-s.livre} a mais). Confira os períodos e o direito.</p>`:''}
+${htmlDatasPopulis(c,d)}${htmlOpcoes(c,d,s)}
 ${htmlPeriodos(d)}
 <div class="row frow">
 <label class="fcampo">Direito neste ciclo<select data-fc="direito">${opcoesSel(FERIAS_DIREITOS.map(v=>[v,v+' dias']),s.direito,d.direitoInformado?null:s.direito+' dias (presumido)')}</select></label>
@@ -1468,6 +1730,7 @@ function renderFerias(){
 ${fEditaAdm?'':'<p class="msg">Já tinha um plano em outro computador, ou uma versão antiga do Cartinhas apagou o seu? <button type="button" id="fAbreCopia">Restaurar de uma cópia</button></p>'}</div>`;
     el.innerHTML=h;return}
   const cs=ciclosAgora(),ctx=fContexto();
+  h+=htmlFaixa(cs,ctx)+htmlEmail(cs,ctx);
   if(fRebase)h+=htmlRebase();
   if(fLanca)h+=htmlLanca();
   if(fDesfaz)h+=htmlDesfaz();
@@ -1522,6 +1785,7 @@ function acrescentaLocal(){const d=$('fLocData').value,nome=$('fLocNome').value.
   if(!dataOk(d)){fAvisoTxt='Informe a data do feriado.';renderFerias();return}
   mudaFerias(f=>{f.config=f.config||{};(f.config.feriadosLocais=f.config.feriadosLocais||[]).push({data:$('fLocAnual').checked?d.slice(5):d,nome:nome||'feriado local'})})}
 $('ferias').addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
+  if(t.dataset.fx){acaoFx(t);return}
   if(t.dataset.d){const d=t.dataset.d;fCliqueDia(d);const b=document.querySelector('#fMesCard [data-d="'+d+'"]');if(b)try{b.focus({preventScroll:true})}catch(x){}return}
   if(t.dataset.desmarca){const id=t.dataset.desmarca;fPainel=null;
     mudaFerias(f=>{for(const k of Object.keys(f.ciclos)){const ps=f.ciclos[k].periodos||[],i=ps.findIndex(x=>x.id===id&&x.estado==='planejado');if(i>=0)ps.splice(i,1)}});return}
@@ -1558,6 +1822,7 @@ $('ferias').addEventListener('click',e=>{const t=e.target.closest('button');if(!
     case 'fCopia':salvaCopiaExterna();return;
     case 'fAbreCopia':abreCopiaExterna();return}});
 $('ferias').addEventListener('change',e=>{const t=e.target;
+  if(t.dataset.fd||t.dataset.fo||t.dataset.fe){campoFx(t);return}
   if(t.dataset.lpula!=null&&fLanca){fLanca.dias[+t.dataset.lpula].pular=!t.checked;renderFerias();return}
   if(t.dataset.rb!=null&&fRebase){fRebase.assoc[+t.dataset.rb].nova=t.value;return}
   if(t.id==='fFoco'){fFocoSel=t.value;fDicaDur=null;fMelhorRes=null;renderFerias();return}

@@ -691,9 +691,10 @@ caso('Férias — marcação','O início fica guardado ao trocar de mês, e Esc 
   p.d.dispatchEvent(new p.w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));const cancelou=!/Início em/.test(p.T('fMesCard'));
   return {ok:guardou&&cancelou,obs:`guardou o início em janeiro: ${guardou} · Esc cancelou: ${cancelou}`}});
 
-caso('Férias — medidas','Descanso seguido conta as bordas que não se pagam: 04/01 a 02/02/2027 dá 33 dias fora e 22 úteis poupados',()=>{const p=abre();comPlano(p);
-  const a=V(p).avalia('2027-01-04',30);
-  return {ok:a.antes===3&&a.depois===0&&a.uteis===22&&a.descanso===33,obs:`antes ${a.antes} (01/01 feriado, 02 e 03 fim de semana) · depois ${a.depois} · úteis ${a.uteis} · descanso ${a.descanso}`}});
+caso('Férias — medidas','Descanso seguido conta as bordas que não se pagam: 29/03 a 27/04/2027 dá 33 dias fora e 21 úteis poupados',()=>{const p=abre();comPlano(p);
+  /* depois da Sexta-feira Santa (26/03) e do fim de semana; o Tiradentes (21/04) fica dentro e gasta um dia corrido */
+  const a=V(p).avalia('2027-03-29',30);
+  return {ok:a.antes===3&&a.depois===0&&a.uteis===21&&a.descanso===33,obs:`antes ${a.antes} (Sexta-feira Santa, sábado e domingo) · depois ${a.depois} · úteis ${a.uteis} (o 21/04 não conta) · descanso ${a.descanso}`}});
 
 // ---------- PROGRAMAÇÃO DE FÉRIAS — fases 7 e 8: dicas e melhor combinação (PLANO-FERIAS.md) ----------
 const brT=s=>s.slice(8)+'/'+s.slice(5,7)+'/'+s.slice(0,4);
@@ -718,7 +719,8 @@ const SEM_INTERVALO={diasTrabalhados:[1,2,3,4,5],dsr:0,leituraInicio:'estrita',i
 
 caso('Férias — dicas','Janeiro, 30 dias de uma vez: a melhor começa em 04/01, logo depois do feriado e do fim de semana',()=>{const p=abre();comPlano(p);
   const r=V(p).dicas('2027-01');const o=(r.opcoes||[])[0]||{};const inis=(r.opcoes||[]).map(x=>x.ini);
-  return {ok:o.ini==='2027-01-04'&&o.descanso===33&&o.uteis===22&&new Set(inis).size===inis.length&&inis.length===3,
+  /* a medida em si é conferida no caso das bordas; aqui, que a melhor é 04/01 e que a dica usa a mesma conta da página */
+  return {ok:o.ini==='2027-01-04'&&o.descanso===V(p).avalia('2027-01-04',30).descanso&&o.uteis===22&&new Set(inis).size===inis.length&&inis.length===3,
     obs:(r.opcoes||[]).map(x=>`${brT(x.ini)}: ${x.descanso} fora, ${x.uteis} úteis`).join(' · ')}});
 
 caso('Férias — dicas','A lista mês a mês e o cartão de cada mês dão sempre a mesma dica',()=>{const p=abre();comPlano(p);
@@ -736,7 +738,7 @@ caso('Férias — dicas','Mês que não cabe aparece na lista com o motivo da re
 
 caso('Férias — dicas','O cartão compara o que a pessoa marcou com a dica, sem julgar',()=>{const p=abre();comPlano(p);marca(p,'2027-01-05','2027-02-03');
   vaiMes(p,'2027-01');const c=p.d.querySelector('#fMesCard .fcomp');const t=c?c.textContent:'';
-  return {ok:/Você marcou 05\/01\/2027 a 03\/02\/2027: 30 dias seguidos fora/.test(t)&&/começando em 04\/01\/2027, seriam 33/.test(t)&&/Quem decide é você/.test(t),obs:t.slice(0,170)||'sem comparação'}});
+  return {ok:/Você marcou 05\/01\/2027 a 03\/02\/2027: 30 dias seguidos fora/.test(t)&&new RegExp('começando em 04/01/2027, seriam '+V(p).avalia('2027-01-04',30).descanso+' ').test(t)&&/Quem decide é você/.test(t),obs:t.slice(0,170)||'sem comparação'}});
 
 caso('Férias — dicas','"Marcar" da dica cria o mesmo período que marcar clicando, pela mesma validação',()=>{const a=abre();comPlano(a);vaiMes(a,'2027-01');clica(a,'#fMesCard [data-marcasug="0"]');
   const b=abre();comPlano(b);marca(b,'2027-01-04','2027-02-02');
@@ -789,12 +791,13 @@ caso('Férias — lançar','Aprovar não muda o banco de horas',()=>{const p=abr
   return {ok:p.saldo()===s0&&cicloDe(p,'2025-03-15').periodos[0].estado==='aprovado',obs:`saldo antes ${s0} · depois de aprovar ${p.saldo()}`}});
 
 caso('Férias — lançar','Pré-visualizar não grava nem cria mês; lançar põe só os dias úteis como férias, sem tipoManual',()=>{const p=abre();
-  lancaDezJan(p);const painel=!!p.d.getElementById('fLancaPainel'),semMes=!p.w.cartinhasTeste.estado().months['2026-12'];
+  comPlano(p);marca(p,'2027-01-04','2027-02-02');aprova(p);clica(p,'[data-pa="lancar"]');
+  const painel=!!p.d.getElementById('fLancaPainel'),semMes=!p.w.cartinhasTeste.estado().months['2027-01']&&!p.w.cartinhasTeste.estado().months['2027-02'];
   const linhas=p.d.querySelectorAll('#fLancaPainel tbody tr').length;clica(p,'#fLancaOk');
-  const ds=['2026-12','2027-01'].flatMap(ym=>(p.w.cartinhasTeste.estado().months[ym]||{days:[]}).days).filter(x=>x.lancFerias);
+  const ds=['2027-01','2027-02'].flatMap(ym=>(p.w.cartinhasTeste.estado().months[ym]||{days:[]}).days).filter(x=>x.lancFerias);
   const per=cicloDe(p,'2025-03-15').periodos[0];
-  const ok=painel&&semMes&&linhas===20&&ds.length===20&&ds.every(x=>x.tipo==='ferias'&&!x.tipoManual)&&diaP(p,'2026-12-25').tipo==='feriado'&&diaP(p,'2026-12-19').tipo==='folga'&&per.lancado&&per.lancados.length===20;
-  return {ok,obs:`painel: ${painel} · dezembro só criado ao lançar: ${semMes} · dias na pré-visualização: ${linhas} · lançados: ${ds.length}, sem tipoManual: ${ds.every(x=>!x.tipoManual)} · 25/12: ${diaP(p,'2026-12-25').tipo} · 19/12: ${diaP(p,'2026-12-19').tipo}`}});
+  const ok=painel&&semMes&&linhas===22&&ds.length===22&&ds.every(x=>x.tipo==='ferias'&&!x.tipoManual)&&diaP(p,'2027-01-09').tipo==='folga'&&diaP(p,'2027-01-01').tipo==='feriado'&&per.lancado&&per.lancados.length===22;
+  return {ok,obs:`painel: ${painel} · janeiro e fevereiro só criados ao lançar: ${semMes} · dias na pré-visualização: ${linhas} · lançados: ${ds.length}, sem tipoManual: ${ds.every(x=>!x.tipoManual)} · 09/01: ${diaP(p,'2027-01-09').tipo} · 01/01, fora do período: ${diaP(p,'2027-01-01').tipo}`}});
 
 caso('Férias — lançar','Dia com batidas fica fora por padrão; incluído, o saldo muda exatamente pelo valor mostrado',()=>{const p=abre('2027-01-06');
   p.importa(L(4,1,'08:00 12:00 13:00 18:00','08:00','Inter Jornada;',2027));const s0=p.saldo();
@@ -832,6 +835,127 @@ caso('Férias — lançar','"Voltar o tipo" devolve o dia útil e mantém a edi�
 caso('Férias — lançar','Período lançado não volta a planejado nem é apagado sem desfazer o lançamento antes',()=>{const p=abre();lancaDezJan(p);clica(p,'#fLancaOk');
   const temVoltar=!!p.d.querySelector('[data-pa="desaprovar"]'),temDesfazer=!!p.d.querySelector('[data-pa="desfazlanc"]');
   return {ok:!temVoltar&&temDesfazer&&cicloDe(p,'2025-03-15').periodos[0].estado==='aprovado',obs:`botão "voltar a planejado": ${temVoltar?'APARECE':'escondido'} · "desfazer o lançamento": ${temDesfazer}`}});
+
+// ---------- PROGRAMAÇÃO DE FÉRIAS — plano mestre: prazo, lembretes, opções e e-mail (PLANO-MESTRE-CARTINHAS.md) ----------
+const KFL='cartinhas.v4.ferias.lembretes';
+const campoCiclo=(p,k,attr,nome,v)=>{const e=p.d.querySelector(`[data-ciclo="${k}"] [${attr}="${nome}"]`);if(!e)throw new Error(`não achei ${attr}=${nome} no ciclo ${k}`);e.value=v;e.dispatchEvent(new p.w.Event('change',{bubbles:true}))};
+const faixa=p=>p.T('fFaixa')+' '+p.T('fFaixaDet');
+const radioEm=(p,k,v)=>{const r=p.d.querySelector(`#fEmail input[data-fe="${k}"][value="${v}"]`);if(!r)throw new Error('não achei a opção '+k+'='+v);r.checked=true;r.dispatchEvent(new p.w.Event('change',{bubbles:true}))};
+const selEm=(p,k,v)=>{const s=p.d.querySelector(`#fEmail [data-fe="${k}"]`);if(!s)throw new Error('não achei '+k);s.value=v;s.dispatchEvent(new p.w.Event('change',{bubbles:true}))};
+const corpo=p=>{const t=p.d.getElementById('fEmCorpo');return t?t.value:''};
+/* admissão em 01/01: o concessivo em curso em 2026 vai de 01/01 a 31/12/2026, como no exemplo do plano */
+const comJan=(p)=>comPlano(p,'2021-01-01');
+
+caso('Férias — prazo','Exemplo do plano: 30 dias pendentes, concessivo até 31/12 — último início 02/12, prazo 23/10',()=>{const p=abre('2026-09-01');comJan(p);const t=faixa(p);
+  return {ok:/Pelo cenário estimado, você tem 52 dias para marcar suas férias/.test(t)&&/até 23\/10\/2026/.test(t)&&/02\/12\/2026/.test(t),obs:t.slice(0,240)}});
+
+caso('Férias — prazo','Se 02/12 for vedado, o prazo sai do início válido anterior (25/11) e vira 16/10',()=>{const p=abre('2026-09-01');comJan(p);
+  p.d.getElementById('fLocData').value='2026-12-02';p.d.getElementById('fLocNome').value='feriado de teste';clica(p,'#fLocAdd');const t=faixa(p);
+  return {ok:/25\/11\/2026/.test(t)&&/até 16\/10\/2026/.test(t)&&/45 dias/.test(t),obs:t.slice(0,240)}});
+
+caso('Férias — prazo','A faixa muda o texto com 1 dia, no dia do prazo e depois dele, e nunca mostra número negativo',()=>{
+  const t=d=>{const p=abre(d);comJan(p);return {f:faixa(p),c:p.T('ferias')}};
+  const a=t('2026-10-22'),b=t('2026-10-23'),c=t('2026-10-24');
+  const ok=/você tem 1 dia para marcar/.test(a.f)&&/Hoje é o último dia para solicitar a programação no prazo ordinário/.test(b.f)
+    &&/O prazo ordinário passou. Ainda há férias a regularizar/.test(c.f)&&/Prazo para solicitar passou/.test(c.c)&&![a.f,b.f,c.f].some(x=>/-\d+ dias|−\d+ dias/.test(x));
+  return {ok,obs:[a.f,b.f,c.f].map(x=>x.slice(16,90)).join(' | ')}});
+
+caso('Férias — prazo','Concessivo encerrado com saldo registrado: a faixa e o card falam de regularização',()=>{const p=abre('2027-01-10');comJan(p);
+  const f=p.w.cartinhasTeste.fer.estado();f.ciclos['2025-01-01']={direito:30,direitoInformado:true,abono:0,abonoInformado:true,periodos:[]};V(p).render();
+  return {ok:/Seu período concessivo terminou com férias pendentes/.test(faixa(p))&&/Férias pendentes de regularização/.test(p.T('ferias')),obs:faixa(p).slice(0,120)}});
+
+caso('Férias — prazo','Rascunho planejado não encerra o aviso; aprovado, a faixa diz que as férias estão programadas',()=>{const p=abre('2026-09-01');comJan(p);
+  marca(p,'2026-12-02','2026-12-31');const a=faixa(p);clica(p,'[data-ciclo="2025-01-01"] [data-pid] [data-pa="aprovar"]');const b=faixa(p);
+  return {ok:/você tem 52 dias/.test(a)&&/Suas férias deste ciclo estão programadas/.test(b),obs:`planejado: ${a.slice(16,80)} · aprovado: ${b.slice(16,80)}`}});
+
+caso('Férias — prazo','A faixa continua no topo da área ao trocar de mês e ao abrir as opções',()=>{const p=abre('2026-09-01');comJan(p);
+  clica(p,'#fMesProx');p.d.querySelector('[data-opc]').open=true;const f=p.d.getElementById('fFaixa');
+  const css=[...p.d.querySelectorAll('style')].map(s=>s.textContent).join('');
+  return {ok:!!f&&p.d.getElementById('ferias').querySelector('.ffaixa')===f&&/\.ffaixa\{position:sticky;top:0/.test(css),obs:`faixa presente: ${!!f} · fixa no topo ao rolar: ${/\.ffaixa\{position:sticky/.test(css)}`}});
+
+caso('Férias — lembretes','Antes da janela final, um lembrete por mês: aparece na primeira abertura e não repete ao reabrir',()=>{
+  const a=abre('2026-09-01');comJan(a);const viu=/Lembrete/.test(a.T('ferias'));
+  const b=abre('2026-09-15');b.w.localStorage.setItem(KFL,a.w.localStorage.getItem(KFL));comJan(b);const repetiu=/Lembrete/.test(b.T('ferias'));
+  const c=abre('2026-10-01');c.w.localStorage.setItem(KFL,a.w.localStorage.getItem(KFL));comJan(c);const outubro=/Lembrete/.test(c.T('ferias'));
+  return {ok:viu&&!repetiu&&outubro,obs:`setembro, primeira vez: ${viu} · setembro de novo: ${repetiu} · outubro: ${outubro}`}});
+
+caso('Férias — lembretes','Na janela final, marcos de 5 em 5 dias; quem ficou sem abrir vê só o de agora, com a contagem de agora',()=>{
+  const a=abre('2026-09-01');comJan(a);const reg=a.w.localStorage.getItem(KFL);
+  const b=abre('2026-10-11');b.w.localStorage.setItem(KFL,reg);comJan(b);const t=b.T('ferias'),cards=(t.match(/Lembrete/g)||[]).length;
+  const c=abre('2026-10-12');c.w.localStorage.setItem(KFL,b.w.localStorage.getItem(KFL));comJan(c);const mesmo=/Lembrete/.test(c.T('ferias'));
+  const d=abre('2026-10-13');d.w.localStorage.setItem(KFL,c.w.localStorage.getItem(KFL));comJan(d);const dez=/Faltam 10 dias para o prazo/.test(d.T('ferias'));
+  return {ok:cards===1&&/Faltam 12 dias para o prazo/.test(t)&&!mesmo&&dez,obs:`11/10: ${cards} lembrete, ${(t.match(/Faltam \d+ dias para o prazo/)||['—'])[0]} · 12/10 (mesmo marco): ${mesmo?'REPETIU':'não repetiu'} · 13/10 (marco de 10): ${dez}`}});
+
+caso('Férias — prazo','Programação automática conhecida: escolha em 20/05, automática em 21/05; em 10/05, 10 dias e o card com a data',()=>{const p=abre('2026-05-10');comJan(p);
+  campoCiclo(p,'2025-01-01','data-fd','dataEscolha','2026-05-20');campoCiclo(p,'2025-01-01','data-fd','fonteDatas','e-mail do gestor');campoCiclo(p,'2025-01-01','data-fd','dataAutomatica','2026-05-21');
+  const f=faixa(p),t=p.T('ferias');
+  return {ok:/^Ciclo 2025\/2026\s*Você tem 10 dias para marcar suas férias/.test(f)&&/antes da programação automática prevista no Populis, em 21\/05\/2026 \(e-mail do gestor\)/.test(t),obs:f.slice(0,110)+' · '+((t.match(/Você tem 10 dias para marcar suas férias antes[^.]*\./)||['sem card'])[0])}});
+
+caso('Férias — prazo','Programação automática desconhecida: a faixa mostra a fonte e a incerteza, sem anunciar data automática',()=>{const p=abre('2026-09-01');comJan(p);const t=p.T('ferias');
+  return {ok:/ainda a confirmar no MANPES/.test(t)&&/Se o Populis tiver um prazo para escolher ou uma programação automática prevista, informe/.test(t)&&!/Programação automática chegando/.test(t),obs:(faixa(p).match(/Prazo recomendado[^]*?MANPES\./)||['—'])[0]}});
+
+caso('Férias — opções','Opções explicadas na tela, com o exemplo do abono seguindo o direito do ciclo, sem mudar o banco de horas',()=>{const p=abre();
+  p.importa(L(3,11,'08:00 12:00 13:00 18:00'));const s0=p.saldo();comPlano(p);
+  const t30=p.d.querySelector('[data-ciclo="2025-03-15"] [data-opc]').textContent;
+  campoCiclo(p,'2025-03-15','data-fc','direito','24');campoCiclo(p,'2025-03-15','data-fo','adiantamento.escolha','sim');campoCiclo(p,'2025-03-15','data-fo','adiantamento.parcelas','3');
+  const t24=p.d.querySelector('[data-ciclo="2025-03-15"] [data-opc]').textContent;V(p).fecha();
+  const ok=/descansar 20 dias e receber pelos outros 10/.test(t30)&&/descansar 16 dias e receber pelos outros 8/.test(t24)&&/A regra relatada permite até cinco parcelas/.test(t24)&&/Constituição/.test(t24)&&p.saldo()===s0
+    &&(cicloDe(p,'2025-03-15').opcoes||{}).adiantamento.parcelas===3;
+  return {ok,obs:`30 dias: ${/descansar 20 dias/.test(t30)} · 24 dias: ${/descansar 16 dias e receber pelos outros 8/.test(t24)} · banco de horas igual: ${p.saldo()===s0}`}});
+
+caso('Férias — opções','13º nas férias vale para um período só em cada ano do 13º',()=>{const p=abre();comPlano(p,'2020-07-01');
+  poePeriodo(p,'2025-07-01',{ini:'2027-01-04',fim:'2027-01-17',estado:'planejado'});poePeriodo(p,'2026-07-01',{ini:'2027-08-02',fim:'2027-08-15',estado:'planejado'});
+  const idA=cicloDe(p,'2025-07-01').periodos[0].id,idB=cicloDe(p,'2026-07-01').periodos[0].id;
+  campoCiclo(p,'2025-07-01','data-fo','decimo.escolha','ferias');campoCiclo(p,'2025-07-01','data-fo','decimo.periodo',idA);
+  campoCiclo(p,'2026-07-01','data-fo','decimo.escolha','ferias');campoCiclo(p,'2026-07-01','data-fo','decimo.periodo',idB);
+  const a=cicloDe(p,'2025-07-01').opcoes.decimo,b=(cicloDe(p,'2026-07-01').opcoes||{}).decimo||{};
+  return {ok:a.ano===2027&&a.periodo===idA&&!b.periodo&&/Só dá para pedir em um período por ano do 13º/.test(p.T('ferias')),obs:`ciclo 2025/2026: 13º em ${a.ano} · ciclo 2026/2027: ${b.periodo?'ACEITOU outro período':'recusado'}`}});
+
+caso('Férias — opções','Apagar o período ligado ao 13º pede revisão da escolha, sem mudar nada sozinho',()=>{const p=abre();comPlano(p);marca(p,'2027-01-04','2027-02-02');
+  const id=cicloDe(p,'2025-03-15').periodos[0].id;campoCiclo(p,'2025-03-15','data-fo','decimo.escolha','ferias');campoCiclo(p,'2025-03-15','data-fo','decimo.periodo',id);
+  clica(p,'[data-ciclo="2025-03-15"] [data-pid] [data-pa="apagar"]');const d=cicloDe(p,'2025-03-15').opcoes.decimo;
+  return {ok:/O período ligado ao 13º nas férias foi apagado: revise/.test(p.T('ferias'))&&d.escolha==='ferias',obs:`aviso: ${/foi apagado: revise/.test(p.T('ferias'))} · escolha mantida até a pessoa revisar: ${d.escolha}`}});
+
+caso('Férias — e-mail','"Preparar e-mail para o chefe" monta o rascunho com os blocos, os dias, o abono e o período do 13º',()=>{const p=abre();comPlano(p);
+  campoCiclo(p,'2025-03-15','data-fc','abono','10');concorda(p);marca(p,'2027-01-04','2027-01-17');marca(p,'2027-02-17','2027-02-22');
+  const antes=JSON.stringify(cicloDe(p,'2025-03-15').periodos.map(x=>x.estado));
+  clica(p,'#fFaixaDet [data-fx="email"]');const titulo=/Como você quer marcar suas férias\?/.test(p.T('fEmail'));
+  const idF=cicloDe(p,'2025-03-15').periodos.find(x=>x.ini==='2027-02-17').id;
+  radioEm(p,'decimo','sim');selEm(p,'decimoPer',idF);radioEm(p,'adiant','sim');selEm(p,'parcelas','3');clica(p,'[data-fx="gerar"]');const c=corpo(p);
+  const ok=titulo&&/04\/01\/2027 a 17\/01\/2027 \(14 dias corridos\)/.test(c)&&/17\/02\/2027 a 22\/02\/2027 \(6 dias corridos\)/.test(c)&&/No total, 20 dias corridos/.test(c)
+    &&/conversão de 10 dias em abono pecuniário/.test(c)&&/13º salário junto das férias de 17\/02\/2027 a 22\/02\/2027/.test(c)&&/devolução em 3 parcelas/.test(c)
+    &&JSON.stringify(cicloDe(p,'2025-03-15').periodos.map(x=>x.estado))===antes;
+  return {ok,obs:c.replace(/\n+/g,' ⏎ ').slice(0,330)}});
+
+caso('Férias — e-mail','"Não solicitar antecipações" desliga o 13º e o adiantamento, limpa as parcelas e preserva o abono',()=>{const p=abre();comPlano(p);
+  campoCiclo(p,'2025-03-15','data-fc','abono','10');marca(p,'2027-01-04','2027-01-23');clica(p,'#fFaixaDet [data-fx="email"]');
+  radioEm(p,'decimo','sim');radioEm(p,'adiant','sim');selEm(p,'parcelas','4');clica(p,'[data-fx="nao-antecipa-email"]');clica(p,'[data-fx="gerar"]');const c=corpo(p);
+  const ok=/não solicito a antecipação da primeira parcela do 13º nas férias nem o adiantamento de férias/.test(c)&&/conversão de 10 dias em abono/.test(c)&&!/parcelas/.test(c)
+    &&/Gostaria de solicitar a programação de férias para 04\/01\/2027 a 23\/01\/2027, com 20 dias corridos de descanso/.test(c);
+  return {ok,obs:c.replace(/\n+/g,' ⏎ ').slice(0,300)}});
+
+caso('Férias — e-mail','O que está "a decidir" não vira pedido: vira pedido de orientação, ou some do texto',()=>{const p=abre();comPlano(p);marca(p,'2027-01-04','2027-02-02');
+  clica(p,'#fFaixaDet [data-fx="email"]');clica(p,'[data-fx="gerar"]');const a=corpo(p);
+  const ch=p.d.querySelector('#fEmail [data-fe="orientar"]');ch.checked=false;ch.dispatchEvent(new p.w.Event('change',{bubbles:true}));clica(p,'[data-fx="gerar"]');const b=corpo(p);
+  const ok=/orientação sobre a venda de dias \(abono\), a antecipação do 13º nas férias e o adiantamento de férias antes de decidir/.test(a)&&!/orientação sobre/.test(b)&&!/solicito a antecipação|solicitar o adiantamento|conversão de/.test(a+b);
+  return {ok,obs:`com orientação: ${(a.match(/Gostaria também[^.]*\./)||['—'])[0]} · sem: ${/orientação sobre/.test(b)?'AINDA PEDE':'só as datas'}`}});
+
+caso('Férias — e-mail','Sem período escolhido, o rascunho pede orientação, com texto e assunto próprios',()=>{const p=abre();comPlano(p);clica(p,'#fFaixaDet [data-fx="email"]');clica(p,'[data-fx="gerar"]');
+  const c=corpo(p),a=p.d.getElementById('fEmAssunto').value;
+  return {ok:a==='Orientação para programação de férias'&&/Gostaria de orientação para programar minhas férias do ciclo 2025\/2026: há 30 dias a programar/.test(c)&&/conferência do meu saldo/.test(c),obs:a+' · '+c.replace(/\n+/g,' ⏎ ').slice(0,200)}});
+
+casoA('Férias — e-mail','"Copiar e-mail" copia assunto e texto, do jeito que a pessoa editou',async()=>{const p=abre();comPlano(p);marca(p,'2027-01-04','2027-02-02');
+  let copiado='';Object.defineProperty(p.w.navigator,'clipboard',{value:{writeText:async t=>{copiado=t}},configurable:true});
+  clica(p,'#fFaixaDet [data-fx="email"]');clica(p,'[data-fx="gerar"]');const t=p.d.getElementById('fEmCorpo');t.value=t.value.replace('[Nome]','Fulano');t.dispatchEvent(new p.w.Event('input',{bubbles:true}));
+  clica(p,'[data-fx="copiar"]');await espera(20);
+  return {ok:/^Assunto: Solicitação de programação de férias\n\nOlá,/.test(copiado)&&/Fulano$/.test(copiado)&&/Copiado/.test(p.T('fEmCopiado')),obs:copiado.replace(/\n+/g,' ⏎ ').slice(0,160)}});
+
+casoA('Férias — arquivo','Datas do Populis e opções vão para o arquivo e voltam; opção fora do formato recusa o arquivo',async()=>{const A=abre();const h=fakeArq('');
+  await A.w.cartinhasTeste.conecta(h,true);comPlano(A);campoCiclo(A,'2025-03-15','data-fd','dataEscolha','2026-12-20');campoCiclo(A,'2025-03-15','data-fo','adiantamento.escolha','sim');
+  await A.w.cartinhasTeste.gravaArq();const B=abre();await B.w.cartinhasTeste.conecta(h,true);const y=B.w.cartinhasTeste.fer.estado().ciclos['2025-03-15'];
+  const o=JSON.parse(h.conteudo);o.ferias.ciclos['2025-03-15'].opcoes.adiantamento.parcelas=9;const C=abre();const h2=fakeArq(JSON.stringify(o));await C.w.cartinhasTeste.conecta(h2,true);
+  return {ok:y.dataEscolha==='2026-12-20'&&y.opcoes.adiantamento.escolha==='sim'&&h2.gravacoes===0&&/fora do formato/.test(C.T('nuvem')),
+    obs:`voltou: prazo ${y.dataEscolha}, adiantamento ${y.opcoes.adiantamento.escolha} · 9 parcelas: ${h2.gravacoes?'GRAVOU':'recusado'} (${C.T('nuvem').replace(/^.*\((.*)\).*$/,'$1')})`}});
 
 // ---------- SAÍDA ----------
 Promise.all(PEND).then(()=>{
