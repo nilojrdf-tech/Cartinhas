@@ -39,11 +39,10 @@ DICAS
 - Ponto facultativo (Carnaval, Corpus Christi): se não houve expediente, mude o Tipo do dia para Feriado.
 - Use o PDF do relatório; o texto copiado da tela do SRP não é aceito.
 
-ATUALIZAR (quem já tem instalado)
-Dê dois cliques em "atualizar.bat". Ele troca só o programa, na mesma pasta de sempre;
-seus dados (cartinhas-dados.json) e o atalho continuam como estão. A versão anterior
-fica guardada ao lado, como Cartinhas-anterior.html.
-Se a tela parecer a antiga depois de atualizar, aperte Ctrl+F5 na página.
+QUANDO SAIR VERSÃO NOVA
+Este pacote é para instalar pela primeira vez; ele já vem com a versão do dia.
+Para atualizar depois, peça o "atualizar.bat": um arquivo só, que troca o programa
+sem mexer nos seus dados nem no atalho.
 
 DESINSTALAR
 Dê dois cliques em "desinstalar.bat". Seus dados (cartinhas-dados.json) não são apagados.

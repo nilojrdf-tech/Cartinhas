@@ -1,0 +1,24 @@
+﻿ATUALIZAR O CARTINHAS (para quem ja usa)
+========================================
+
+Dê dois cliques em "atualizar.bat".
+
+Ele busca a versao nova, confere se chegou inteira e troca so o programa,
+na pasta de sempre (C:\Users\<seu usuario>\Cartinhas).
+
+O que ele NAO toca:
+- o seu cartinhas-dados.json (seus meses e correcoes);
+- o atalho da Area de Trabalho.
+
+A versao anterior fica guardada ao lado, como Cartinhas-anterior.html, caso
+voce queira voltar: e so renomear.
+
+Depois de atualizar, se a tela ainda parecer a antiga, aperte Ctrl+F5 na
+pagina: o navegador estava mostrando a copia guardada dele.
+
+SE A REDE BLOQUEAR O DOWNLOAD
+Peca o arquivo Cartinhas.html, deixe ele nesta mesma pasta, ao lado do
+atualizar.bat, e rode de novo: ele usa o arquivo da pasta e nao baixa nada.
+
+Quem nunca instalou nao usa este arquivo: pede o pacote de instalacao e roda
+o instalar.bat, que ja vem com a versao nova.
