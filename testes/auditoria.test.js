@@ -413,6 +413,120 @@ caso('Férias — saldo','Planejado e aprovado não aparecem como consumido',()=
   const s=f.fSaldo(c,{direitoInformado:true,abonoInformado:true,abono:10,periodos:[{ini:'2027-01-04',fim:'2027-01-17',estado:'planejado'},{ini:'2026-12-01',fim:'2026-12-05',estado:'aprovado'}]},null,'2026-11-25');
   return {ok:s.consumido===10&&s.comprometido===5&&s.pretendido===14&&s.livre===1,obs:`consumido ${s.consumido} (só o abono) · comprometido ${s.comprometido} · pretendido ${s.pretendido} · livre ${s.livre}`}});
 
+// ---------- PROGRAMAÇÃO DE FÉRIAS — fase 2: área, gravação e cópias (PLANO-FERIAS.md) ----------
+const KF='cartinhas.v4.ferias';
+const espera=ms=>new Promise(r=>setTimeout(r,ms));
+const canonT=x=>JSON.stringify(x,(k,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.keys(v).sort().reduce((o,c)=>(o[c]=v[c],o),{}):v);
+/* abre a área e informa a admissão, como a pessoa faz */
+function comPlano(p,adm){p.w.cartinhasTeste.fer.abre();p.d.getElementById('fAdm').value=adm||'2020-03-15';p.d.getElementById('fAdmOk').click();return p.w.cartinhasTeste.fer.estado()}
+const muda=(p,ciclo,campo,v)=>{const s=p.d.querySelector(`[data-ciclo="${ciclo}"] [data-fc="${campo}"]`);if(s.type==='checkbox')s.checked=v;else s.value=v;s.dispatchEvent(new p.w.Event('change',{bubbles:true}))};
+const arqBase=extra=>JSON.stringify({app:'Cartinhas',versao:1,cur:'2026-11',months:{'2026-11':{days:[{d:'2026-11-03',marcas:'08:00 12:00 13:00 17:00',srpMarcas:'08:00 12:00 13:00 17:00',tipo:'util',obs:''}],meta:null}},...extra});
+/* o que uma versão antiga faz: regrava só com os campos que conhece */
+async function versaoAntigaGrava(h,mexe){const o=JSON.parse(h.conteudo);delete o.ferias;o.versao=1;if(mexe)mexe(o);const w=await h.createWritable();await w.write(JSON.stringify(o,null,1));await w.close();return o}
+
+caso('Férias — área','A área abre e volta pelo botão abaixo do Mês, sem mexer no banco de horas',()=>{const p=abre();
+  p.importa(L(3,11,'08:00 12:00 13:00 18:00'));const s0=p.saldo(),m0=JSON.stringify(p.w.cartinhasTeste.estado().months);
+  p.d.getElementById('btnFerias').click();
+  const abriu=p.w.cartinhasTeste.fer.modo()&&p.w.location.hash==='#ferias'&&!p.d.getElementById('secFerias').hidden&&p.d.body.classList.contains('modo-ferias');
+  p.d.getElementById('btnFerias').click();
+  const voltou=!p.w.cartinhasTeste.fer.modo()&&/^#mes-/.test(p.w.location.hash)&&p.d.getElementById('secFerias').hidden;
+  const igual=p.saldo()===s0&&JSON.stringify(p.w.cartinhasTeste.estado().months)===m0;
+  return {ok:abriu&&voltou&&igual,obs:`abriu em #ferias: ${abriu} · voltou ao mês: ${voltou} · saldo e meses iguais: ${igual} (${s0})`}});
+
+caso('Férias — área','Pergunta só a admissão e mostra os dois ciclos, com o saldo provisório',()=>{const p=abre();
+  p.w.cartinhasTeste.fer.abre();const pediu=!!p.d.getElementById('fAdm');
+  const f=comPlano(p,'2020-03-15');const t=p.T('ferias');
+  const ok=pediu&&f&&f.admissao==='2020-03-15'&&f.rev===1&&/Ciclo 2025\/2026/.test(t)&&/Ciclo 2026\/2027/.test(t)&&/presumido/.test(t)&&/Saldo provisório/.test(t)&&!!p.w.localStorage.getItem(KF);
+  return {ok,obs:`pediu a admissão: ${pediu} · ciclos na tela: ${(t.match(/Ciclo \d{4}\/\d{4}/g)||[]).join(', ')} · cópia no navegador: ${!!p.w.localStorage.getItem(KF)}`}});
+
+caso('Férias — área','Data de admissão no futuro ou inválida é recusada com explicação',()=>{const p=abre();p.w.cartinhasTeste.fer.abre();
+  p.d.getElementById('fAdm').value='2027-01-10';p.d.getElementById('fAdmOk').click();
+  return {ok:!p.w.cartinhasTeste.fer.estado()&&/não esteja no futuro/.test(p.T('ferias')),obs:'admissão em 10/01/2027 com hoje em 25/11/2026: '+(p.w.cartinhasTeste.fer.estado()?'ACEITA':'recusada')}});
+
+casoA('Férias — arquivo','Sem plano, o arquivo de dados continua exatamente no formato de antes',async()=>{const p=abre();const h=fakeArq('');
+  await p.w.cartinhasTeste.conecta(h,true);await p.w.cartinhasTeste.gravaArq();const o=JSON.parse(h.conteudo);
+  return {ok:o.versao===1&&!('ferias' in o),obs:`versão ${o.versao}, campo ferias: ${'ferias' in o?'PRESENTE':'ausente'}`}});
+
+casoA('Férias — arquivo','Com plano, ele vai para o arquivo, e o arquivo sobe para a versão 2',async()=>{const p=abre();const h=fakeArq('');
+  await p.w.cartinhasTeste.conecta(h,true);comPlano(p);await p.w.cartinhasTeste.gravaArq();const o=JSON.parse(h.conteudo);
+  return {ok:o.versao===2&&o.ferias&&o.ferias.admissao==='2020-03-15',obs:`versão ${o.versao} · admissão no arquivo: ${o.ferias&&o.ferias.admissao}`}});
+
+casoA('Férias — arquivo','Campo de topo que esta versão não conhece continua no arquivo depois de gravar',async()=>{const p=abre();
+  const h=fakeArq(arqBase({recursoFuturo:{x:1}}));await p.w.cartinhasTeste.conecta(h,true);
+  p.edita('03/11','obs','mudei');await p.w.cartinhasTeste.gravaArq();const o=JSON.parse(h.conteudo);
+  return {ok:!!(o.recursoFuturo&&o.recursoFuturo.x===1)&&o.months['2026-11'].days.find(x=>x.d==='2026-11-03').obs==='mudei',obs:`recursoFuturo depois de gravar: ${JSON.stringify(o.recursoFuturo)}`}});
+
+casoA('Férias — arquivo','Arquivo de versão mais nova não é sobrescrito: avisa e pede para atualizar',async()=>{const p=abre();
+  const h=fakeArq(arqBase({versao:3}));await p.w.cartinhasTeste.conecta(h,true);p.edita('03/11','obs','tentativa');await espera(700);
+  return {ok:h.gravacoes===0&&/versão mais nova/.test(p.T('nuvem')),obs:`gravações: ${h.gravacoes} · aviso: ${p.T('nuvem').slice(0,90)}`}});
+
+casoA('Férias — arquivo','Plano fora do formato recusa o arquivo inteiro, sem mexer na tela',async()=>{const ruins=[
+    {admissao:'2020-03-15',ciclos:{'2025-03-15':{direito:45,periodos:[]}}},
+    {admissao:'2020-03-15',ciclos:{'2025-03-15':{direito:30,periodos:[{ini:'2026-07-10',fim:'2026-07-01',estado:'planejado'}]}}},
+    {admissao:'2020-03-15',ciclos:{'2025-03-15':{direito:30,periodos:[{ini:'2026-07-01',fim:'2026-07-10',estado:'sonhado'}]}}},
+    {admissao:'2020-03-15',ciclos:{'2025-03-15':{direito:30,abono:12,periodos:[]}}}];
+  const res=[];for(const f of ruins){const p=abre();p.importa(L(4,11,'08:00 12:00 13:00 17:00'));const s0=p.saldo();
+    const h=fakeArq(arqBase({versao:2,ferias:f}));await p.w.cartinhasTeste.conecta(h,true);
+    res.push({ok:h.gravacoes===0&&p.saldo()===s0&&!p.w.cartinhasTeste.fer.estado()&&/fora do formato/.test(p.T('nuvem')),msg:p.T('nuvem').replace(/^.*\((.*)\).*$/,'$1')})}
+  return {ok:res.every(r=>r.ok),obs:res.map(r=>(r.ok?'recusado: ':'ACEITO: ')+r.msg).join(' · ')}});
+
+casoA('Férias — arquivo','Versão antiga apagou o plano (mesmo navegador): ele volta, e o ponto gravado por ela fica',async()=>{
+  const A=abre();A.importa(L(3,11,'08:00 12:00 13:00 17:00'));const h=fakeArq('');await A.w.cartinhasTeste.conecta(h,true);
+  comPlano(A);await A.w.cartinhasTeste.gravaArq();
+  const velho=await versaoAntigaGrava(h,o=>{o.months['2026-11'].days.find(x=>x.d==='2026-11-03').obs='feito na versão antiga'});
+  const B=abre();B.w.localStorage.setItem(KF,A.w.localStorage.getItem(KF));
+  await B.w.cartinhasTeste.conecta(h,true);const of=B.w.cartinhasTeste.fer.oferta();
+  B.w.cartinhasTeste.fer.abre();B.d.querySelector('[data-fres="0"]').click();await B.w.cartinhasTeste.gravaArq();
+  const o=JSON.parse(h.conteudo);const mesIgual=canonT(o.months['2026-11'])===canonT(velho.months['2026-11']);
+  return {ok:!!of&&of.opcoes.length===1&&!!o.ferias&&o.ferias.admissao==='2020-03-15'&&mesIgual,
+    obs:`ofereceu: ${!!of} · plano de volta no arquivo: ${!!o.ferias} · novembro igual ao que a versão antiga gravou: ${mesIgual}`}});
+
+casoA('Férias — arquivo','Versão antiga apagou o plano (outro navegador): ele volta pela cópia salva fora do navegador',async()=>{
+  const A=abre();const h=fakeArq('');await A.w.cartinhasTeste.conecta(h,true);comPlano(A);await A.w.cartinhasTeste.gravaArq();
+  const copia=fakeArq('');A.w.showSaveFilePicker=async()=>copia;A.d.getElementById('fCopia').click();await espera(30);
+  const so=JSON.parse(copia.conteudo||'{}');
+  await versaoAntigaGrava(h,o=>{o.months['2026-11'].days.find(x=>x.d==='2026-11-03').obs='ponto da versão antiga'});
+  const C=abre();await C.w.cartinhasTeste.conecta(h,true);const semOferta=!C.w.cartinhasTeste.fer.oferta();
+  C.w.showOpenFilePicker=async()=>[copia];C.w.cartinhasTeste.fer.abre();C.d.getElementById('fAbreCopia').click();await espera(30);
+  const of=C.w.cartinhasTeste.fer.oferta();C.d.querySelector('[data-fres="0"]').click();await C.w.cartinhasTeste.gravaArq();
+  const o=JSON.parse(h.conteudo);
+  return {ok:so.tipo==='copia-ferias'&&!('months' in so)&&semOferta&&!!of&&!!o.ferias&&o.months['2026-11'].days.find(x=>x.d==='2026-11-03').obs==='ponto da versão antiga',
+    obs:`cópia só com o plano: ${so.tipo==='copia-ferias'&&!('months' in so)} · navegador novo sem oferta: ${semOferta} · restaurado pela cópia: ${!!o.ferias} · ponto da versão antiga mantido: ${o.months['2026-11'].days.find(x=>x.d==='2026-11-03').obs}`}});
+
+casoA('Férias — arquivo','Cópia do navegador mais velha que o arquivo não é oferecida, e passa a acompanhar o arquivo',async()=>{
+  const A=abre();const h=fakeArq('');await A.w.cartinhasTeste.conecta(h,true);comPlano(A);
+  muda(A,'2025-03-15','direito','24');muda(A,'2025-03-15','abono','0');await A.w.cartinhasTeste.gravaArq();
+  const velha=JSON.parse(A.w.localStorage.getItem(KF));velha.rev=1;velha.ciclos={};
+  const B=abre();B.w.localStorage.setItem(KF,JSON.stringify(velha));await B.w.cartinhasTeste.conecta(h,true);
+  const revArq=JSON.parse(h.conteudo).ferias.rev,revNav=JSON.parse(B.w.localStorage.getItem(KF)).rev;
+  return {ok:!B.w.cartinhasTeste.fer.oferta()&&revNav===revArq,obs:`oferta: ${B.w.cartinhasTeste.fer.oferta()?'FEITA':'nenhuma'} · cópia do navegador agora na revisão ${revNav} (arquivo: ${revArq})`}});
+
+casoA('Férias — arquivo','Duas cópias com mudanças diferentes: mostra as duas e pede decisão',async()=>{
+  const A=abre();const h=fakeArq('');await A.w.cartinhasTeste.conecta(h,true);comPlano(A);await A.w.cartinhasTeste.gravaArq();
+  const nav=JSON.parse(A.w.localStorage.getItem(KF));nav.rev=4;nav.unidade={sei:'',gestor:'versão do navegador'};
+  const ext=JSON.parse(JSON.stringify(nav));ext.unidade={sei:'',gestor:'versão da cópia'};
+  await versaoAntigaGrava(h);
+  const B=abre();B.w.localStorage.setItem(KF,JSON.stringify(nav));await B.w.cartinhasTeste.conecta(h,true);
+  B.w.cartinhasTeste.fer.avaliaCopia(ext,'Cópia salva em arquivo');const of=B.w.cartinhasTeste.fer.oferta();
+  return {ok:!!of&&of.opcoes.length===2&&/duas cópias/.test(of.motivo),obs:of?`${of.opcoes.length} opções: ${of.opcoes.map(o=>o.nome).join(' / ')} — ${of.motivo}`:'nenhuma oferta'}});
+
+casoA('Férias — arquivo','Duas janelas mudando o plano: fica o do arquivo, e a outra avisa e guarda o seu',async()=>{
+  const A=abre();const h=fakeArq('');await A.w.cartinhasTeste.conecta(h,true);comPlano(A);await A.w.cartinhasTeste.gravaArq();
+  const B=abre();await B.w.cartinhasTeste.conecta(h,true);B.w.cartinhasTeste.fer.abre();
+  muda(A,'2025-03-15','direito','24');await A.w.cartinhasTeste.gravaArq();
+  muda(B,'2025-03-15','abono','5');await B.w.cartinhasTeste.gravaArq();
+  const o=JSON.parse(h.conteudo),y=o.ferias.ciclos['2025-03-15']||{};
+  return {ok:y.direito===24&&!y.abonoInformado&&/plano de férias foi alterado nos dois/.test(B.T('nuvem')),
+    obs:`no arquivo: direito ${y.direito}, abono ${y.abonoInformado?y.abono:'não informado'} · B avisou: ${B.T('nuvem').slice(0,110)}`}});
+
+casoA('Férias — arquivo','Só uma janela mudou o plano: a mudança dela vale, junto com o ponto da outra',async()=>{
+  const A=abre();A.importa(L(3,11,'08:00 12:00 13:00 17:00'));const h=fakeArq('');await A.w.cartinhasTeste.conecta(h,true);comPlano(A);await A.w.cartinhasTeste.gravaArq();
+  const B=abre();await B.w.cartinhasTeste.conecta(h,true);B.w.cartinhasTeste.fer.abre();
+  A.edita('03/11','obs','ponto de A');await A.w.cartinhasTeste.gravaArq();
+  muda(B,'2025-03-15','concorda',true);await B.w.cartinhasTeste.gravaArq();
+  const o=JSON.parse(h.conteudo);const y=o.ferias.ciclos['2025-03-15']||{};const obs=o.months['2026-11'].days.find(x=>x.d==='2026-11-03').obs;
+  return {ok:y.concordaFracionar===true&&obs==='ponto de A',obs:`concordância de B no arquivo: ${y.concordaFracionar} · observação de A no arquivo: ${obs}`}});
+
 // ---------- SAÍDA ----------
 Promise.all(PEND).then(()=>{
 R.sort((a,b)=>a.id-b.id);
