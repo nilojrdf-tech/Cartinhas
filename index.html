@@ -138,7 +138,7 @@ td input.ed{font-weight:600;color:var(--b)}tr.fut td{opacity:.7}tfoot td{border-
 .fper{margin:10px 0}.fper td,.fper th{font-size:14px}.fac{white-space:nowrap}.fac button,.fitem button{min-height:36px;padding:0 10px;margin:2px}
 .fitem{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}.fperigo{border-color:var(--neg)!important;color:var(--neg)!important}.floc{margin:6px 0;padding-left:20px}
 .fcard h4{font:600 15px Inter,system-ui,sans-serif;margin:14px 0 4px}
-.fbars{min-height:170px}
+.fbars{min-height:170px}.fbars:before{display:none}
 button.fcol{min-height:0;padding:0 0 2px;border:1px solid transparent;border-radius:3px;color:var(--rulink);font-weight:600;font-size:12px;justify-content:space-between;align-items:center}
 button.fcol:hover{border-color:var(--b)}button.fcol[disabled]{cursor:default}
 .fcol.fpass{opacity:.55}.fcol.fini{outline:3px solid var(--b);outline-offset:1px}
@@ -1471,10 +1471,12 @@ ${fEditaAdm?'':'<p class="msg">Já tinha um plano em outro computador, ou uma ve
   if(fRebase)h+=htmlRebase();
   if(fLanca)h+=htmlLanca();
   if(fDesfaz)h+=htmlDesfaz();
-  h+=htmlFila(cs);
-  h+=htmlDicas(cs,ctx)+htmlMes(cs,ctx);
+  /* a ordem da seção 13.1: o saldo dos ciclos primeiro, porque é nele que se dá a concordância e se
+     confere o direito — o que muda as dicas; depois a fila, as dicas e o mês */
   const mostrar=[...cs.emConcessivo];if(cs.emAquisitivo&&!mostrar.includes(cs.emAquisitivo))mostrar.push(cs.emAquisitivo);
   h+=mostrar.map(htmlCiclo).join('');
+  h+=htmlFila(cs);
+  h+=htmlDicas(cs,ctx)+htmlMes(cs,ctx);
   h+=htmlAcrescentar(cs)+htmlConfig()+htmlAjuste(cs)+htmlCopia();
   el.innerHTML=h}
 function cicloDoCartao(el){const k=el.closest('[data-ciclo]');const cs=ciclosAgora();return k&&cs?cs.lista.find(c=>c.chave===k.dataset.ciclo):null}
