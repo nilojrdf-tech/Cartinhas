@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#ffcc00">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cartinhas">
+<title>Cartinhas</title>
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="apple-touch-icon" href="logo.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+/* Mesma paleta e mesma voz do Cartinhas do computador, arrumada para a tela do celular:
+   saldo e calculo do dia primeiro, o mes em cartoes em vez de tabela. */
+:root{
+  color-scheme:light dark;
+  --y:#ffcc00;--bb:#003e6b;
+  --bg:light-dark(#ffffff,#0f1a24);--ink:light-dark(#10202e,#e8eef3);
+  --mut:light-dark(#5a6b78,#9fb0bd);--line:light-dark(#dde3e8,#25384a);
+  --card:light-dark(#f4f7f9,#152434);--top:light-dark(#ffcc00,#6e6232);
+  --topink:light-dark(#10202e,#efe9cf);--b:light-dark(#003e6b,#5fb0e8);
+  --pos:light-dark(#0a7a3d,#4cd18a);--neg:light-dark(#c4161c,#ff6b6b);
+  --crt:light-dark(#0a5c2e,#9fd6b4);--dbt:light-dark(#9b1318,#f0b1b2);
+  --crh:light-dark(#d6eedd,#22372b);--dbh:light-dark(#f7d6d6,#3d2426);
+  --fs:light-dark(#eef6e0,#243021);--fe:light-dark(#e6f3f7,#1e323a);--fr:light-dark(#fbeef4,#33262c);
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--sans);overflow-x:clip;
+  padding-bottom:env(safe-area-inset-bottom)}
+[hidden]{display:none !important}
+.topo{background:var(--top);color:var(--topink);padding:max(env(safe-area-inset-top),10px) 16px 12px;
+  display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:20}
+.topo img{width:38px;height:38px;flex:none}
+.topo h1{font:800 20px/1.1 var(--sans);margin:0;flex:1}
+.topo .quem{font-size:13px;opacity:.85;display:block;font-weight:500}
+.icone{min-height:40px;min-width:40px;padding:0 10px;border-radius:10px;border:1px solid light-dark(#10202e33,#ffffff40);
+  background:light-dark(#ffffffcc,#ffffff1a);color:inherit;font:600 14px var(--sans)}
+main{padding:16px;max-width:760px;margin:0 auto;display:grid;gap:16px}
+h2{font:700 19px/1.2 var(--sans);margin:0 0 4px}
+h3{font:600 16px var(--sans);margin:0 0 8px}
+p{margin:0 0 10px}
+.mut{color:var(--mut);font-size:14px}
+.cartao{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.saldo{background:var(--bb);color:#fff;border-radius:14px;padding:18px;text-align:center;transition:background .3s}
+.saldo.deve{background:light-dark(#b3141a,#7a2c2f)}
+.saldo small{display:block;font-size:14px;opacity:.85}
+.saldo .big{font:800 clamp(44px,15vw,64px)/1 var(--sans);margin:8px 0 4px;white-space:nowrap}
+.saldo .verd{font-weight:600;font-size:16px}
+.saldo .alts{display:grid;gap:6px;margin-top:14px;font-size:14px;text-align:left}
+.saldo .alts div{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #ffffff33;padding-top:6px}
+label{display:block;font-size:14px;color:var(--mut);margin-bottom:4px}
+input,select,button,textarea{font:inherit;font-size:16px}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+  background:var(--bg);color:var(--ink)}
+button{min-height:46px;padding:0 16px;border-radius:10px;border:1.5px solid var(--b);background:var(--bg);
+  color:var(--b);font-weight:600;cursor:pointer}
+button.pri{background:var(--bb);color:#fff;border-color:var(--bb)}
+button.leve{border-color:var(--line);color:var(--ink);background:transparent}
+button[disabled]{opacity:.55;cursor:default}
+:focus-visible{outline:3px solid var(--y);outline-offset:2px}
+.linha{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.grade2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grade3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.aviso{font-size:14px;border-radius:10px;padding:10px 12px;margin-top:10px}
+.aviso.ruim{background:var(--dbh);color:var(--dbt)}
+.aviso.bom{background:var(--crh);color:var(--crt)}
+.aviso:empty{display:none}
+/* cartoes de dia */
+.dias{display:grid;gap:8px}
+.dia{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg)}
+.dia.folga{background:var(--fs)}.dia.feriado{background:var(--fe)}.dia.ferias{background:var(--fr)}
+.dia.hoje{border-color:var(--y);border-width:2px}
+.dia .cab{display:flex;align-items:baseline;gap:8px}
+.dia .data{font:700 16px var(--sans)}
+.dia .sem{color:var(--mut);font-size:13px;flex:1}
+.dia .vale{font:700 15px var(--sans)}
+.dia .vale.c{color:var(--pos)}.dia .vale.d{color:var(--neg)}
+.dia .marcas{font:500 15px ui-monospace,monospace;margin-top:4px;word-break:break-word}
+.dia .nota{font-size:13px;color:var(--mut);margin-top:2px}
+.dia .campos{display:none;gap:8px;margin-top:10px}
+.dia.aberto .campos{display:grid}
+.dia .campos label{margin-top:4px}
+.conflito{border:2px solid var(--neg);border-radius:12px;padding:12px;background:var(--dbh);color:var(--dbt);margin-top:10px}
+.conflito h3{color:inherit}
+.conflito .lado{background:light-dark(#fff8,#0003);border-radius:8px;padding:8px;margin:6px 0;font-size:14px}
+.rodape{padding:18px 16px 28px;text-align:center;color:var(--mut);font-size:13px}
+.fila{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px;
+  font-size:14px;display:flex;gap:10px;align-items:center;z-index:10}
+.fila:empty{display:none}
+.entrar{max-width:380px;margin:0 auto;display:grid;gap:12px}
+.entrar img{width:72px;height:72px;margin:8px auto 0}
+.entrar h2{text-align:center}
+@media (min-width:620px){.dias{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<header class="topo" id="topo" hidden>
+  <img src="logo.svg" alt="">
+  <h1>Cartinhas<span class="quem" id="quem"></span></h1>
+  <button class="icone" id="btnUsuarios" hidden>Usuários</button>
+  <button class="icone" id="btnSair">Sair</button>
+</header>
+
+<!-- ENTRAR -->
+<main id="telaEntrar" hidden>
+  <form class="entrar" id="formEntrar" autocomplete="on">
+    <img src="logo.svg" alt="">
+    <h2>Entrar no Cartinhas</h2>
+    <p class="mut" style="text-align:center">Ferramenta de apoio, não oficial. O registro que vale é o do SRP.</p>
+    <div>
+      <label for="mat">Matrícula dos Correios</label>
+      <input id="mat" name="username" inputmode="numeric" autocomplete="username" maxlength="8"
+             pattern="[0-9]{8}" placeholder="oito algarismos" required>
+    </div>
+    <div>
+      <label for="senha">Senha do Cartinhas</label>
+      <input id="senha" name="password" type="password" autocomplete="current-password" required>
+    </div>
+    <button class="pri" type="submit" id="btnEntrar">Entrar</button>
+    <button class="leve" type="button" id="btnEsqueci">Esqueci minha senha</button>
+    <div class="aviso" id="avisoEntrar"></div>
+  </form>
+</main>
+
+<!-- CONVITE: quem recebeu o link pelo WhatsApp -->
+<main id="telaConvite" hidden>
+  <form class="entrar" id="formConvite">
+    <img src="logo.svg" alt="">
+    <h2>Convite para o Cartinhas</h2>
+    <p class="mut">Informe a sua matrícula. Se ela conferir com o convite, enviamos um e-mail
+      para você criar a sua senha.</p>
+    <div>
+      <label for="matConvite">Matrícula dos Correios</label>
+      <input id="matConvite" inputmode="numeric" maxlength="8" pattern="[0-9]{8}"
+             autocomplete="username" placeholder="oito algarismos" required>
+    </div>
+    <button class="pri" type="submit">Continuar</button>
+    <div class="aviso" id="avisoConvite"></div>
+  </form>
+</main>
+
+<!-- SENHA NOVA: primeira senha ou recuperação -->
+<main id="telaSenha" hidden>
+  <form class="entrar" id="formSenha" autocomplete="on">
+    <img src="logo.svg" alt="">
+    <h2 id="tituloSenha">Criar a sua senha</h2>
+    <p class="mut" id="recadoSenha"></p>
+    <input id="matSenha" name="username" autocomplete="username" hidden>
+    <div>
+      <label for="senha1">Nova senha (pelo menos 8 caracteres)</label>
+      <input id="senha1" name="new-password" type="password" autocomplete="new-password" minlength="8" required>
+    </div>
+    <div>
+      <label for="senha2">Repita a senha</label>
+      <input id="senha2" type="password" autocomplete="new-password" minlength="8" required>
+    </div>
+    <button class="pri" type="submit">Salvar senha</button>
+    <div class="aviso" id="avisoSenha"></div>
+  </form>
+</main>
+
+<!-- USUÁRIOS (administrador) -->
+<main id="telaUsuarios" hidden>
+  <section class="cartao">
+    <h2>Usuários</h2>
+    <p class="mut" id="vagas"></p>
+    <h3>Convidar usuário</h3>
+    <form id="formConvidar" class="grade2">
+      <div><label for="convMat">Matrícula</label>
+        <input id="convMat" inputmode="numeric" maxlength="8" pattern="[0-9]{8}" required></div>
+      <div><label for="convEmail">E-mail individual</label>
+        <input id="convEmail" type="email" required></div>
+      <button class="pri" type="submit" style="grid-column:1/-1">Criar convite</button>
+    </form>
+    <div class="aviso" id="avisoConvidar"></div>
+  </section>
+  <section class="cartao">
+    <h3>Convites pendentes</h3>
+    <div id="listaConvites" class="dias"></div>
+  </section>
+  <section class="cartao">
+    <h3>Contas</h3>
+    <div id="listaContas" class="dias"></div>
+  </section>
+  <div class="linha"><button class="leve" id="btnVoltaApp">Voltar ao meu ponto</button></div>
+</main>
+
+<!-- APLICATIVO -->
+<main id="telaApp" hidden>
+  <section>
+    <div class="saldo" id="saldo">
+      <small id="saldoLbl">Saldo do mês</small>
+      <div class="big" id="saldoBig">—</div>
+      <div class="verd" id="saldoVerd"></div>
+      <div class="alts" id="saldoAlts"></div>
+    </div>
+  </section>
+
+  <section class="cartao">
+    <h2>Cálculo do dia</h2>
+    <p class="mut" id="calcDiaLbl"></p>
+    <div class="grade2">
+      <div><label for="cE1">Entrada</label><input id="cE1" inputmode="numeric" placeholder="08:00"></div>
+      <div><label for="cS1">Saída almoço</label><input id="cS1" inputmode="numeric" placeholder="12:00"></div>
+      <div><label for="cE2">Volta almoço</label><input id="cE2" inputmode="numeric" placeholder="13:00"></div>
+      <div><label for="cS2">Saída</label><input id="cS2" inputmode="numeric" placeholder="deixe em branco"></div>
+      <div><label for="cJ">Jornada do dia</label><input id="cJ" inputmode="numeric" placeholder="08:00"></div>
+      <div><label for="cAlvo">Quero fechar o dia em</label><input id="cAlvo" placeholder="0:00"></div>
+    </div>
+    <div class="linha" style="margin-top:10px">
+      <button class="leve" id="btnHoje">Usar batidas de hoje</button>
+    </div>
+    <div class="aviso bom" id="calcSaida"></div>
+  </section>
+
+  <section class="cartao">
+    <h2>Importar o espelho do SRP</h2>
+    <p class="mut">No SRP: <em>Meu Espelho Ponto</em> → escolha o mês → <em>Relatório Espelho de Ponto</em> em PDF.
+      Depois escolha o arquivo baixado aqui.</p>
+    <div class="linha">
+      <input id="arq" type="file" accept="application/pdf,.pdf,.txt" style="padding:8px">
+    </div>
+    <div class="aviso" id="avisoImp"></div>
+  </section>
+
+  <section>
+    <div class="linha" style="justify-content:space-between">
+      <h2 id="mesTit" style="margin:0">Dias do mês</h2>
+      <select id="mesSel" style="width:auto"></select>
+    </div>
+    <div class="dias" id="dias" style="margin-top:10px"></div>
+  </section>
+
+  <div class="aviso" id="avisoConflito"></div>
+</main>
+
+<div class="fila" id="fila"></div>
+<footer class="rodape" id="rodape" hidden>
+  Ferramenta de apoio, não oficial. O registro que vale é o do SRP.<br>
+  <span id="versao" class="mut"></span>
+</footer>
+
+<script type="module" src="app.mjs"></script>
+</body>
+</html>

@@ -35,6 +35,17 @@
 - Trabalho em folga ou feriado, e hora extra autorizada, é hora extra paga e fica fora do banco.
 - Ponto facultativo no relatório = dia sem carga; afastamento ou licença = dia abonado.
 
+## Aplicativo para celular (em construção)
+
+A pasta [`app`](app) tem a versão com conta por pessoa e os dados num servidor, para abrir
+no celular e no computador. É um aplicativo web instalável (PWA), em Node.js com SQLite, sem
+nenhuma dependência de npm. O Cartinhas de um arquivo só, descrito acima, continua
+funcionando igual e não depende dele.
+
+As regras de cálculo **não são reescritas** lá: `app/montar-regras.cjs` extrai do próprio
+`index.html` as funções de cálculo e de leitura do relatório, e um teste compara as duas
+lado a lado. Veja [`app/LEIA-ME.md`](app/LEIA-ME.md).
+
 ## Testes
 
 `testes/auditoria.test.js` roda 62 situações (relatórios fora do padrão, tolerância, turno noturno, meses, abono, virada da meia-noite, arquivo de dados fora do formato etc.) num navegador simulado:
@@ -47,6 +58,13 @@ node auditoria.test.js ../index.html
 
 Termina com código de erro se algum caso falhar, e grava o detalhe em `testes/resultado.json`.
 
+Para rodar tudo, essas 62 mais as 118 do aplicativo (180 ao todo):
+
+```
+cd app
+node testes/todos.js
+```
+
 ## Arquivos
 
 | Arquivo | O que é |
@@ -55,6 +73,7 @@ Termina com código de erro se algum caso falhar, e grava o detalhe em `testes/r
 | `instalacao/Cartinhas.html` | O mesmo sistema em um arquivo só, com o leitor de PDF embutido (funciona sem internet). |
 | `instalacao/instalar.bat` / `desinstalar.bat` | Instalam e removem o atalho no Windows. |
 | `instalacao/LEIA-ME.txt` | Instruções para quem vai usar. |
+| `app/` | O aplicativo para celular (PWA), com conta por pessoa. Em construção. |
 | `logo/` | Logo em SVG, PNG e ícone do Windows. |
 
 O leitor de PDF é o [pdf.js](https://github.com/mozilla/pdf.js) 5.4.149 (Mozilla, licença Apache 2.0).

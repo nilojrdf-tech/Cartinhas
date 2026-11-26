@@ -1,3 +1,10 @@
 cartinhas-dados.json
 *.zip
 *.mp4
+
+# dados e resultados locais do aplicativo
+app/dados/
+app/testes/resultado-*.json
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm

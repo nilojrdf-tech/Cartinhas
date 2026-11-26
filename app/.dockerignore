@@ -1,0 +1,13 @@
+# O que nao entra na imagem.
+testes/
+dados/
+node_modules/
+*.sqlite
+*.sqlite-*
+montar-regras.cjs
+montar-pdfjs.cjs
+migrar.cjs
+LEIA-ME.md
+FASE-0.md
+.dockerignore
+Dockerfile
